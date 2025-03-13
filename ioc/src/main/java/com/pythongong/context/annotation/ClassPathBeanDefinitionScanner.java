@@ -2,13 +2,13 @@ package com.pythongong.context.annotation;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.lang.model.element.TypeElement;
-
 import com.pythongong.beans.BeanDefinitionRegistry;
 import com.pythongong.beans.config.BeanDefinition;
+import com.pythongong.beans.impl.DefaultListableBeanFactory;
 import com.pythongong.core.filter.AnnotationTypeFilter;
 import com.pythongong.core.filter.TypeFilter;
 import com.pythongong.exception.IocException;
@@ -19,16 +19,17 @@ public class ClassPathBeanDefinitionScanner {
     
     private final BeanDefinitionRegistry beanDefinitionRegistry;
 
-    private final List<TypeFilter> includeFilters = new ArrayList<>();
-
+    private final List<TypeFilter> includeFilters;
 
     public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry beanDefinitionRegistry) {
-        this.beanDefinitionRegistry = beanDefinitionRegistry;
-        this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+        this(beanDefinitionRegistry, null);
     }
 
-    public void scan(String... basePackages) {
-        doScan(basePackages);
+
+    public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry beanDefinitionRegistry, List<TypeFilter> includeFilters) {
+        this.beanDefinitionRegistry = beanDefinitionRegistry == null ? new DefaultListableBeanFactory() : beanDefinitionRegistry;
+        this.includeFilters = includeFilters == null ? new ArrayList<>() : includeFilters;
+        this.includeFilters.add(new AnnotationTypeFilter(Component.class));
     }
 
     /**
@@ -38,20 +39,24 @@ public class ClassPathBeanDefinitionScanner {
 		this.includeFilters.add(includeFilter);
 	}
 
-    private void doScan(String... basePackages) {
+    public Set<BeanDefinition> scan(String... basePackages) {
         if (basePackages == null) {
             throw new IllegalArgumentException("At least one package");
         }
+
+        Set<BeanDefinition> beanDefinitions = new HashSet<>();
         for (String basePackage : basePackages) {
-            List<BeanDefinition> candidates = scanCandidateComponents(basePackage);
+            Set<BeanDefinition> candidates = scanCandidateComponents(basePackage);
             for (BeanDefinition candiate : candidates) {
                 beanDefinitionRegistry.registerBeanDefinition(candiate.getBeanClass().getName(), candiate);
             }
+            beanDefinitions.addAll(candidates);
         }
+        return beanDefinitions;
     }
 
-    private List<BeanDefinition> scanCandidateComponents(String basePackage) {
-        List<BeanDefinition> beanDefinitions = new ArrayList<>();
+    private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+        Set<BeanDefinition> beanDefinitions = new HashSet<>();
 
         Set<String> classNames = PathUtils.getFileNamesOfPackage(basePackage, fileName -> {
             if (fileName.endsWith(PathUtils.CLASS_FILE_SUFFIX)) {

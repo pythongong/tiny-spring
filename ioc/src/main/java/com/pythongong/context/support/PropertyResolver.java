@@ -3,17 +3,35 @@ package com.pythongong.context.support;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
-public class PropertySourcesPropertyResolver {
+public class PropertyResolver {
 
     private final static String START = "${";
 
     private final static String END = "}";
 
     private Properties properties;
+
+    public PropertyResolver() {
+        this(null);
+    }
     
-    public PropertySourcesPropertyResolver(Properties properties) {
+    public PropertyResolver(Properties properties) {
         this.properties = properties == null ? new Properties() : properties;
         this.properties.putAll(System.getenv());
+    }
+
+    public String getProperty(String key) {
+        PropertyExpr propertyExpr = parsePropertyExpr(key);
+        String value = getProperty(key);
+        if (propertyExpr != null && propertyExpr.defaultValue() != null) {
+            value = properties.getProperty(key, propertyExpr.defaultValue());
+        } 
+        
+        if (value == null) {
+            throw new NoSuchElementException( key + " doesn't exist: ");
+        }
+
+        return value;
     }
 
     private PropertyExpr parsePropertyExpr(String key) {
@@ -29,20 +47,6 @@ public class PropertySourcesPropertyResolver {
         String defaultValue = key.substring(defaultValueIndex + 1, key.length() - END.length());
         key = key.substring(START.length(), defaultValueIndex);
         return new PropertyExpr(key, defaultValue);
-    }
-
-    public String getProperty(String key) {
-        PropertyExpr propertyExpr = parsePropertyExpr(key);
-        String value = getProperty(key);
-        if (propertyExpr != null && propertyExpr.defaultValue() != null) {
-            value = properties.getProperty(key, propertyExpr.defaultValue());
-        } 
-        
-        if (value == null) {
-            throw new NoSuchElementException( key + " doesn't exist: ");
-        }
-
-        return value;
     }
 }
 

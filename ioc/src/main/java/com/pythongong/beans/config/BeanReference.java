@@ -1,6 +1,7 @@
 package com.pythongong.beans.config;
 
 public class BeanReference {
+    
     private String beanName;
 
     public String getBeanName() {

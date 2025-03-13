@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
@@ -90,7 +91,7 @@ public class PathUtils {
 		Set<String> paths = new HashSet<>();
 		try {
 			URI uri = url.toURI();
-			String uriStr = URLEncoder.encode(uri.toString(), StandardCharsets.UTF_8);
+			String uriStr = URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8);
 			
 			if (uriStr.startsWith(FILE_URL_PREFIX)) {
 				// Remove the file prefix and leading slash
