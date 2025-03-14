@@ -7,13 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target(ElementType.METHOD)
 @Documented
-public @interface AutoWired {
-
-    /**
-	 * Declares whether the annotated dependency is required.
-	 * <p>Defaults to {@code true}.
-	 */
-	boolean required() default true;
+public @interface PostConstruct {
+    
 }

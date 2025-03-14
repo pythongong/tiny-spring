@@ -10,6 +10,7 @@ import com.pythongong.beans.BeanFactory;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.context.annotation.ClassPathBeanDefinitionScanner;
 import com.pythongong.context.annotation.ConfigurationClassParser;
+import com.pythongong.context.support.PropertyResolver;
 import com.pythongong.exception.BeansException;
 
 import util.com.test.BeanA;
@@ -32,11 +33,10 @@ public class AnnotationTest {
 
     @Test
     void Test_Parse() {
-        BeanDefinitionRegistry registry = new DefaultListableBeanFactory(); 
-        ConfigurationClassParser parser = new ConfigurationClassParser(registry);
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
+        ConfigurationClassParser parser = new ConfigurationClassParser(new PropertyResolver(), beanFactory);
         parser.parse(TestApplication.class);
         // get bean  
-        BeanFactory beanFactory = (BeanFactory) registry;  
         assertThrows(BeansException.class, () -> beanFactory.getBean("util.com.test.PathA"));
         assertNotNull((BeanB) beanFactory.getBean("util.com.test.inside.BeanB") );
         assertNotNull((BeanA) beanFactory.getBean("util.com.test.BeanA") );

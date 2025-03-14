@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.beans.config.BeanDefinition;
@@ -12,6 +14,18 @@ import com.pythongong.beans.config.PropertyValueList;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 
 public class BeanTest {
+
+    @Test
+    void test_InitAndDestroy() throws NoSuchMethodException, SecurityException {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        BeanDefinition beanDefinition = new BeanDefinition(UserDao.class, null, UserDao.class.getMethod("init"), UserDao.class.getMethod("destroy"));
+        factory.registerBeanDefinition("userDao", beanDefinition);
+        UserDao userDao = (UserDao) factory.getBean("userDao");
+        assertEquals("Tom", userDao.getNameMap().get(1));
+        factory.destroySingletons();
+        assertTrue(userDao.getNameMap().isEmpty());
+        
+    }
     
     @Test
     void  test_Singleton() {

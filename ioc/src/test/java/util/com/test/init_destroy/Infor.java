@@ -1,23 +1,19 @@
-package beans;
+package util.com.test.init_destroy;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.pythongong.stereotype.Component;
 import com.pythongong.stereotype.PostConstruct;
 import com.pythongong.stereotype.PreDestroy;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
-@EqualsAndHashCode
-public class UserDao {
+@Component
+public class Infor {
 
     private Map<Integer, String> nameMap;
-    
-    private Integer id;
 
     @PostConstruct
     public void init() {
@@ -27,6 +23,8 @@ public class UserDao {
 
     @PreDestroy
     public void destroy() {
+        System.out.println("destroy exectued");
         this.nameMap.clear();
     }
+    
 }

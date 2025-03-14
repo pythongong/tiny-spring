@@ -1,5 +1,6 @@
 package com.pythongong.context.annotation;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,6 +14,9 @@ import com.pythongong.core.filter.AnnotationTypeFilter;
 import com.pythongong.core.filter.TypeFilter;
 import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.Component;
+import com.pythongong.stereotype.PostConstruct;
+import com.pythongong.stereotype.PreDestroy;
+import com.pythongong.util.ClassUtils;
 import com.pythongong.util.PathUtils;
 
 public class ClassPathBeanDefinitionScanner {
@@ -76,7 +80,12 @@ public class ClassPathBeanDefinitionScanner {
                     return;
                 }
                 checkModifiers(clazz);
-                beanDefinitions.add(new BeanDefinition(clazz));
+                // init method:
+                Method initMethod = ClassUtils.findInitOrDestoryMethod(clazz, PostConstruct.class);
+                // destroy method:
+                Method destoryMethod = ClassUtils.findInitOrDestoryMethod(clazz, PreDestroy.class);
+                
+                beanDefinitions.add(new BeanDefinition(clazz, null, initMethod,  destoryMethod));
             } catch (ClassNotFoundException e) {
                 throw new BeansException("package path: " + basePackage, e);
             }

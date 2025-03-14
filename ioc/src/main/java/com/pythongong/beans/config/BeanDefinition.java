@@ -2,8 +2,10 @@
 
 package com.pythongong.beans.config;
 
+import java.lang.reflect.Method;
+
 public record BeanDefinition(Class<?> beanClass, PropertyValueList propertyValueList
-, String initMethodName, String destroyMethodName) {
+, Method initMethod, Method destroyMethod) {
     
     public BeanDefinition {
         if (propertyValueList == null) {

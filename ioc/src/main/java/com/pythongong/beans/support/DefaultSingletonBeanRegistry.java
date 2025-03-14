@@ -1,11 +1,12 @@
 
 package com.pythongong.beans.support;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.pythongong.DisposableBean;
 import com.pythongong.beans.SingletonBeanRegistry;
+import com.pythongong.beans.config.DisposableBean;
+import com.pythongong.exception.BeansException;
 
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry{
 
@@ -28,8 +29,22 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry{
 
     @Override
     public void destroySingletons() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'destroySingletons'");
+        Object[] disaposableNames = disposableBeanMap.keySet().toArray();
+
+        Arrays.stream(disaposableNames).forEach(beanName -> {
+            DisposableBean bean = disposableBeanMap.get(beanName);
+            if (bean == null) {
+                throw new BeansException("Disaposable bean is null");
+            }
+            disposableBeanMap.remove(beanName);
+            try {
+                bean.destroy();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        });
+        
     }
 
     

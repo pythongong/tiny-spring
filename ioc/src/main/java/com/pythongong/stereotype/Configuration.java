@@ -9,6 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Documented
+@Component
 public @interface Configuration {
+
+    String value() default "";
     
 }

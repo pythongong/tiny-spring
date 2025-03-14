@@ -2,18 +2,18 @@ package com.pythongong.beans.support;
 
 import java.lang.reflect.Method;
 
-import com.pythongong.DisposableBean;
+import com.pythongong.beans.config.DisposableBean;
 import com.pythongong.exception.BeansException;
 
-public class DisposableBeanAdapter implements DisposableBean{
+public class DisposableBeanAdapter implements DisposableBean {
 
     private final Object bean;
 
-    private final String destroyMethodName;
+    private final Method destroyMethod;
 
-    public DisposableBeanAdapter(Object bean, String destroyMethodName) {
+    public DisposableBeanAdapter(Object bean, Method destroyMethod) {
         this.bean = bean;
-        this.destroyMethodName = destroyMethodName;
+        this.destroyMethod = destroyMethod;
     }
 
     @Override
@@ -22,11 +22,10 @@ public class DisposableBeanAdapter implements DisposableBean{
             ((DisposableBean) bean).destroy();
         }
 
-        Method destroyMethod = bean.getClass().getMethod(destroyMethodName);
         if (destroyMethod == null) {
-            throw new BeansException("Could not find an destroy method named: " + destroyMethodName);
+            throw new BeansException("Could not find an destroy method named: " + destroyMethod);
         }
-        destroyMethod.invoke(destroyMethod);
+        destroyMethod.invoke(bean);
     }
     
 }

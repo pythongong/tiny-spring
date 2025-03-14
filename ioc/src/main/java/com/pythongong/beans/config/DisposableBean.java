@@ -1,4 +1,4 @@
-package com.pythongong;
+package com.pythongong.beans.config;
 
 public interface DisposableBean {
     

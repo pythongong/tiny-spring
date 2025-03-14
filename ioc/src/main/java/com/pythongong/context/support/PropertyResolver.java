@@ -1,5 +1,7 @@
 package com.pythongong.context.support;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
@@ -18,6 +20,15 @@ public class PropertyResolver {
     public PropertyResolver(Properties properties) {
         this.properties = properties == null ? new Properties() : properties;
         this.properties.putAll(System.getenv());
+    }
+
+    public void load(InputStream inputStream) {
+        try {
+            properties.load(inputStream);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public String getProperty(String key) {

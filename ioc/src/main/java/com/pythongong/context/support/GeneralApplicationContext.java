@@ -1,7 +1,6 @@
 package com.pythongong.context.support;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import com.pythongong.beans.BeanFactoryPostProcessor;
@@ -13,8 +12,14 @@ import com.pythongong.exception.BeansException;
 
 public class GeneralApplicationContext implements ConfigurableApplicationContext {
 
+    /**
+     * function to refresh bean factory
+     */
     private Runnable refreshBeanFactory;
 
+    /**
+     * function to get refreshed bean factory
+     */
     private Supplier<ConfigurableListableBeanFactory> getBeanFactory;
 
     public GeneralApplicationContext(Runnable refreshBeanFactory,  Supplier<ConfigurableListableBeanFactory> getBeanFactory) {

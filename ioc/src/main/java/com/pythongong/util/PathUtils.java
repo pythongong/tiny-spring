@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -21,7 +20,9 @@ import com.pythongong.exception.BeansException;
 
 public class PathUtils {
 	
-	public PathUtils(){}
+	private PathUtils(){}
+
+	public static final String PROPERTY_SUFFIX = ".properties";
 
 	/** The package separator string: {@code "."}. */
 	public static final String PACKAGE_SEPARATOR = ".";

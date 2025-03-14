@@ -1,5 +1,6 @@
 package com.pythongong.context.support;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -8,7 +9,11 @@ import com.pythongong.beans.ListableBeanFactory;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.context.ConfigurableApplicationContext;
 import com.pythongong.context.annotation.ConfigurationClassParser;
+import com.pythongong.core.io.DefaultResourceLoader;
+import com.pythongong.core.io.Resource;
+import com.pythongong.core.io.ResourceLoader;
 import com.pythongong.exception.BeansException;
+import com.pythongong.util.PathUtils;
 
 public class AnnotationConfigApplicationContext implements ConfigurableApplicationContext, ListableBeanFactory {
 
@@ -18,9 +23,12 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
 
     private GeneralApplicationContext applicationContext;
 
+    private final PropertyResolver propertyResolver;
+
     public AnnotationConfigApplicationContext(Class<?> configurationClass) {
         this.configurationClass = configurationClass;
         applicationContext = new GeneralApplicationContext(() -> refreshBeanFactory(), () -> getBeanFactory());
+        propertyResolver = createPropertyResolver();
     }
 
     @Override
@@ -58,10 +66,34 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         return this.beanFactory.getBean(name, args);
     }
 
+    private PropertyResolver createPropertyResolver() {
+        Set<String> fileNames = PathUtils.getFileNamesOfPackage(configurationClass.getPackageName(), (fileName) -> {
+            if (fileName.endsWith(PathUtils.PROPERTY_SUFFIX)) {
+                return fileName;
+            }
+            return null;
+        });
+        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        PropertyResolver propertyResolver = new PropertyResolver();
+        if (fileNames.isEmpty()) {
+            return propertyResolver;
+        }
+        fileNames.forEach(fileName -> {
+            Resource resource = resourceLoader.getResource(fileName);
+            try {
+                propertyResolver.load(resource.getInputStream());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        });
+        return propertyResolver;
+    }
+
 
     private void refreshBeanFactory() throws BeansException {
         DefaultListableBeanFactory beanFactory = createBeanFactory();
-        ConfigurationClassParser parser = new ConfigurationClassParser(beanFactory);
+        ConfigurationClassParser parser = new ConfigurationClassParser(propertyResolver, beanFactory);
         parser.parse(configurationClass);
         this.beanFactory = beanFactory;
     }
