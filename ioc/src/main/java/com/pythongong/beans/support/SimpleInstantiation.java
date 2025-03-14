@@ -1,15 +1,14 @@
-package com.pythongong.beans.impl;
+package com.pythongong.beans.support;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.pythongong.beans.InstantiationStrategy;
-import com.pythongong.exception.IocException;
+import com.pythongong.exception.BeansException;
 
 public class SimpleInstantiation implements InstantiationStrategy {
 
     @Override
-    public Object instance(Class<?> clazz, Constructor<?> constructor, Object[] args) throws IocException {
+    public Object instance(Class<?> clazz, Constructor<?> constructor, Object[] args) throws BeansException {
         Object bean;
         try {
             if (constructor == null) {
@@ -19,7 +18,7 @@ public class SimpleInstantiation implements InstantiationStrategy {
             }
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
-            throw new IocException("Failed to instantiate [" + clazz.getName() + "]", e);
+            throw new BeansException("Failed to instantiate [" + clazz.getName() + "]", e);
         }
         return bean;
 

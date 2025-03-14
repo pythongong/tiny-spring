@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.PropertyValue;
 import com.pythongong.beans.config.PropertyValueList;
-import com.pythongong.beans.impl.DefaultListableBeanFactory;
+import com.pythongong.beans.support.DefaultListableBeanFactory;
 
 public class BeanTest {
     

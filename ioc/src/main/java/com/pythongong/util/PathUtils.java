@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.pythongong.exception.IocException;
+import com.pythongong.exception.BeansException;
 
 public class PathUtils {
 	
@@ -74,7 +74,7 @@ public class PathUtils {
 				paths.addAll(getFileNameOfPath(url, basePackagePath, mapper));
 			}
 		} catch (IOException e) {
-			throw new IocException("package name:" + packageName, e);
+			throw new BeansException("package name:" + packageName, e);
 		}
 
 		return paths;
@@ -112,7 +112,7 @@ public class PathUtils {
 				});
 			}
 		} catch (URISyntaxException | IOException e) {
-			throw new IocException("package path:" + basePackagePath, e);
+			throw new BeansException("package path:" + basePackagePath, e);
 		}
 		
 		return paths;

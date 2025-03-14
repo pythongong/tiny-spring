@@ -8,10 +8,10 @@ import java.util.Set;
 
 import com.pythongong.beans.BeanDefinitionRegistry;
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.impl.DefaultListableBeanFactory;
+import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.core.filter.AnnotationTypeFilter;
 import com.pythongong.core.filter.TypeFilter;
-import com.pythongong.exception.IocException;
+import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.Component;
 import com.pythongong.util.PathUtils;
 
@@ -48,7 +48,7 @@ public class ClassPathBeanDefinitionScanner {
         for (String basePackage : basePackages) {
             Set<BeanDefinition> candidates = scanCandidateComponents(basePackage);
             for (BeanDefinition candiate : candidates) {
-                beanDefinitionRegistry.registerBeanDefinition(candiate.getBeanClass().getName(), candiate);
+                beanDefinitionRegistry.registerBeanDefinition(candiate.beanClass().getName(), candiate);
             }
             beanDefinitions.addAll(candidates);
         }
@@ -78,7 +78,7 @@ public class ClassPathBeanDefinitionScanner {
                 checkModifiers(clazz);
                 beanDefinitions.add(new BeanDefinition(clazz));
             } catch (ClassNotFoundException e) {
-                throw new IocException("package path: " + basePackage, e);
+                throw new BeansException("package path: " + basePackage, e);
             }
         });
         return beanDefinitions;
@@ -97,7 +97,7 @@ public class ClassPathBeanDefinitionScanner {
     private void checkModifiers(Class<?> clazz) {
         int modifiers = clazz.getModifiers();
         if (Modifier.isPrivate(modifiers) || Modifier.isAbstract(modifiers)) {
-            throw new IocException("modifer is private or abstract");
+            throw new BeansException("modifer is private or abstract");
         }
     }
 

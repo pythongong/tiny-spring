@@ -2,27 +2,21 @@
 
 package com.pythongong.beans.config;
 
-public class BeanDefinition {
+public record BeanDefinition(Class<?> beanClass, PropertyValueList propertyValueList
+, String initMethodName, String destroyMethodName) {
     
-    private Class<?> beanClass;
-
-    private PropertyValueList propertyValueList;
-
-    public BeanDefinition(Class<?> beanClass, PropertyValueList propertyValueList) {
-        this.beanClass = beanClass;
-        this.propertyValueList = propertyValueList == null ? new PropertyValueList() : propertyValueList;
+    public BeanDefinition {
+        if (propertyValueList == null) {
+            propertyValueList = new PropertyValueList();
+        }
     }
 
     public BeanDefinition(Class<?> beanClass) {
-        this.beanClass = beanClass;
+        this(beanClass, new PropertyValueList(), null, null);
     }
 
-    public Class<?> getBeanClass() {
-        return beanClass;
-    }
-
-    public PropertyValueList getPropertyValueList() {
-        return propertyValueList;
+    public BeanDefinition(Class<?> beanClass, PropertyValueList propertyValueList) {
+        this(beanClass, propertyValueList, null, null);
     }
 
 }

@@ -7,16 +7,17 @@ import org.junit.jupiter.api.Test;
 
 import com.pythongong.beans.BeanDefinitionRegistry;
 import com.pythongong.beans.BeanFactory;
-import com.pythongong.beans.impl.DefaultListableBeanFactory;
+import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.context.annotation.ClassPathBeanDefinitionScanner;
 import com.pythongong.context.annotation.ConfigurationClassParser;
-import com.pythongong.exception.IocException;
+import com.pythongong.exception.BeansException;
 
 import util.com.test.BeanA;
 import util.com.test.TestApplication;
 import util.com.test.inside.BeanB;
 
 public class AnnotationTest {
+
     
     @Test
     void test_Scan() {
@@ -25,7 +26,7 @@ public class AnnotationTest {
         scanner.scan("util.com.test");
         // get bean  
         BeanFactory beanFactory = (BeanFactory) registry;  
-        assertThrows(IocException.class, () -> beanFactory.getBean("util.com.test.PathA"));
+        assertThrows(BeansException.class, () -> beanFactory.getBean("util.com.test.PathA"));
         assertNotNull((BeanA) beanFactory.getBean("util.com.test.BeanA") );
     }
 
@@ -36,7 +37,8 @@ public class AnnotationTest {
         parser.parse(TestApplication.class);
         // get bean  
         BeanFactory beanFactory = (BeanFactory) registry;  
-        assertThrows(IocException.class, () -> beanFactory.getBean("util.com.test.PathA"));
+        assertThrows(BeansException.class, () -> beanFactory.getBean("util.com.test.PathA"));
         assertNotNull((BeanB) beanFactory.getBean("util.com.test.inside.BeanB") );
+        assertNotNull((BeanA) beanFactory.getBean("util.com.test.BeanA") );
     }
 }
