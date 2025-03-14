@@ -2,7 +2,7 @@ package com.pythongong.beans;
 
 import com.pythongong.beans.config.BeanPostProcessor;
 
-public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry{
+public interface ConfigurableBeanFactory extends BeanFactory{
     
     String SCOPE_SINGLETON = "singleton";
 

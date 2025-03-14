@@ -2,7 +2,7 @@ package com.pythongong.beans;
 
 import com.pythongong.exception.BeansException;
 
-public interface AutowireCapableBeanFactory {
+public interface AutowireCapableBeanFactory extends BeanFactory{
 
     /**
      * 执行 BeanPostProcessors 接口实现类的 postProcessBeforeInitialization 方法

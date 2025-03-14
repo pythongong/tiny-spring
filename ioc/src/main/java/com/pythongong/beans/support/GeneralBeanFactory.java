@@ -2,21 +2,39 @@ package com.pythongong.beans.support;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import com.pythongong.beans.ConfigurableBeanFactory;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
+import com.pythongong.beans.config.MetaData;
 import com.pythongong.exception.BeansException;
 
-public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
+public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+
+    private final Function<String, BeanDefinition> getBeanDefinition;
+
+    private final Function<MetaData, Object> createBean;
+
+    private final DefaultSingletonBeanRegistry  singletonBeanRegistry = new DefaultSingletonBeanRegistry();
+
+    public DefaultSingletonBeanRegistry getSingletonBeanRegistry() {
+        return singletonBeanRegistry;
+    }
+
+    public GeneralBeanFactory(Function<String, BeanDefinition> getBeanDefinition,
+            Function<MetaData, Object> createBean) {
+        this.getBeanDefinition = getBeanDefinition;
+        this.createBean = createBean;
+    }
+    
 
     @Override
     public Object getBean(String name) throws BeansException {
         return doGetBean(name, null);
     }
-
     
 
     @Override
@@ -29,17 +47,16 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         if (!beanPostProcessors.contains(beanPostProcessor)) {
             beanPostProcessors.add(beanPostProcessor);
         }
-        
 
     }
 
     private Object doGetBean(String beanname, Object[] args) {
-        Object bean = getSingleton(beanname);
+        Object bean = singletonBeanRegistry.getSingleton(beanname);
         if (bean != null) {
             return bean;
         }
-        BeanDefinition beanDefinition = getBeanDefinition(beanname);
-        return createBean(beanname, beanDefinition, args);
+        BeanDefinition beanDefinition = getBeanDefinition.apply(beanname);
+        return createBean.apply(new MetaData(beanname, beanDefinition, args));
     }
 
      /**
@@ -49,11 +66,5 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     public List<BeanPostProcessor> getBeanPostProcessors() {
         return this.beanPostProcessors;
     }
-
-
-
-    protected abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
-
-    protected abstract Object createBean(String beanName, BeanDefinition beanDefinition, Object[] args) throws BeansException;
     
 }
