@@ -15,12 +15,15 @@ import com.pythongong.beans.config.PropertyValue;
 import com.pythongong.beans.config.PropertyValueList;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.context.support.PropertyResolver;
+import com.pythongong.enums.AnnotationTypeEnum;
+import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.AutoWired;
 import com.pythongong.stereotype.Component;
 import com.pythongong.stereotype.ComponentScan;
 import com.pythongong.stereotype.PostConstruct;
 import com.pythongong.stereotype.PreDestroy;
+import com.pythongong.stereotype.Scope;
 import com.pythongong.stereotype.Value;
 
 public class ConfigurationClassParser {
@@ -62,14 +65,31 @@ public class ConfigurationClassParser {
     }
 
     private BeanDefinition createBeanDefinition(Class<?> beanClass) {
+        String beanName = generateBeanName(beanClass);
+
         // init method:
         Method initMethod = findInitOrDestoryMethod(beanClass, PostConstruct.class);
+
         // destroy method:
         Method destoryMethod = findInitOrDestoryMethod(beanClass, PreDestroy.class);
 
-        String beanName = generateBeanName(beanClass);
+        ScopeEnum scopeEnum = extractScope(beanClass);
 
-        return new BeanDefinition(beanName, beanClass, createPropertyValueList(beanClass), initMethod, destoryMethod);
+        PropertyValueList propertyValueList = createPropertyValueList(beanClass);
+
+        return BeanDefinition.builder()
+        .beanName(beanName)
+        .beanClass(beanClass)
+        .propertyValueList(propertyValueList)
+        .initMethod(initMethod)
+        .destroyMethod(destoryMethod)
+        .scope(scopeEnum)
+        .build();
+    }
+
+    private ScopeEnum extractScope(Class<?> beanClass) {
+        Scope scope = beanClass.getAnnotation(Scope.class);
+        return scope == null ? ScopeEnum.SINGLETON : ScopeEnum.fromScope(scope.value());
     }
 
     private String generateBeanName(Class<?> beanClass) {
@@ -106,9 +126,7 @@ public class ConfigurationClassParser {
 
     private PropertyValueList createPropertyValueList(Class<?> beanClass) {
         PropertyValueList propertyValueList = new PropertyValueList();
-
         Field[] fields = beanClass.getFields();
-
         for (Field field : fields) {
             PropertyValue prpertyValue = accessFieldAnnotations(field);
             if (prpertyValue != null) {

@@ -88,6 +88,11 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
         generalBeanFactory.addBeanPostProcessor(beanPostProcessor);
     }
 
+    @Override
+    public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+        return generalBeanFactory.getBean(name, requiredType);
+    }
+
     
     
     

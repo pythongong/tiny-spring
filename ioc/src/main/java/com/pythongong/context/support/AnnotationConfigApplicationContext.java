@@ -111,5 +111,10 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
     public ConfigurableListableBeanFactory getBeanFactory() {
         return beanFactory;
     }
+
+    @Override
+    public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+        return beanFactory.getBean(name, requiredType);
+    }
     
 }

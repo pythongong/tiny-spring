@@ -1,16 +1,17 @@
 package beans;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import com.pythongong.beans.Aware;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.PropertyValue;
 import com.pythongong.beans.config.PropertyValueList;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
+import com.pythongong.enums.ScopeEnum;
 
 import util.com.test.aware.AwareBean;
 
@@ -18,10 +19,33 @@ public class BeanTest {
 
     private static final String AWARE_BEAN = "aware";
 
+    private static final String USER_SERVICE = "userSerive";
+
+    private static final String USER_DAO = "userDao";
+
+    @Test
+    void test_Prototype() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+        .scope(ScopeEnum.PROTOTYPE)
+        .beanClass( AwareBean.class)
+        .beanName(AWARE_BEAN)
+        .build();
+        
+        factory.registerBeanDefinition(beanDefinition);
+        AwareBean awareBean1 = factory.getBean(AWARE_BEAN, AwareBean.class);
+        AwareBean awareBean2 = factory.getBean(AWARE_BEAN, AwareBean.class);
+        assertFalse(awareBean1 == awareBean2);
+    }
+
     @Test
     void test_Aware() {
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        BeanDefinition beanDefinition = new BeanDefinition(AWARE_BEAN, AwareBean.class);
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+        .beanClass( AwareBean.class)
+        .beanName(AWARE_BEAN)
+        .build();
+        
         factory.registerBeanDefinition(beanDefinition);
         AwareBean awareBean = (AwareBean) factory.getBean(AWARE_BEAN);
         assertNotNull(awareBean.getBeanFactory());
@@ -32,7 +56,12 @@ public class BeanTest {
     @Test
     void test_InitAndDestroy() throws NoSuchMethodException, SecurityException {
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        BeanDefinition beanDefinition = new BeanDefinition("userDao", UserDao.class, null, UserDao.class.getMethod("init"), UserDao.class.getMethod("destroy"));
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+        .beanClass(UserDao.class)
+        .beanName(USER_DAO)
+        .initMethod(UserDao.class.getMethod("init"))
+        .destroyMethod(UserDao.class.getMethod("destroy"))
+        .build();
         factory.registerBeanDefinition(beanDefinition);
         UserDao userDao = (UserDao) factory.getBean("userDao");
         assertEquals("Tom", userDao.getNameMap().get(1));
@@ -44,7 +73,10 @@ public class BeanTest {
     @Test
     void  test_Singleton() {
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        BeanDefinition beanDefinition = new BeanDefinition("userService",UserService.class);
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+        .beanClass(UserService.class)
+        .beanName(USER_SERVICE)
+        .build();
         factory.registerBeanDefinition(beanDefinition);
         UserService userService1 = (UserService) factory.getBean("userService");
         UserService userService2 = (UserService) factory.getBean("userService");
@@ -58,7 +90,10 @@ public class BeanTest {
     @Test
     void test_ArgsConstructor() {
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        BeanDefinition beanDefinition = new BeanDefinition("userService",UserService.class);
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+        .beanClass(UserService.class)
+        .beanName(USER_SERVICE)
+        .build();;
         factory.registerBeanDefinition(beanDefinition);
         UserService userService = (UserService) factory.getBean("userService", "user");
         
@@ -80,7 +115,10 @@ public class BeanTest {
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
         PropertyValueList propertyValueList = new PropertyValueList();
         propertyValueList.addPropertyValue(new PropertyValue("id", 100));
-        BeanDefinition beanDefinition = new BeanDefinition("userDao", UserDao.class,  propertyValueList, null, null);
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+        .beanClass(UserDao.class)
+        .beanName(USER_DAO)
+        .build();
         factory.registerBeanDefinition(beanDefinition);
         UserDao userDao = (UserDao) factory.getBean("userDao");
 
@@ -93,9 +131,15 @@ public class BeanTest {
         
         PropertyValueList propertyValueList1 = new PropertyValueList();
         propertyValueList1.addPropertyValue(new PropertyValue("id", 100));
-        BeanDefinition beanDefinition1 = new BeanDefinition("userDao", UserDao.class, propertyValueList1, null, null);
+        BeanDefinition beanDefinition1 = BeanDefinition.builder()
+        .beanClass(UserDao.class)
+        .beanName(USER_DAO)
+        .build();
         factory.registerBeanDefinition(beanDefinition1);
-        BeanDefinition beanDefinition2 = new BeanDefinition("userService",UserService.class);
+        BeanDefinition beanDefinition2 = BeanDefinition.builder()
+        .beanClass(UserService.class)
+        .beanName(USER_SERVICE)
+        .build();;
         PropertyValueList propertyValueList2 = new PropertyValueList();
         propertyValueList2.addPropertyValue(new PropertyValue("name", "Alex"));
         propertyValueList2.addPropertyValue(new PropertyValue("userDao", (UserDao) factory.getBean("userDao")));

@@ -19,6 +19,7 @@ import com.pythongong.beans.config.InitializingBean;
 import com.pythongong.beans.config.MetaData;
 import com.pythongong.beans.config.PropertyValue;
 import com.pythongong.beans.config.PropertyValueList;
+import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.AutoWired;
 import com.pythongong.util.ClassUtils;
@@ -55,7 +56,9 @@ public class GeneralAutowireCapableBeanFactory implements AutowireCapableBeanFac
             throw new BeansException("Initiation of bean failed", e);
         }
         registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
-        singletonBeanRegistry.addSingleton(beanName, bean);
+        if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
+            singletonBeanRegistry.addSingleton(beanName, bean);
+        }
         return bean;
     }
 
@@ -83,6 +86,9 @@ public class GeneralAutowireCapableBeanFactory implements AutowireCapableBeanFac
     }
 
     private void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        if (!ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
+            return;
+        }
         if (bean instanceof DisposableBean || beanDefinition.destroyMethod() != null) {
             singletonBeanRegistry.registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanDefinition.destroyMethod()));
         }
@@ -142,7 +148,7 @@ public class GeneralAutowireCapableBeanFactory implements AutowireCapableBeanFac
             e.printStackTrace();
         }
 
-        // 2. BeanPostProcessor After 
+        // BeanPostProcessor After 
         wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
         return wrappedBean;
     }
@@ -222,6 +228,12 @@ public class GeneralAutowireCapableBeanFactory implements AutowireCapableBeanFac
     @Override
     public Object getBean(String name, Object... args) throws BeansException {
         return this.generalBeanFactory.getBean(name, args);
+    }
+
+    @Override
+    public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getBean'");
     }
     
     

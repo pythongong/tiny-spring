@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.pythongong.beans.ConfigurableBeanFactory;
+import com.pythongong.beans.FactoryBean;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.config.MetaData;
 import com.pythongong.exception.BeansException;
 
+@SuppressWarnings("unchecked")
 public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
@@ -19,6 +21,8 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
     private final Function<MetaData, Object> createBean;
 
     private final DefaultSingletonBeanRegistry  singletonBeanRegistry = new DefaultSingletonBeanRegistry();
+
+    private final FactoryBeanRegistrySupport beanRegistrySupport = new FactoryBeanRegistrySupport();
 
     public DefaultSingletonBeanRegistry getSingletonBeanRegistry() {
         return singletonBeanRegistry;
@@ -50,13 +54,24 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
     }
 
-    private Object doGetBean(String beanname, Object[] args) {
-        Object bean = singletonBeanRegistry.getSingleton(beanname);
-        if (bean != null) {
-            return bean;
+    private <T> T doGetBean(String beanname, Object[] args) {
+        Object sharedInstance = singletonBeanRegistry.getSingleton(beanname);
+        if (sharedInstance != null) {
+            return (T) getObjectForBeanInstance(sharedInstance, beanname);
         }
         BeanDefinition beanDefinition = getBeanDefinition.apply(beanname);
-        return createBean.apply(new MetaData(beanname, beanDefinition, args));
+        return (T) createBean.apply(new MetaData(beanname, beanDefinition, args));
+    }
+
+    private Object getObjectForBeanInstance(Object sharedInstance, String beanname) {
+        if (!(sharedInstance instanceof FactoryBean)) {
+            return sharedInstance;
+        }
+        Object cachedObject = beanRegistrySupport.getCachedObjectForFactoryBean(beanname);
+        if (cachedObject == null) {
+            cachedObject = beanRegistrySupport.getObjectFromFactoryBean((FactoryBean<?>) sharedInstance, beanname);
+        }
+        return cachedObject;
     }
 
      /**
@@ -65,6 +80,11 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
      */
     public List<BeanPostProcessor> getBeanPostProcessors() {
         return this.beanPostProcessors;
+    }
+
+    @Override
+    public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
+        return doGetBean(name, null);
     }
     
 }

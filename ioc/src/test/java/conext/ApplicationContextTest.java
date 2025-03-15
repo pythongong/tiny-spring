@@ -1,6 +1,7 @@
 package conext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -14,12 +15,24 @@ import util.com.test.init_destroy.Infor;
 import util.com.test.inside.BeanB;
 import util.com.test.post_process.MyBeanFactoryPostProcessor;
 import util.com.test.post_process.MyBeanPostProcessor;
+import util.com.test.proxy.InforDao;
 
 public class ApplicationContextTest {
     
     public static final String LOCATION = "New York";
 
     public static final String NAME = "Tom";
+
+    private static final String INFOR_DAO = "InforDao";
+
+    @Test
+    void test_Proxy() {
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestApplication.class);
+        applicationContext.refresh();
+        InforDao inforDao = applicationContext.getBean(INFOR_DAO, InforDao.class);
+        assertNotNull(inforDao);
+    }
+
 
     @Test
     void test_InitAndDestroy() {
