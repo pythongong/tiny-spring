@@ -4,7 +4,9 @@ package com.pythongong.beans.config;
 
 import java.lang.reflect.Method;
 
-public record BeanDefinition(Class<?> beanClass, PropertyValueList propertyValueList
+import lombok.EqualsAndHashCode;
+
+public record BeanDefinition(String beanName, Class<?> beanClass, PropertyValueList propertyValueList
 , Method initMethod, Method destroyMethod) {
     
     public BeanDefinition {
@@ -13,13 +15,8 @@ public record BeanDefinition(Class<?> beanClass, PropertyValueList propertyValue
         }
     }
 
-    public BeanDefinition(Class<?> beanClass) {
-        this(beanClass, new PropertyValueList(), null, null);
+    public BeanDefinition(String beanName, Class<?> beanClass) {
+        this(beanName, beanClass, new PropertyValueList(), null, null);
     }
-
-    public BeanDefinition(Class<?> beanClass, PropertyValueList propertyValueList) {
-        this(beanClass, propertyValueList, null, null);
-    }
-
 }
 

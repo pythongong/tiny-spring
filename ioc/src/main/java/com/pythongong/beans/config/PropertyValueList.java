@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public class PropertyValueList implements Iterable<PropertyValue>{
     
     private final List<PropertyValue> propertyValues;

@@ -1,44 +1,62 @@
 package conext;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import com.pythongong.beans.BeanDefinitionRegistry;
-import com.pythongong.beans.BeanFactory;
+import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
-import com.pythongong.context.annotation.ClassPathBeanDefinitionScanner;
+import com.pythongong.context.annotation.PackageClassScanner;
 import com.pythongong.context.annotation.ConfigurationClassParser;
 import com.pythongong.context.support.PropertyResolver;
-import com.pythongong.exception.BeansException;
-
-import util.com.test.BeanA;
 import util.com.test.TestApplication;
-import util.com.test.inside.BeanB;
 
 public class AnnotationTest {
 
+    private static final String BASE_PACKAGE = "util.com.test";
+
+    private static final String PATHA = "util.com.test.PathA";
+
+    private static final String BEANA = "util.com.test.BeanA";
+
+    private static final String BEANB = "util.com.test.inside.BeanB";
     
     @Test
-    void test_Scan() {
-        BeanDefinitionRegistry registry = new DefaultListableBeanFactory();  
-        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(registry);
-        scanner.scan("util.com.test");
-        // get bean  
-        BeanFactory beanFactory = (BeanFactory) registry;  
-        assertThrows(BeansException.class, () -> beanFactory.getBean("util.com.test.PathA"));
-        assertNotNull((BeanA) beanFactory.getBean("util.com.test.BeanA") );
+    void test_Scan() throws ClassNotFoundException {
+        PackageClassScanner scanner = new PackageClassScanner();
+        Set<Class<?>> beanClasses = scanner.scan(BASE_PACKAGE);
+        assertFalse(beanClasses.contains(Class.forName(PATHA)));
+        assertTrue(beanClasses.contains(Class.forName(BEANA)));
+        assertTrue(beanClasses.contains(Class.forName(BEANB)));
     }
 
     @Test
-    void Test_Parse() {
+    void Test_Parse() throws ClassNotFoundException {
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
         ConfigurationClassParser parser = new ConfigurationClassParser(new PropertyResolver(), beanFactory);
-        parser.parse(TestApplication.class);
-        // get bean  
-        assertThrows(BeansException.class, () -> beanFactory.getBean("util.com.test.PathA"));
-        assertNotNull((BeanB) beanFactory.getBean("util.com.test.inside.BeanB") );
-        assertNotNull((BeanA) beanFactory.getBean("util.com.test.BeanA") );
+        Set<BeanDefinition> beanDefinitions = parser.parse(TestApplication.class);
+        boolean isPathAExist = false;
+        boolean isBeanAExist = false;
+        boolean isBeanBExist = false;
+        for (BeanDefinition beanDefinition : beanDefinitions) {
+            if (!isPathAExist && beanDefinition.beanName().equals(PATHA)) {
+                isPathAExist = true;
+            }
+
+            if (!isBeanAExist && beanDefinition.beanName().equals(BEANA)) {
+                isBeanAExist = true;
+            }
+
+            if (!isBeanBExist && beanDefinition.beanName().equals(BEANB)) {
+                isBeanBExist = true;
+            }
+        }
+        assertFalse(isPathAExist);
+        assertTrue(isBeanAExist);
+        assertTrue(isBeanBExist);
+        
     }
 }

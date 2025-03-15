@@ -29,19 +29,19 @@ public class GeneralApplicationContext implements ConfigurableApplicationContext
 
     @Override
     public void refresh() throws BeansException {
-        // 1. 创建 BeanFactory，并加载 BeanDefinition
+       
         refreshBeanFactory.run();
 
-        // 2. 获取 BeanFactory
         ConfigurableListableBeanFactory beanFactory = getBeanFactory.get();
 
-        // 3. 在 Bean 实例化之前，执行 BeanFactoryPostProcessor (Invoke factory processors registered as beans in the context.)
+        beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+        
         invokeBeanFactoryPostProcessors(beanFactory);
 
-        // 4. BeanPostProcessor 需要提前于其他 Bean 对象实例化之前执行注册操作
+
         registerBeanPostProcessors(beanFactory);
 
-        // 5. 提前实例化单例Bean对象
+    
         beanFactory.preInstantiateSingletons();
     }
 

@@ -13,7 +13,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
 
     private final Map<String, BeanDefinition> beanDefinitionMap = new HashMap<>(256);
 
-    private final GeneralCapableBeanFactory generalCapableBeanFactory;
+    private final GeneralAutowireCapableBeanFactory generalCapableBeanFactory;
 
     private final GeneralBeanFactory generalBeanFactory;
 
@@ -21,7 +21,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     
     
     public DefaultListableBeanFactory() {
-        generalCapableBeanFactory = new GeneralCapableBeanFactory((beanName) -> getBeanDefinition(beanName));
+        generalCapableBeanFactory = new GeneralAutowireCapableBeanFactory((beanName) -> getBeanDefinition(beanName));
         generalBeanFactory = generalCapableBeanFactory.getGeneralBeanFactory();
         singletonBeanRegistry = generalBeanFactory.getSingletonBeanRegistry();
     }
@@ -36,8 +36,8 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     }
 
     @Override
-    public void registerBeanDefinition(String name, BeanDefinition beanDefinition) {
-        beanDefinitionMap.put(name, beanDefinition);
+    public void registerBeanDefinition(BeanDefinition beanDefinition) {
+        beanDefinitionMap.put(beanDefinition.beanName(), beanDefinition);
     }
 
     @SuppressWarnings("unchecked")

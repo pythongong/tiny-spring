@@ -4,12 +4,11 @@ import java.lang.annotation.Annotation;
 
 import com.pythongong.stereotype.AutoWired;
 import com.pythongong.stereotype.Bean;
-import com.pythongong.stereotype.ComponentScan;
 import com.pythongong.stereotype.Value;
 
 public enum AnnotationTypeEnum {
     
-    COMPONENT_SCAN(ComponentScan.class), VALUE(Value.class)
+    VALUE(Value.class)
     , AUTO_WIRED(AutoWired.class), BEAN(Bean.class);
 
     private final Class<? extends Annotation> annotationClass;

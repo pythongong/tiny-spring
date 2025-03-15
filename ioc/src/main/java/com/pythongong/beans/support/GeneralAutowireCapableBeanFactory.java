@@ -7,6 +7,10 @@ import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import com.pythongong.beans.AutowireCapableBeanFactory;
+import com.pythongong.beans.Aware;
+import com.pythongong.beans.BeanClassLoaderAware;
+import com.pythongong.beans.BeanFactoryAware;
+import com.pythongong.beans.BeanNameAware;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.config.BeanReference;
@@ -17,8 +21,9 @@ import com.pythongong.beans.config.PropertyValue;
 import com.pythongong.beans.config.PropertyValueList;
 import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.AutoWired;
+import com.pythongong.util.ClassUtils;
 
-public class GeneralCapableBeanFactory implements AutowireCapableBeanFactory {
+public class GeneralAutowireCapableBeanFactory implements AutowireCapableBeanFactory {
 
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiation();
 
@@ -31,7 +36,7 @@ public class GeneralCapableBeanFactory implements AutowireCapableBeanFactory {
         return generalBeanFactory;
     }
 
-    public GeneralCapableBeanFactory(Function<String, BeanDefinition> getBeanDefinition) {
+    public GeneralAutowireCapableBeanFactory(Function<String, BeanDefinition> getBeanDefinition) {
         generalBeanFactory = new GeneralBeanFactory(getBeanDefinition, (metaData) -> createBean(metaData));
         singletonBeanRegistry = generalBeanFactory.getSingletonBeanRegistry();
     }
@@ -46,7 +51,6 @@ public class GeneralCapableBeanFactory implements AutowireCapableBeanFactory {
             bean = createBeanInstance(beanDefinition, metaData.args());
             fillPropertyValues(beanDefinition, bean);
             bean = initializeBean(beanName, bean, beanDefinition);
-            invokeInitMethods(beanName, bean, beanDefinition);
         } catch (Exception e) {
             throw new BeansException("Initiation of bean failed", e);
         }
@@ -124,6 +128,8 @@ public class GeneralCapableBeanFactory implements AutowireCapableBeanFactory {
     }
 
     private Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) {
+        awareBean(beanName, bean);
+
         // BeanPostProcessor Before 
         Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
@@ -141,6 +147,24 @@ public class GeneralCapableBeanFactory implements AutowireCapableBeanFactory {
         return wrappedBean;
     }
 
+    private void awareBean(String beanName, Object bean) {
+        if (!(bean instanceof Aware)) {
+            return;
+        }
+
+        if (bean instanceof BeanFactoryAware) {
+            ((BeanFactoryAware) bean).setBeanFactory(this);
+        }
+        
+        if (bean instanceof BeanClassLoaderAware){
+            ((BeanClassLoaderAware) bean).setBeanClassLoader(ClassUtils.getDefaultClassLoader());
+        }
+        if (bean instanceof BeanNameAware) {
+            ((BeanNameAware) bean).setBeanName(beanName);
+        }
+            
+    }
+    
     private void methodInject(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
         Class<?> beanClass = beanDefinition.getClass();
         Method[] methods = beanClass.getMethods();
@@ -163,6 +187,7 @@ public class GeneralCapableBeanFactory implements AutowireCapableBeanFactory {
             if (bean == null && autoWired.required()) {
                 throw new BeansException("inject method has more than one arugment");
             }
+            
             try {
                 method.invoke(wrappedBean, bean);
             } catch (IllegalAccessException | InvocationTargetException e) {

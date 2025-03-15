@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.pythongong.beans.ConfigurableListableBeanFactory;
 import com.pythongong.beans.ListableBeanFactory;
+import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.context.ConfigurableApplicationContext;
 import com.pythongong.context.annotation.ConfigurationClassParser;
@@ -29,6 +30,7 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
         this.configurationClass = configurationClass;
         applicationContext = new GeneralApplicationContext(() -> refreshBeanFactory(), () -> getBeanFactory());
         propertyResolver = createPropertyResolver();
+        beanFactory = new DefaultListableBeanFactory();
     }
 
     @Override
@@ -94,7 +96,10 @@ public class AnnotationConfigApplicationContext implements ConfigurableApplicati
     private void refreshBeanFactory() throws BeansException {
         DefaultListableBeanFactory beanFactory = createBeanFactory();
         ConfigurationClassParser parser = new ConfigurationClassParser(propertyResolver, beanFactory);
-        parser.parse(configurationClass);
+        Set<BeanDefinition> beanDefinitions = parser.parse(configurationClass);
+        beanDefinitions.forEach(beanDefinition -> {
+            beanFactory.registerBeanDefinition(beanDefinition);
+        });
         this.beanFactory = beanFactory;
     }
 
