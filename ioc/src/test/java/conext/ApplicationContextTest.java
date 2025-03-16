@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.beans.support.DefaultListableBeanFactory;
-import com.pythongong.context.annotation.ConfigurationClassParser;
+import com.pythongong.context.annotation.ConfigurableClassParser;
 import com.pythongong.context.support.AnnotationConfigApplicationContext;
 import com.pythongong.context.support.PropertyResolver;
 
@@ -61,7 +61,7 @@ public class ApplicationContextTest {
     void test_AnnotationConfigApplicationContext() {
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-        ConfigurationClassParser parser = new ConfigurationClassParser(new PropertyResolver(), beanFactory);
+        ConfigurableClassParser parser = new ConfigurableClassParser(new PropertyResolver());
         parser.parse(TestApplication.class);
 
 
@@ -72,7 +72,7 @@ public class ApplicationContextTest {
         beanFactory.addBeanPostProcessor(beanPostProcessor);
         
 
-        BeanB beanB = (BeanB) beanFactory.getBean("util.com.test.inside.BeanB", "name", "location");
+        BeanB beanB = (BeanB) beanFactory.getBean("util.com.test.inside.BeanB");
 
         assertEquals(NAME, beanB.getName());
         

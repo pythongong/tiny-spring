@@ -6,11 +6,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.pythongong.enums.ScopeEnum;
+
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(value =  {ElementType.TYPE, ElementType.METHOD})
 @Documented
 public @interface Scope {
 
-    String value() default "";
+    ScopeEnum value() default ScopeEnum.SINGLETON;
     
 }

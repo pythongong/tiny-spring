@@ -10,7 +10,7 @@ import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.context.ApplicationContext;
-import com.pythongong.context.annotation.ConfigurationClassParser;
+import com.pythongong.context.annotation.ConfigurableClassParser;
 import com.pythongong.context.event.ApplicationEvent;
 import com.pythongong.context.event.ApplicationEventMulticaster;
 import com.pythongong.context.event.ApplicationListener;
@@ -85,11 +85,6 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         return this.beanFactory.getBean(name);
     }
 
-    @Override
-    public Object getBean(String name, Object... args) throws BeansException {
-        return this.beanFactory.getBean(name, args);
-    }
-
     @SuppressWarnings("rawtypes")
     private void registerListeners() {
         Map<String, ApplicationListener> listenerMap = beanFactory.getBeansOfType(ApplicationListener.class);
@@ -125,7 +120,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     private void refreshBeanFactory() throws BeansException {
         DefaultListableBeanFactory beanFactory = createBeanFactory();
-        ConfigurationClassParser parser = new ConfigurationClassParser(propertyResolver, beanFactory);
+        ConfigurableClassParser parser = new ConfigurableClassParser(propertyResolver);
         Set<BeanDefinition> beanDefinitions = parser.parse(configurationClass);
         beanDefinitions.forEach(beanDefinition -> {
             beanFactory.registerBeanDefinition(beanDefinition);

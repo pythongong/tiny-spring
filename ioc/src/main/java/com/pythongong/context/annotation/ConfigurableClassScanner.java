@@ -12,16 +12,16 @@ import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.Component;
 import com.pythongong.util.PathUtils;
 
-public class PackageClassScanner {
+public class ConfigurableClassScanner {
     
     private final List<TypeFilter> includeFilters;
 
-    public PackageClassScanner() {
+    public ConfigurableClassScanner() {
         this(null);
     }
 
 
-    public PackageClassScanner(List<TypeFilter> includeFilters) {
+    public ConfigurableClassScanner(List<TypeFilter> includeFilters) {
         this.includeFilters = includeFilters == null ? new ArrayList<>() : includeFilters;
         this.includeFilters.add(new AnnotationTypeFilter(Component.class));
     }

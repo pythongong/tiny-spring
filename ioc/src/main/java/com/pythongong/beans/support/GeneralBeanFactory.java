@@ -8,7 +8,6 @@ import com.pythongong.beans.ConfigurableBeanFactory;
 import com.pythongong.beans.FactoryBean;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
-import com.pythongong.beans.config.MetaData;
 import com.pythongong.exception.BeansException;
 
 @SuppressWarnings("unchecked")
@@ -18,7 +17,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
     private final Function<String, BeanDefinition> getBeanDefinition;
 
-    private final Function<MetaData, Object> createBean;
+    private final Function<BeanDefinition, Object> createBean;
 
     private final DefaultSingletonBeanRegistry  singletonBeanRegistry = new DefaultSingletonBeanRegistry();
 
@@ -29,7 +28,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
     }
 
     public GeneralBeanFactory(Function<String, BeanDefinition> getBeanDefinition,
-            Function<MetaData, Object> createBean) {
+            Function<BeanDefinition, Object> createBean) {
         this.getBeanDefinition = getBeanDefinition;
         this.createBean = createBean;
     }
@@ -37,41 +36,15 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
     @Override
     public Object getBean(String name) throws BeansException {
-        return doGetBean(name, null);
+        return doGetBean(name);
     }
     
-
-    @Override
-    public Object getBean(String name, Object... args) throws BeansException {
-        return doGetBean(name, args);
-    }
-
     @Override
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         if (!beanPostProcessors.contains(beanPostProcessor)) {
             beanPostProcessors.add(beanPostProcessor);
         }
 
-    }
-
-    private <T> T doGetBean(String beanname, Object[] args) {
-        Object sharedInstance = singletonBeanRegistry.getSingleton(beanname);
-        if (sharedInstance != null) {
-            return (T) getObjectForBeanInstance(sharedInstance, beanname);
-        }
-        BeanDefinition beanDefinition = getBeanDefinition.apply(beanname);
-        return (T) createBean.apply(new MetaData(beanname, beanDefinition, args));
-    }
-
-    private Object getObjectForBeanInstance(Object sharedInstance, String beanname) {
-        if (!(sharedInstance instanceof FactoryBean)) {
-            return sharedInstance;
-        }
-        Object cachedObject = beanRegistrySupport.getCachedObjectForFactoryBean(beanname);
-        if (cachedObject == null) {
-            cachedObject = beanRegistrySupport.getObjectFromFactoryBean((FactoryBean<?>) sharedInstance, beanname);
-        }
-        return cachedObject;
     }
 
      /**
@@ -84,7 +57,27 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-        return doGetBean(name, null);
+        return doGetBean(name);
+    }
+
+    private <T> T doGetBean(String beanname) {
+        Object sharedInstance = singletonBeanRegistry.getSingleton(beanname);
+        if (sharedInstance != null && !(sharedInstance instanceof FactoryBean)) {
+            return (T) sharedInstance;
+        }
+        BeanDefinition beanDefinition = getBeanDefinition.apply(beanname);
+        if (sharedInstance != null) {
+            return (T) getObjectForBeanInstance(sharedInstance, beanDefinition);
+        }
+        return (T) createBean.apply(beanDefinition);
+    }
+
+    private Object getObjectForBeanInstance(Object sharedInstance, BeanDefinition beanDefinition) {
+            Object cachedObject = beanRegistrySupport.getCachedObjectForFactoryBean(beanDefinition.beanName());
+            if (cachedObject == null) {
+                cachedObject = beanRegistrySupport.getObjectFromFactoryBean((FactoryBean<?>) sharedInstance, beanDefinition);
+        }
+        return cachedObject;
     }
     
 }

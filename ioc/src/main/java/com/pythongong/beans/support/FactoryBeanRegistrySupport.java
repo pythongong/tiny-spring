@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.pythongong.beans.FactoryBean;
+import com.pythongong.beans.config.BeanDefinition;
+import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.util.ClassUtils;
 
@@ -16,15 +18,16 @@ public class FactoryBeanRegistrySupport {
         return cachedObject == ClassUtils.NULL_OBJECT ? null : cachedObject;
     }
 
-    protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName) {
+    protected Object getObjectFromFactoryBean(FactoryBean<?> factory, BeanDefinition beanDefinition) {
         Object curObject = null;
+        String beanName = beanDefinition.beanName();
         try {
             curObject = factory.getObject();
         } catch (Exception e) {
             throw new BeansException("FactoryBean throws exception on object: " + beanName);
         }
 
-        if (!factory.isSingleton()) {
+        if (!ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
             return curObject;
         }
 

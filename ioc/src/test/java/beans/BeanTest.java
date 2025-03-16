@@ -88,19 +88,6 @@ public class BeanTest {
     }
 
     @Test
-    void test_ArgsConstructor() {
-        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
-        BeanDefinition beanDefinition = BeanDefinition.builder()
-        .beanClass(UserService.class)
-        .beanName(USER_SERVICE)
-        .build();;
-        factory.registerBeanDefinition(beanDefinition);
-        UserService userService = (UserService) factory.getBean("userService", "user");
-        
-        assertNotNull(userService);
-    }
-
-    @Test
     void test_PropertyList() {
         PropertyValueList propertyValueList = new PropertyValueList();
         propertyValueList.addPropertyValue(new PropertyValue("id", 100));

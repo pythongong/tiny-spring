@@ -31,14 +31,4 @@ public class ProxBeanFactory implements FactoryBean<InforDao> {
         return (InforDao) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), new Class<?>[]{InforDao.class}, handler);
     }
 
-    @Override
-    public Class<?> getObjectType() {
-        return InforDao.class;
-    }
-
-    @Override
-    public boolean isSingleton() {
-        return true;
-    }
-
 }

@@ -8,9 +8,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.support.DefaultListableBeanFactory;
-import com.pythongong.context.annotation.PackageClassScanner;
-import com.pythongong.context.annotation.ConfigurationClassParser;
+import com.pythongong.context.annotation.ConfigurableClassScanner;
+import com.pythongong.context.annotation.ConfigurableClassParser;
 import com.pythongong.context.support.PropertyResolver;
 import util.com.test.TestApplication;
 
@@ -26,7 +25,7 @@ public class AnnotationTest {
     
     @Test
     void test_Scan() throws ClassNotFoundException {
-        PackageClassScanner scanner = new PackageClassScanner();
+        ConfigurableClassScanner scanner = new ConfigurableClassScanner();
         Set<Class<?>> beanClasses = scanner.scan(BASE_PACKAGE);
         assertFalse(beanClasses.contains(Class.forName(PATHA)));
         assertTrue(beanClasses.contains(Class.forName(BEANA)));
@@ -35,8 +34,7 @@ public class AnnotationTest {
 
     @Test
     void Test_Parse() throws ClassNotFoundException {
-        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory(); 
-        ConfigurationClassParser parser = new ConfigurationClassParser(new PropertyResolver(), beanFactory);
+        ConfigurableClassParser parser = new ConfigurableClassParser(new PropertyResolver());
         Set<BeanDefinition> beanDefinitions = parser.parse(TestApplication.class);
         boolean isPathAExist = false;
         boolean isBeanAExist = false;

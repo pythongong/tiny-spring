@@ -16,4 +16,6 @@ public @interface AutoWired {
 	 * <p>Defaults to {@code true}.
 	 */
 	boolean required() default true;
+
+	String name() default "";
 }
