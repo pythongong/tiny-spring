@@ -53,7 +53,7 @@ public class GeneralAutowireCapableBeanFactory implements AutowireCapableBeanFac
             fillPropertyValues(beanDefinition, bean);
             bean = initializeBean(beanName, bean, beanDefinition);
         } catch (Exception e) {
-            throw new BeansException("Initiation of bean failed", e);
+            throw new BeansException("Initiation of bean failed: " + beanName, e);
         }
         registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
         if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
@@ -232,8 +232,7 @@ public class GeneralAutowireCapableBeanFactory implements AutowireCapableBeanFac
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getBean'");
+        return this.getGeneralBeanFactory().getBean(name, requiredType);
     }
     
     

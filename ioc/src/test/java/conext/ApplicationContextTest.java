@@ -11,6 +11,8 @@ import com.pythongong.context.support.AnnotationConfigApplicationContext;
 import com.pythongong.context.support.PropertyResolver;
 
 import util.com.test.TestApplication;
+import util.com.test.event.SignUpListener;
+import util.com.test.event.SingUpEvent;
 import util.com.test.init_destroy.Infor;
 import util.com.test.inside.BeanB;
 import util.com.test.post_process.MyBeanFactoryPostProcessor;
@@ -25,10 +27,21 @@ public class ApplicationContextTest {
 
     private static final String INFOR_DAO = "InforDao";
 
+    private static final String SIGNUP_LISTENER = "SignUpListener";
+
+    private static final String EVENT_MESSAGE = "success";
+
+    @Test
+    void test_Event() {
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestApplication.class);
+        applicationContext.publishEvent(new SingUpEvent(applicationContext, EVENT_MESSAGE));
+        SignUpListener listener = applicationContext.getBean(SIGNUP_LISTENER, SignUpListener.class);
+        assertEquals(EVENT_MESSAGE, listener.getMessgae());
+    }
+
     @Test
     void test_Proxy() {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestApplication.class);
-        applicationContext.refresh();
         InforDao inforDao = applicationContext.getBean(INFOR_DAO, InforDao.class);
         assertNotNull(inforDao);
     }
@@ -37,7 +50,7 @@ public class ApplicationContextTest {
     @Test
     void test_InitAndDestroy() {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestApplication.class);
-        applicationContext.refresh();
+        
         applicationContext.registerShutdownHook();
         Infor infor = (Infor) applicationContext.getBean("util.com.test.init_destroy.Infor");
         assertEquals("Tom", infor.getNameMap().get(1));

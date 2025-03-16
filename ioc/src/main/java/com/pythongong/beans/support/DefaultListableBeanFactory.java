@@ -7,7 +7,10 @@ import com.pythongong.beans.BeanDefinitionRegistry;
 import com.pythongong.beans.ConfigurableListableBeanFactory;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
+import com.pythongong.context.event.ApplicationEventMulticaster;
+import com.pythongong.context.event.GeneralApplicationEventMulticaster;
 import com.pythongong.exception.BeansException;
+import com.pythongong.util.ClassUtils;
 
 public class DefaultListableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory {
 
@@ -45,7 +48,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
         Map<String, T> results = new HashMap<>();
         beanDefinitionMap.forEach((beanName, beanDefinition) -> {
-            if (beanDefinition.beanClass().isAssignableFrom(type)) {
+            if (type.isAssignableFrom(beanDefinition.beanClass())) {
                 results.put(beanName, (T) getBean(beanName));
             }
         });
@@ -93,6 +96,13 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
         return generalBeanFactory.getBean(name, requiredType);
     }
 
+    @Override
+    public ApplicationEventMulticaster initApplicationEventMulticaster() {
+        GeneralApplicationEventMulticaster applicationEventMulticaster = new GeneralApplicationEventMulticaster();
+        generalBeanFactory.getSingletonBeanRegistry().addSingleton(ClassUtils.APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
+        return applicationEventMulticaster;
+    }
+  
     
     
     
