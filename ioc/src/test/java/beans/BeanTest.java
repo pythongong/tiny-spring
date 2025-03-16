@@ -8,12 +8,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.beans.config.BeanDefinition;
+import com.pythongong.beans.config.BeanReference;
 import com.pythongong.beans.config.PropertyValue;
 import com.pythongong.beans.config.PropertyValueList;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.enums.ScopeEnum;
 
 import util.com.test.aware.AwareBean;
+import util.com.test.cyclic_dependency.CyclicA;
+import util.com.test.cyclic_dependency.CyclicB;
 
 public class BeanTest {
 
@@ -22,6 +25,28 @@ public class BeanTest {
     private static final String USER_SERVICE = "userSerive";
 
     private static final String USER_DAO = "userDao";
+
+    @Test
+    void test_Cylic() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        PropertyValueList propertyValueList = new PropertyValueList();
+        propertyValueList.addPropertyValue(new PropertyValue("cyclicB", new BeanReference("B")));
+        factory.registerBeanDefinition(BeanDefinition.builder()
+        .beanName("A")
+        .beanClass(CyclicA.class)
+        .propertyValueList(propertyValueList)
+        .build());
+
+        propertyValueList = new PropertyValueList();
+        propertyValueList.addPropertyValue(new PropertyValue("cyclicA", new BeanReference("A")));
+        factory.registerBeanDefinition(BeanDefinition.builder()
+        .beanName("B")
+        .beanClass(CyclicB.class).build());
+
+        CyclicA cyclicA = (CyclicA) factory.getBean("A");
+        assertNotNull(cyclicA.getCyclicB());
+
+    }
 
     @Test
     void test_Prototype() {

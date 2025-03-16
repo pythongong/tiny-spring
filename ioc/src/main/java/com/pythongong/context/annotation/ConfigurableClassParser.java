@@ -182,7 +182,7 @@ public class ConfigurableClassParser {
     private void fillPropertyValueList(BeanDefinition beandDefinition) {
         Class<?> beanClass = beandDefinition.beanClass();
         PropertyValueList propertyValueList = beandDefinition.propertyValueList();
-        Field[] fields = beanClass.getFields();
+        Field[] fields = beanClass.getDeclaredFields();
         for (Field field : fields) {
             PropertyValue prpertyValue = accessFieldAnnotations(field);
             if (prpertyValue == null) {
@@ -220,7 +220,7 @@ public class ConfigurableClassParser {
             return new PropertyValue(field.getName(), new BeanReference(beanName));
         }
 
-        Class<?> fieldClass = field.getClass();
+        Class<?> fieldClass = field.getType();
         BeanDefinition beanDefinition = getBeanDefinitionByType(fieldClass);
         beanName = beanDefinition.beanName();
         return new PropertyValue(field.getName(), new BeanReference(beanName));

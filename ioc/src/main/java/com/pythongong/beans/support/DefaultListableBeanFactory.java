@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.pythongong.beans.AutowireCapableBeanFactory;
@@ -80,11 +79,6 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     }
 
     @Override
-    public Set<String> getBeanDefinitionNames() {
-        return beanDefinitionMap.keySet();
-    }
-
-    @Override
     public void preInstantiateSingletons() throws BeansException {
         beanDefinitionMap.keySet().forEach(this::getBean);
     }
@@ -146,16 +140,22 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
 
     protected Object createBean(BeanDefinition beanDefinition) throws BeansException {
         Object bean;
-         try {
-            bean = createBeanInstance(beanDefinition);
-            fillPropertyValues(beanDefinition, bean);
-            bean = initializeBean(bean, beanDefinition);
-        } catch (Exception e) {
-            throw new BeansException("Initiation of bean failed: " + beanDefinition.beanName(), e);
-        }
-        registerDisposableBeanIfNecessary(bean, beanDefinition);
+        String beanName = beanDefinition.beanName();
+        
+        bean = createBeanInstance(beanDefinition);
+
         if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
-            singletonBeanRegistry.addSingleton( beanDefinition.beanName(), bean);
+            singletonBeanRegistry.addSingleton(beanName, bean);
+        }
+        
+        fillPropertyValues(beanDefinition, bean);
+
+        bean = initializeBean(bean, beanDefinition);
+
+        registerDisposableBeanIfNecessary(bean, beanDefinition);
+
+        if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
+            singletonBeanRegistry.addSingleton(beanName, bean);
         }
         return bean;
     }
@@ -172,6 +172,9 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     private Object createBeanInstance(BeanDefinition beanDefinition) {
         Constructor<?> constructorToUse = beanDefinition.constructor();
         Class<?> beanClass = beanDefinition.beanClass();
+        if (constructorToUse == null) {
+            return instantiationStrategy.instance(beanClass, constructorToUse, null);
+        }
         Class<?>[] parameterTypes = constructorToUse.getParameterTypes();
         Object[] args = new Object[parameterTypes.length];
         for (int i = 0; i < args.length; i++) {
@@ -190,7 +193,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
             String propertyName = propertyValue.name();
             Object value = propertyValue.value();
 
-            if (value instanceof BeanDefinition) {
+            if (value instanceof BeanReference) {
                 BeanReference beanReference = (BeanReference) value;
                 value = generalBeanFactory.getBean(beanReference.getBeanName());
             }

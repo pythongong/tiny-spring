@@ -4,12 +4,13 @@ import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.context.event.ApplicationEventMulticaster;
 import com.pythongong.exception.BeansException;
 
-public interface ConfigurableListableBeanFactory extends ListableBeanFactory, SingletonBeanRegistry, ConfigurableBeanFactory{
+public interface ConfigurableListableBeanFactory extends SingletonBeanRegistry, ConfigurableBeanFactory, ListableBeanFactory{
 
-    BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
     void preInstantiateSingletons() throws BeansException;
 
     ApplicationEventMulticaster initApplicationEventMulticaster();
+
+    BeanDefinition getBeanDefinition(String beanName) throws BeansException;
     
 }

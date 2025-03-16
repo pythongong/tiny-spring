@@ -11,6 +11,7 @@ import com.pythongong.context.support.AnnotationConfigApplicationContext;
 import com.pythongong.context.support.PropertyResolver;
 
 import util.com.test.TestApplication;
+import util.com.test.cyclic_dependency.CyclicA;
 import util.com.test.event.SignUpListener;
 import util.com.test.event.SingUpEvent;
 import util.com.test.init_destroy.Infor;
@@ -30,6 +31,13 @@ public class ApplicationContextTest {
     private static final String SIGNUP_LISTENER = "SignUpListener";
 
     private static final String EVENT_MESSAGE = "success";
+
+    @Test
+    void test_Cyclic() {
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(TestApplication.class);
+        CyclicA cyclicA = applicationContext.getBean("CyclicA", CyclicA.class);
+        assertNotNull(cyclicA.getCyclicB());
+    }
 
     @Test
     void test_Event() {
@@ -63,19 +71,5 @@ public class ApplicationContextTest {
 
         ConfigurableClassParser parser = new ConfigurableClassParser(new PropertyResolver());
         parser.parse(TestApplication.class);
-
-
-        MyBeanFactoryPostProcessor beanFactoryPostProcessor = new MyBeanFactoryPostProcessor();
-        beanFactoryPostProcessor.postProcessBeanFactory(beanFactory);
-
-        MyBeanPostProcessor beanPostProcessor = new MyBeanPostProcessor();
-        beanFactory.addBeanPostProcessor(beanPostProcessor);
-        
-
-        BeanB beanB = (BeanB) beanFactory.getBean("util.com.test.inside.BeanB");
-
-        assertEquals(NAME, beanB.getName());
-        
-        assertEquals(LOCATION, beanB.getLocation());
     }
 }

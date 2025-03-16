@@ -76,11 +76,6 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     }
 
     @Override
-    public Set<String> getBeanDefinitionNames() {
-        return this.beanFactory.getBeanDefinitionNames();
-    }
-
-    @Override
     public Object getBean(String name) throws BeansException {
         return this.beanFactory.getBean(name);
     }
