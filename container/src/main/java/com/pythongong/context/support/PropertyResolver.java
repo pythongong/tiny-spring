@@ -22,13 +22,8 @@ public class PropertyResolver {
         this.properties.putAll(System.getenv());
     }
 
-    public void load(InputStream inputStream) {
-        try {
-            properties.load(inputStream);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public void load(InputStream inputStream) throws IOException {
+        properties.load(inputStream);
     }
 
     public String getProperty(String key) {
