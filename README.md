@@ -1,1 +1,1 @@
-# my-tiny-spring
+# tiny-spring
