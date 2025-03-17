@@ -1,6 +1,7 @@
 package com.pythongong.context.support;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,6 +21,7 @@ import com.pythongong.core.io.DefaultResourceLoader;
 import com.pythongong.core.io.Resource;
 import com.pythongong.core.io.ResourceLoader;
 import com.pythongong.exception.BeansException;
+import com.pythongong.util.ClassPathSerchParam;
 import com.pythongong.util.PathUtils;
 
 public class AnnotationConfigApplicationContext implements ApplicationContext {
@@ -28,25 +30,23 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     private DefaultListableBeanFactory beanFactory;
 
-    private final PropertyResolver propertyResolver;
-
     private ApplicationEventMulticaster applicationEventMulticaster;
 
     public AnnotationConfigApplicationContext(Class<?> configurationClass) {
         this.configurationClass = configurationClass;
-        propertyResolver = createPropertyResolver();
         refresh();
     }
 
     @Override
     public void refresh() throws BeansException {
+
+        this.beanFactory = new DefaultListableBeanFactory();
         
         refreshBeanFactory();
 
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
         
         invokeBeanFactoryPostProcessors(beanFactory);
-
 
         registerBeanPostProcessors(beanFactory);
 
@@ -89,24 +89,28 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     }
 
     private PropertyResolver createPropertyResolver() {
-        Set<String> fileNames = PathUtils.getFileNamesOfPackage(configurationClass.getPackageName(), (fileName) -> {
+        Set<String> propertiesFiles = new HashSet<>();
+        PathUtils.findClassPathFileNames(ClassPathSerchParam.builder()
+        .packagePath("")
+        .searchSudDirect(false)
+        .serachJar(false)
+        .scanFile(true)
+        .pathMapper((basePath, filePath) -> {
+            String fileName =filePath.getFileName().toString();
             if (fileName.endsWith(PathUtils.PROPERTY_SUFFIX)) {
-                return fileName;
+                propertiesFiles.add(fileName);
             }
-            return null;
-        });
+        })
+        .build());
+
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         PropertyResolver propertyResolver = new PropertyResolver();
-        if (fileNames.isEmpty()) {
-            return propertyResolver;
-        }
-        fileNames.forEach(fileName -> {
-            Resource resource = resourceLoader.getResource(fileName);
+        propertiesFiles.forEach(propertiesFile -> {
+            Resource resource = resourceLoader.getResource(PathUtils.CLASSPATH_URL_PREFIX + propertiesFile);
             try {
                 propertyResolver.load(resource.getInputStream());
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new BeansException("load properties failed");
             }
         });
         return propertyResolver;
@@ -114,18 +118,11 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
 
     private void refreshBeanFactory() throws BeansException {
-        DefaultListableBeanFactory beanFactory = createBeanFactory();
-        ConfigurableClassParser parser = new ConfigurableClassParser(propertyResolver);
+        ConfigurableClassParser parser = new ConfigurableClassParser(createPropertyResolver());
         Set<BeanDefinition> beanDefinitions = parser.parse(configurationClass);
-        beanDefinitions.forEach(beanDefinition -> {
-            beanFactory.registerBeanDefinition(beanDefinition);
-        });
-        this.beanFactory = beanFactory;
+        beanDefinitions.forEach(this.beanFactory::registerBeanDefinition);
     }
 
-    private DefaultListableBeanFactory createBeanFactory() {
-        return new DefaultListableBeanFactory();
-    }
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {

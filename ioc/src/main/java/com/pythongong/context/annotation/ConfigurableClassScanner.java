@@ -10,7 +10,9 @@ import com.pythongong.core.filter.AnnotationTypeFilter;
 import com.pythongong.core.filter.TypeFilter;
 import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.Component;
+import com.pythongong.util.ClassPathSerchParam;
 import com.pythongong.util.PathUtils;
+import com.pythongong.util.StringUtils;
 
 public class ConfigurableClassScanner {
     
@@ -27,7 +29,7 @@ public class ConfigurableClassScanner {
     }
 
     /**
-	 * Add an include type filter to the <i>end</i> of the inclusion list.
+	 * Add an include type filter to  the inclusion list.
 	 */
 	public void addIncludeFilter(TypeFilter includeFilter) {
 		this.includeFilters.add(includeFilter);
@@ -46,26 +48,39 @@ public class ConfigurableClassScanner {
     }
 
     private Set<Class<?>> scanCandidateComponents(String basePackage) {
-        Set<String> classNames = PathUtils.getFileNamesOfPackage(basePackage, fileName -> {
-            if (fileName.endsWith(PathUtils.CLASS_FILE_SUFFIX)) {
-                fileName= fileName.substring(0, fileName.length() - PathUtils.CLASS_FILE_SUFFIX.length());
-                return fileName.replace(PathUtils.SYSTEM_PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR);
+        Set<String> classNames = new HashSet<>();
+        String packagePath = PathUtils.convertPackageToPath(basePackage);
+
+        PathUtils.findClassPathFileNames(ClassPathSerchParam.builder()
+        .packagePath(packagePath)
+        .serachJar(true)
+        .scanFile(true)
+        .searchSudDirect(true)
+        .pathMapper((basePath, filePath) -> {
+            String filePathStr = filePath.toString();
+            if (!filePathStr.endsWith(PathUtils.CLASS_FILE_SUFFIX)) {
+                return;
             }
-            return null;
-        });
+            String basePathStr = basePath.toString();
+            // For Jar file system, it;s 0
+            int startIndex = basePathStr.length() - packagePath.length();
+            int endIndex = filePathStr.length() - PathUtils.CLASS_FILE_SUFFIX.length();
+            String className = filePathStr.substring(startIndex, endIndex);
+            className = className.replace(PathUtils.PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR)
+            .replace(PathUtils.SYSTEM_PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR);
+            if (!StringUtils.isEmpty(className)) {
+                classNames.add(className);
+            }
+        })
+        .build());
 
         Set<Class<?>> beanClasses = new HashSet<>();
         classNames.forEach(className -> {
             try {
-                if (className == null) {
-                    return;
-                }
                 Class<?> clazz = Class.forName(className);
-                if (!isCandidateComponent(clazz)) {
-                    return;
+                if (isCandidateComponent(clazz)) {
+                    beanClasses.add(clazz);
                 }
-                checkModifiers(clazz);
-                beanClasses.add(clazz);
             } catch (ClassNotFoundException e) {
                 throw new BeansException("package path: " + basePackage, e);
             }
@@ -75,19 +90,16 @@ public class ConfigurableClassScanner {
 
     private boolean isCandidateComponent(Class<?> clazz) {
         for (TypeFilter typeFilter : includeFilters) {
-            if (typeFilter.match(clazz)) {
-                return true;
+            if (!typeFilter.match(clazz)) {
+                continue;
             }
-            
+            int modifiers = clazz.getModifiers();
+            if (Modifier.isPrivate(modifiers) || Modifier.isAbstract(modifiers)) {
+                throw new BeansException("modifer is private or abstract");
+            }
+            return true;
         }
         return false;
     }
     
-    private void checkModifiers(Class<?> clazz) {
-        int modifiers = clazz.getModifiers();
-        if (Modifier.isPrivate(modifiers) || Modifier.isAbstract(modifiers)) {
-            throw new BeansException("modifer is private or abstract");
-        }
-    }
-
 }

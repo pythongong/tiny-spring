@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,13 +15,15 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 import com.pythongong.exception.BeansException;
 
 public class PathUtils {
 	
 	private PathUtils(){}
+
+	public static final String ROOT_CLASS_PATH = "";
 
 	public static final String PROPERTY_SUFFIX = ".properties";
 
@@ -58,79 +61,71 @@ public class PathUtils {
 	/** URL prefix for loading from a jar file: "jar:". */
 	public static final String JAR_URL_PREFIX = "jar:";
 
-	/**
-	 * 
-	 * @param packageName
-	 * @param mapper Function to access the file name
-	 * @return
-	 */
-	public static Set<String> getFileNamesOfPackage(String packageName, Function<String, String> mapper) {
-		String basePackagePath = packageName.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
-		Set<String> paths = new HashSet<>();
-		try {
-			// Get urls by the classloader
-			Enumeration<URL> en = ClassUtils.getDefaultClassLoader().getResources(basePackagePath);
-			while (en.hasMoreElements()) {
-				URL url = en.nextElement();
-				paths.addAll(getFileNameOfPath(url, basePackagePath, mapper));
-			}
-		} catch (IOException e) {
-			throw new BeansException("package name:" + packageName, e);
-		}
 
-		return paths;
-	}
-	
-	/**
-	 * 
-	 * @param url
-	 * @param basePackagePath
-	 * @param mapper
-	 * @return
-	 */
-	private static Set<String> getFileNameOfPath(URL url, String basePackagePath, Function<String, String> mapper) {
-		Set<String> paths = new HashSet<>();
+	public static void findClassPathFileNames(ClassPathSerchParam param) {
+		String packagePath = param.packagePath();
+		
 		try {
-			URI uri = url.toURI();
-			String uriStr = URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8);
-			
-			if (uriStr.startsWith(FILE_URL_PREFIX)) {
-				// Remove the file prefix and leading slash
-				String rootDir = stripLeadingSlash(uriStr.substring(
-				FILE_URL_PREFIX.length(), uriStr.length() - basePackagePath.length()));
-				Path path = Paths.get(uri);
-				Files.walk(path).filter(Files::isRegularFile).forEach(filePath -> {
-					// Remove the root dir and just leave the 
-					String fileName = filePath.toString().substring(rootDir.length());
-					accessFileName(fileName, mapper, paths);
-				});
-			} else if (uriStr.startsWith(JAR_URL_PREFIX)) {
-				// Jar system needs a new file system to create path
-				Path path = FileSystems.newFileSystem(uri, Map.of()).getPath(basePackagePath);
-				Files.walk(path).filter(Files::isRegularFile).forEach(filePath -> {
-					String fileName = filePath.toString();
-					accessFileName(fileName, mapper, paths);
-				});
+			Enumeration<URL> enumUrls = ClassUtils.getDefaultClassLoader().getResources(packagePath);
+			while (enumUrls.hasMoreElements()) {
+				URL url = enumUrls.nextElement();
+				URI uri;
+				uri = url.toURI();
+				String uriStr = URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8);
+				Path basePath = null;
+				if (uriStr.startsWith(FILE_URL_PREFIX) && param.scanFile()) {
+					basePath = Paths.get(uri);
+					
+				} else if (uriStr.startsWith(JAR_URL_PREFIX) && param.serachJar()) {
+					// Jar system needs a new file system to create path
+					basePath = FileSystems.newFileSystem(uri, Map.of()).getPath(packagePath);
+				}
+
+				if (basePath == null) {
+					continue;
+				}
+
+				if (param.searchSudDirect() ) {
+					findFileNamesIncluSubdirect(basePath, param.pathMapper());
+				} else {
+					findFileNames(basePath, param.pathMapper());		
+				}
+				
+				
 			}
 		} catch (URISyntaxException | IOException e) {
-			throw new BeansException("package path:" + basePackagePath, e);
-		}
-		
-		return paths;
-	}
-
-	private static void accessFileName(String fileName , Function<String, String> mapper, Set<String> paths ) {
-		if (mapper != null) {
-			fileName = mapper.apply(fileName);
-		}
-		
-		if (fileName != null) {
-			paths.add(fileName);
+			throw new BeansException("file error");
 		}
 	}
 
-	private static String stripLeadingSlash(String path) {
-		return (path.startsWith(PATH_SEPARATOR) ? path.substring(PACKAGE_SEPARATOR.length()) : path);
+	private static Set<String> findFileNamesIncluSubdirect(Path basePath, BiConsumer<Path, Path> pathMapper) {
+		Set<String> fileNames = new HashSet<>();
+		try {
+			Files.walk(basePath).filter(Files::isRegularFile).forEach(filePath -> {
+				pathMapper.accept(basePath, filePath);
+			});
+		} catch (IOException e) {
+			throw new BeansException("file error");
+		}
+		return fileNames;
+	}
+
+	private static void findFileNames(Path basePath, BiConsumer<Path, Path> pathMapper) {
+		try (DirectoryStream<Path> stream = 
+		Files.newDirectoryStream(basePath, entry -> Files.isRegularFile(entry))) {
+			for (Path filePath : stream) {
+				pathMapper.accept(basePath, filePath);
+			}
+		} catch (IOException e) {
+			throw new BeansException("file error");
+		}
+
+	
+	}
+
+	public static String convertPackageToPath(String packageName) {
+		return packageName.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
 	}
 	
 }
+

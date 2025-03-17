@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.pythongong.beans.ConfigurableBeanFactory;
 import com.pythongong.beans.FactoryBean;
+import com.pythongong.beans.SingletonBeanRegistry;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.exception.BeansException;
@@ -13,24 +14,21 @@ import com.pythongong.exception.BeansException;
 @SuppressWarnings("unchecked")
 public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
-    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
-
     private final Function<String, BeanDefinition> getBeanDefinition;
 
     private final Function<BeanDefinition, Object> createBean;
 
-    private final DefaultSingletonBeanRegistry  singletonBeanRegistry = new DefaultSingletonBeanRegistry();
+    private final SingletonBeanRegistry  singletonBeanRegistry;
 
     private final FactoryBeanRegistrySupport beanRegistrySupport = new FactoryBeanRegistrySupport();
 
-    public DefaultSingletonBeanRegistry getSingletonBeanRegistry() {
-        return singletonBeanRegistry;
-    }
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
     public GeneralBeanFactory(Function<String, BeanDefinition> getBeanDefinition,
-            Function<BeanDefinition, Object> createBean) {
+            Function<BeanDefinition, Object> createBean, SingletonBeanRegistry singletonBeanRegistry) {
         this.getBeanDefinition = getBeanDefinition;
         this.createBean = createBean;
+        this.singletonBeanRegistry = singletonBeanRegistry;
     }
     
 

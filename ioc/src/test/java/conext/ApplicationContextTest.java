@@ -5,19 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-import com.pythongong.beans.support.DefaultListableBeanFactory;
-import com.pythongong.context.annotation.ConfigurableClassParser;
 import com.pythongong.context.support.AnnotationConfigApplicationContext;
-import com.pythongong.context.support.PropertyResolver;
-
 import util.com.test.TestApplication;
 import util.com.test.cyclic_dependency.CyclicA;
 import util.com.test.event.SignUpListener;
 import util.com.test.event.SingUpEvent;
 import util.com.test.init_destroy.Infor;
-import util.com.test.inside.BeanB;
-import util.com.test.post_process.MyBeanFactoryPostProcessor;
-import util.com.test.post_process.MyBeanPostProcessor;
 import util.com.test.proxy.InforDao;
 
 public class ApplicationContextTest {
@@ -65,11 +58,5 @@ public class ApplicationContextTest {
     }
 
 
-    @Test
-    void test_AnnotationConfigApplicationContext() {
-        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-
-        ConfigurableClassParser parser = new ConfigurableClassParser(new PropertyResolver());
-        parser.parse(TestApplication.class);
-    }
+   
 }

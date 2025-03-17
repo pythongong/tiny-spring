@@ -43,8 +43,8 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     
     
     public DefaultListableBeanFactory() {
-        generalBeanFactory = new GeneralBeanFactory(this::getBeanDefinition, this::createBean);
-        singletonBeanRegistry = generalBeanFactory.getSingletonBeanRegistry();
+        singletonBeanRegistry = new DefaultSingletonBeanRegistry();
+        generalBeanFactory = new GeneralBeanFactory(this::getBeanDefinition, this::createBean, singletonBeanRegistry);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     @Override
     public ApplicationEventMulticaster initApplicationEventMulticaster() {
         GeneralApplicationEventMulticaster applicationEventMulticaster = new GeneralApplicationEventMulticaster();
-        generalBeanFactory.getSingletonBeanRegistry().addSingleton(ClassUtils.APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
+        singletonBeanRegistry.addSingleton(ClassUtils.APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
         return applicationEventMulticaster;
     }
 
