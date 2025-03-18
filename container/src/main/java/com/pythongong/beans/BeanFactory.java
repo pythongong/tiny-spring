@@ -18,10 +18,10 @@ package com.pythongong.beans;
 import com.pythongong.exception.BeansException;
 
 /**
- * The root interface for accessing the Spring bean container.
- * This interface provides the basic functionality for retrieving beans
- * by name or type from a Spring IoC container.
- *
+ * The central interface in the Spring bean container.
+ * This is the basic client view of a bean container, providing
+ * methods to retrieve bean instances by name or type.
+ * 
  * @author Cheng Gong
  */
 public interface BeanFactory {
@@ -36,14 +36,13 @@ public interface BeanFactory {
     Object getBean(String beanName) throws BeansException;
 
     /**
-     * Returns an instance of the bean registered with the given name,
-     * requiring it to be of the given type.
+     * Returns an instance of the bean registered with the given name and required type.
      *
      * @param <T> the required type of the bean
      * @param beanName name of the bean to retrieve
      * @param requiredType type the bean must match
-     * @return an instance of the bean
+     * @return an instance of the bean cast to the required type
      * @throws BeansException if the bean could not be obtained or is not of the required type
      */
     <T> T getBean(String beanName, Class<T> requiredType) throws BeansException;
-}
+} 

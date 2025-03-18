@@ -1,23 +1,4 @@
-package com.pythongong.beans;
-/**
- * Marker interface to be implemented by beans that wish to be notified of their
- * running environment by the container. Serves as a parent interface for all
- * awareness-based interfaces in the framework.
- *
- * <p>A bean implementing this interface will receive a callback during the bean
- * initialization process, allowing it to be notified of the environment it's
- * running in or to access specific container facilities.
- *
- * <p>Common Aware interfaces include:
- * <ul>
- *     <li>{@link BeanAware} - Provides access to the BeanFactory</li>
- *     <li>{@link BeanNameAware} - Notifies of the bean's name</li>
- * </ul>
- *
- * @author Cheng Gong
- * @since 1.0
- *
- * @license Apache License 2.0
+/*
  * Copyright 2025 Cheng Gong
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +13,13 @@ package com.pythongong.beans;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.pythongong.beans;
+
+/**
+ * Marker interface to be implemented by beans that wish to be aware of their
+ * environment. Serves as a parent interface for all *Aware interfaces in the framework.
+ *
+ * @author Cheng Gong
+ */
 public interface Aware {
-    // Marker interface - no methods to implement
 }
