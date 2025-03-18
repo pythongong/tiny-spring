@@ -1,47 +1,74 @@
+/*
+ * Copyright 2025 Cheng Gong
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.pythongong.context.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
-import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.config.BeanReference;
-import com.pythongong.beans.config.FactoryBean;
-import com.pythongong.beans.config.PropertyValue;
-import com.pythongong.beans.config.PropertyValueList;
+import com.pythongong.beans.config.*;
 import com.pythongong.context.support.PropertyResolver;
 import com.pythongong.enums.FiledAnnoEnum;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.DuplicateBeanExcpetion;
-import com.pythongong.stereotype.AutoWired;
-import com.pythongong.stereotype.Bean;
-import com.pythongong.stereotype.Component;
-import com.pythongong.stereotype.ComponentScan;
-import com.pythongong.stereotype.Configuration;
-import com.pythongong.stereotype.PostConstruct;
-import com.pythongong.stereotype.PreDestroy;
-import com.pythongong.stereotype.Scope;
-import com.pythongong.stereotype.Value;
+import com.pythongong.stereotype.*;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
 import com.pythongong.util.StringUtils;
 
+/**
+ * Parser that processes configuration classes and component scanning to create bean definitions.
+ * <p>This class handles configuration classes marked with {@link Configuration} and processes
+ * component scanning through {@link ComponentScan}. It creates bean definitions from both
+ * annotated classes and {@link Bean} methods in configuration classes.
+ * 
+ * <p>Key responsibilities:
+ * <ul>
+ *   <li>Component scanning and bean definition creation</li>
+ *   <li>Processing of {@link Configuration} classes</li>
+ *   <li>Handling of dependency injection annotations</li>
+ *   <li>Processing of bean lifecycle annotations</li>
+ * </ul>
+ *
+ * @author Cheng Gong
+ * @see Configuration
+ * @see ComponentScan
+ * @see Bean
+ * @see BeanDefinition
+ */
 public class ConfigurableClassParser {
 
+    /** Scanner used to find candidate component classes */
     private final ConfigurableClassScanner scanner;
 
+    /** Resolver for property placeholders */
     private final PropertyResolver propertyResolver;
 
+    /** Set of bean definitions discovered during parsing */
     private Set<BeanDefinition> beanDefinitions;
 
+    /**
+     * Creates a new parser with the specified property resolver.
+     *
+     * @param propertyResolver the resolver for property placeholders
+     * @throws IllegalArgumentException if propertyResolver is null
+     */
     public ConfigurableClassParser(PropertyResolver propertyResolver) {
         CheckUtils.nullArgs(propertyResolver, "ConfigurableClassParser receives null propertyResolver");
         this.scanner = new ConfigurableClassScanner();
@@ -49,6 +76,15 @@ public class ConfigurableClassParser {
         beanDefinitions = new HashSet<>();
     }
     
+    /**
+     * Parses a configuration class to discover and create bean definitions.
+     * <p>Processes {@link ComponentScan} configuration and scans for components
+     * in the specified base packages.
+     *
+     * @param declaredClass the configuration class to parse
+     * @return a Set of discovered bean definitions
+     * @throws IllegalArgumentException if declaredClass is null
+     */
     public Set<BeanDefinition> parse(Class<?> declaredClass) {
         CheckUtils.nullArgs(declaredClass, "ConfigurableClassParser.parse receives null class");
         Annotation[] annotations = declaredClass.getAnnotations();
@@ -62,28 +98,41 @@ public class ConfigurableClassParser {
 
         String[] basePackages = componentScan.basePackages();
         Set<Class<?>> beanClasses = scanner.scan(ClassUtils.isArrayEmpty(basePackages) ? 
-        new String[]{declaredClass.getPackageName()} : basePackages);
+            new String[]{declaredClass.getPackageName()} : basePackages);
 
         return doParse(beanClasses);
     }
 
-    private Set<BeanDefinition> doParse(Set<Class<?>> beanClasses){
-
+    /**
+     * Processes discovered bean classes to create bean definitions.
+     *
+     * @param beanClasses the set of candidate component classes
+     * @return a Set of bean definitions
+     */
+    private Set<BeanDefinition> doParse(Set<Class<?>> beanClasses) {
         this.beanDefinitions = new HashSet<>();
         beanClasses.forEach(this::createBeanDefinition);
         this.beanDefinitions.forEach(this::fillPropertyValueList);
         return this.beanDefinitions;
     }
 
+    /**
+     * Creates a bean definition from a component class.
+     * <p>Processes component configuration including scope, lifecycle methods,
+     * and factory methods for {@link Configuration} classes.
+     *
+     * @param beanClass the class to create a bean definition for
+     * @throws DuplicateBeanExcpetion if a bean definition already exists
+     */
     private void createBeanDefinition(Class<?> beanClass) {
         BeanDefinition beanDefinition = BeanDefinition.builder()
-        .constructor(getConfigurableConstrucor(beanClass))
-        .beanName(generateBeanName(beanClass))
-        .beanClass(beanClass)
-        .initMethod(findInitOrDestoryMethod(beanClass, PostConstruct.class))
-        .destroyMethod(findInitOrDestoryMethod(beanClass, PreDestroy.class))
-        .scope(extractScope(beanClass))
-        .build();
+            .constructor(getConfigurableConstrucor(beanClass))
+            .beanName(generateBeanName(beanClass))
+            .beanClass(beanClass)
+            .initMethod(findInitOrDestoryMethod(beanClass, PostConstruct.class))
+            .destroyMethod(findInitOrDestoryMethod(beanClass, PreDestroy.class))
+            .scope(extractScope(beanClass))
+            .build();
 
         addBeanDef(beanDefinition);
 
@@ -92,45 +141,68 @@ public class ConfigurableClassParser {
         }
     }
 
+    /**
+     * Creates bean definitions for methods marked with {@link Bean} in configuration classes.
+     *
+     * @param beanClass the configuration class to process
+     */
     private void createFactoryBeanDefinitions(Class<?> beanClass) {
         Method[] methods = beanClass.getMethods();
         Arrays.stream(methods)
-        .filter(method -> method.isAnnotationPresent(Bean.class))
-        .forEach(method -> {
-            Bean beanAnno = method.getAnnotation(Bean.class);
-            String beanName = beanAnno.value();
-            if (StringUtils.isEmpty(beanName)) {
-                beanName = method.getReturnType().getName();
-            }
-            
-            FactoryBean<Object> factoryBean = () -> method;
-            ScopeEnum scope = extractScope(method.getClass());
-            BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName(beanName)
-            .beanClass(factoryBean.getClass())
-            .scope(scope)
-            .build();
+            .filter(method -> method.isAnnotationPresent(Bean.class))
+            .forEach(method -> {
+                Bean beanAnno = method.getAnnotation(Bean.class);
+                String beanName = beanAnno.value();
+                if (StringUtils.isEmpty(beanName)) {
+                    beanName = method.getReturnType().getName();
+                }
+                
+                FactoryBean<Object> factoryBean = () -> method;
+                ScopeEnum scope = extractScope(method.getClass());
+                BeanDefinition beanDefinition = BeanDefinition.builder()
+                    .beanName(beanName)
+                    .beanClass(factoryBean.getClass())
+                    .scope(scope)
+                    .build();
 
-            addBeanDef(beanDefinition);
-        });;
-        
+                addBeanDef(beanDefinition);
+            });
     }
 
+    /**
+     * Adds a bean definition to the set of discovered definitions.
+     *
+     * @param beanDefinition the bean definition to add
+     * @throws DuplicateBeanExcpetion if a definition already exists
+     */
     private void addBeanDef(BeanDefinition beanDefinition) {
         if (!this.beanDefinitions.add(beanDefinition)) {
             throw new DuplicateBeanExcpetion(beanDefinition.beanName(), beanDefinition.beanClass());
         }
     }
 
+    /**
+     * Extracts the scope from a bean class, defaulting to singleton.
+     *
+     * @param beanClass the class to check for scope
+     * @return the scope enum value
+     */
     private ScopeEnum extractScope(Class<?> beanClass) {
         Scope scope = beanClass.getAnnotation(Scope.class);
         return scope == null ? ScopeEnum.SINGLETON : scope.value();
     }
 
-    private Constructor<?>  getConfigurableConstrucor(Class<?> beanClass) {
+    /**
+     * Finds an {@link AutoWired} annotated constructor.
+     *
+     * @param beanClass the class to check for autowired constructors
+     * @return the autowired constructor or null if none found
+     * @throws BeansException if multiple autowired constructors are found
+     */
+    private Constructor<?> getConfigurableConstrucor(Class<?> beanClass) {
         Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
         List<Constructor<?>> configurabeConsturctors = Arrays.stream(declaredConstructors)
-        .filter(constructor -> constructor.isAnnotationPresent(AutoWired.class)).toList();
+            .filter(constructor -> constructor.isAnnotationPresent(AutoWired.class)).toList();
 
         if (configurabeConsturctors.isEmpty()) {
             return null;
@@ -142,6 +214,12 @@ public class ConfigurableClassParser {
         return configurabeConsturctors.get(0);
     }
 
+    /**
+     * Generates a bean name from a component class.
+     *
+     * @param beanClass the class to generate a name for
+     * @return the bean name
+     */
     private String generateBeanName(Class<?> beanClass) {
         Component component = ClassUtils.findAnnotation(beanClass, Component.class);
         if (component == null || component.value().isBlank()) {
@@ -150,16 +228,24 @@ public class ConfigurableClassParser {
         return component.value();
     }
 
+    /**
+     * Finds initialization or destruction methods.
+     *
+     * @param beanClass the class to check for lifecycle methods
+     * @param anotationClass the lifecycle annotation to look for
+     * @return the lifecycle method or null if none found
+     * @throws BeansException if multiple lifecycle methods are found
+     */
     private Method findInitOrDestoryMethod(Class<?> beanClass, Class<? extends Annotation> anotationClass) {
         List<Method> methods = Arrays.stream(beanClass.getDeclaredMethods())
-        .filter(method -> method.isAnnotationPresent(anotationClass)).map(method -> {
-            if (method.getParameterCount() != 0) {
-                throw new BeansException (
-                    String.format("Method '%s' with @%s must not have argument: %s", 
-                    method.getName(), anotationClass.getSimpleName(), beanClass.getName()));
-            }
-            return method;
-        }).toList();
+            .filter(method -> method.isAnnotationPresent(anotationClass)).map(method -> {
+                if (method.getParameterCount() != 0) {
+                    throw new BeansException(
+                        String.format("Method '%s' with @%s must not have argument: %s", 
+                        method.getName(), anotationClass.getSimpleName(), beanClass.getName()));
+                }
+                return method;
+            }).toList();
 
         if (methods.isEmpty()) {
             return null;
@@ -167,13 +253,17 @@ public class ConfigurableClassParser {
 
         if (methods.size() > 1) {
             throw new BeansException(String.format("Multiple methods with @%s found in class: %s"
-            , anotationClass.getSimpleName(), beanClass.getName()));
+                , anotationClass.getSimpleName(), beanClass.getName()));
         }
 
         return methods.get(0);
     }
 
-
+    /**
+     * Processes field annotations to create property values.
+     *
+     * @param beandDefinition the bean definition to process
+     */
     private void fillPropertyValueList(BeanDefinition beandDefinition) {
         Class<?> beanClass = beandDefinition.beanClass();
         PropertyValueList propertyValueList = beandDefinition.propertyValueList();
@@ -187,6 +277,12 @@ public class ConfigurableClassParser {
         }
     }
 
+    /**
+     * Processes annotations on a field to create property values.
+     *
+     * @param field the field to process
+     * @return the property value or null if no relevant annotations
+     */
     private PropertyValue accessFieldAnnotations(Field field) {
         Annotation[] annotations = field.getAnnotations();
         for (Annotation annotation : annotations) {
@@ -201,14 +297,27 @@ public class ConfigurableClassParser {
             }
         }
         return null;
-        
     }
 
+    /**
+     * Creates a property value for a {@link Value} annotated field.
+     *
+     * @param value the Value annotation
+     * @param field the annotated field
+     * @return the property value
+     */
     private PropertyValue getValuedField(Value value, Field field) {
         String property = propertyResolver.getProperty(value.value());
         return new PropertyValue(field.getName(), property);
     }
 
+    /**
+     * Creates a property value for an {@link AutoWired} annotated field.
+     *
+     * @param autoWired the AutoWired annotation
+     * @param field the annotated field
+     * @return the property value
+     */
     private PropertyValue getAutowiredField(AutoWired autoWired, Field field) {
         String beanName = autoWired.name();
         if (!StringUtils.isEmpty(beanName)) {
@@ -221,19 +330,27 @@ public class ConfigurableClassParser {
         return new PropertyValue(field.getName(), new BeanReference(beanName));
     }
 
+    /**
+     * Finds a bean definition by type.
+     *
+     * @param requiredType the required bean type
+     * @return the matching bean definition
+     * @throws NoSuchElementException if no matching bean is found
+     * @throws BeansException if multiple matching beans are found
+     */
     private BeanDefinition getBeanDefinitionByType(Class<?> requiredType) {
-        List<BeanDefinition> requiredDefs = beanDefinitions.stream().filter(beanDefinition -> beanDefinition.beanClass().equals(requiredType)).toList();
+        List<BeanDefinition> requiredDefs = beanDefinitions.stream()
+            .filter(beanDefinition -> beanDefinition.beanClass().equals(requiredType))
+            .toList();
 
         if (requiredDefs.isEmpty()) {
             throw new NoSuchElementException();
         }
 
         if (requiredDefs.size() > 1) {
-            throw new BeansException("complict bean");
+            throw new BeansException("conflicting beans found");
         }
 
         return requiredDefs.get(0);
     }
-
-
 }
