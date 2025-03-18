@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.pythongong.beans.config.DisposableBean;
 import com.pythongong.beans.registry.SingletonBeanRegistry;
 import com.pythongong.exception.BeansException;
-import com.pythongong.exception.NoScuhBeanException;
+import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.util.CheckUtils;
 
 /**
@@ -73,7 +73,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
         Arrays.stream(disaposableNames).forEach(beanName -> {
             DisposableBean bean = disposableBeanMap.get(beanName);
             if (bean == null) {
-                throw new NoScuhBeanException((String) beanName, DisposableBean.class);
+                throw new NoSuchBeanException((String) beanName, DisposableBean.class);
             }
             disposableBeanMap.remove(beanName);
             try {

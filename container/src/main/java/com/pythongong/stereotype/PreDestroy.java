@@ -22,23 +22,36 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a method to be called right before a bean instance is destroyed by the container.
- * Methods annotated with @PreDestroy will be invoked during bean destruction,
- * allowing for cleanup of resources or any other necessary operations before
- * the bean is removed from the container.
+ * Marks a method to be called before a bean is destroyed by the container.
+ * This provides an opportunity to perform cleanup operations before the bean
+ * instance is removed from the container.
  *
  * <p>The annotated method must:
  * <ul>
- *   <li>Have no parameters</li>
+ *   <li>Take no parameters</li>
  *   <li>Return void</li>
  *   <li>Not throw checked exceptions</li>
  * </ul>
- * 
+ *
+ * <p>Example usage:
+ * <pre>{@code
+ * @Component
+ * public class DatabaseConnection {
+ *     private Connection conn;
+ *
+ *     @PreDestroy
+ *     public void cleanup() {
+ *         if (conn != null) {
+ *             conn.close();
+ *         }
+ *     }
+ * }
+ * }</pre>
+ *
  * @author Cheng Gong
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
 public @interface PreDestroy {
-    
 }

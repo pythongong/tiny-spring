@@ -41,7 +41,7 @@ import com.pythongong.context.event.ApplicationEventMulticaster;
 import com.pythongong.context.event.GeneralApplicationEventMulticaster;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
-import com.pythongong.exception.NoScuhBeanException;
+import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.stereotype.AutoWired;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
@@ -100,7 +100,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
         });
 
         if (results.isEmpty()) {
-            throw new NoScuhBeanException(type);
+            throw new NoSuchBeanException(type);
         }
 
         return results;

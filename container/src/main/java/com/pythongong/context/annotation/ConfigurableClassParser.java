@@ -26,7 +26,7 @@ import com.pythongong.context.support.PropertyResolver;
 import com.pythongong.enums.FiledAnnoEnum;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
-import com.pythongong.exception.DuplicateBeanExcpetion;
+import com.pythongong.exception.DuplicateBeanException;
 import com.pythongong.stereotype.*;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
@@ -122,7 +122,7 @@ public class ConfigurableClassParser {
      * and factory methods for {@link Configuration} classes.
      *
      * @param beanClass the class to create a bean definition for
-     * @throws DuplicateBeanExcpetion if a bean definition already exists
+     * @throws DuplicateBeanException if a bean definition already exists
      */
     private void createBeanDefinition(Class<?> beanClass) {
         BeanDefinition beanDefinition = BeanDefinition.builder()
@@ -173,11 +173,11 @@ public class ConfigurableClassParser {
      * Adds a bean definition to the set of discovered definitions.
      *
      * @param beanDefinition the bean definition to add
-     * @throws DuplicateBeanExcpetion if a definition already exists
+     * @throws DuplicateBeanException if a definition already exists
      */
     private void addBeanDef(BeanDefinition beanDefinition) {
         if (!this.beanDefinitions.add(beanDefinition)) {
-            throw new DuplicateBeanExcpetion(beanDefinition.beanName(), beanDefinition.beanClass());
+            throw new DuplicateBeanException(beanDefinition.beanName(), beanDefinition.beanClass());
         }
     }
 

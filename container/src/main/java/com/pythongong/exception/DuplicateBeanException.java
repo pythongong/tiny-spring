@@ -16,31 +16,30 @@
 package com.pythongong.exception;
 
 /**
- * Base exception for all beans-related exceptions in the framework.
- * This runtime exception is thrown when problems occur during bean
- * creation, configuration, or other bean operations.
+ * Exception thrown when attempting to register a bean with a name
+ * that is already in use within the container.
  *
  * @author pythongong
  * @since 2025-03-18
  */
-public class BeansException extends RuntimeException {
+public class DuplicateBeanException extends BeansException {
 
     /**
-     * Constructs a new BeansException with the specified message.
+     * Constructs a new DuplicateBeanExcpetion with the specified message.
      *
      * @param msg the detail message
      */
-    public BeansException(String msg) {
+    public DuplicateBeanException(String msg) {
         super(msg);
     }
-
+    
     /**
-     * Constructs a new BeansException with the specified message and cause.
+     * Constructs a new DuplicateBeanExcpetion with details about the duplicate bean.
      *
-     * @param msg the detail message
-     * @param cause the cause of the exception
+     * @param beanName the name of the bean that was duplicated
+     * @param beanClass the type of the bean that was duplicated
      */
-    public BeansException(String msg, Throwable cause) {
-        super(msg, cause);
+    public DuplicateBeanException(String beanName, Class<?> beanClass) {
+        this(String.format("Duplicate bean named: {%s}, type: {%s}", beanName, beanClass.getName()));
     }
 }

@@ -25,7 +25,7 @@ import com.pythongong.beans.config.FactoryBean;
 import com.pythongong.beans.factory.ConfigurableBeanFactory;
 import com.pythongong.beans.registry.SingletonBeanRegistry;
 import com.pythongong.exception.BeansException;
-import com.pythongong.exception.NoScuhBeanException;
+import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.util.CheckUtils;
 
 /**
@@ -119,7 +119,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         }
         BeanDefinition beanDefinition = getBeanDefinition.apply(beanName);
         if (beanDefinition == null) {
-            throw new NoScuhBeanException(String.format("No bean is definited as: {%s}", beanName));
+            throw new NoSuchBeanException(String.format("No bean is definited as: {%s}", beanName));
         }
 
         if (sharedInstance != null) {
