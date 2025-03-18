@@ -1,3 +1,18 @@
+/*
+ * Copyright 2025 Cheng Gong
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.pythongong.beans.support;
 
 import java.util.ArrayList;
@@ -13,19 +28,38 @@ import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoScuhBeanException;
 import com.pythongong.util.CheckUtils;
 
+/**
+ * General implementation of the ConfigurableBeanFactory interface.
+ * This class provides the core functionality for bean instantiation and configuration,
+ * supporting both singleton and prototype scopes, as well as factory beans.
+ *
+ * @author Cheng Gong
+ */
 @SuppressWarnings("unchecked")
 public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
+    /** Function to retrieve bean definitions by name */
     private final Function<String, BeanDefinition> getBeanDefinition;
 
+    /** Function to create bean instances from definitions */
     private final Function<BeanDefinition, Object> createBean;
 
-    private final SingletonBeanRegistry  singletonBeanRegistry;
+    /** Registry for managing singleton beans */
+    private final SingletonBeanRegistry singletonBeanRegistry;
 
+    /** Support class for handling FactoryBean instances */
     private final FactoryBeanRegistrySupport beanRegistrySupport = new FactoryBeanRegistrySupport();
 
+    /** List of bean post processors */
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
+    /**
+     * Constructs a new GeneralBeanFactory with the specified dependencies.
+     *
+     * @param getBeanDefinition function to retrieve bean definitions
+     * @param createBean function to create bean instances
+     * @param singletonBeanRegistry registry for managing singleton beans
+     */
     public GeneralBeanFactory(Function<String, BeanDefinition> getBeanDefinition,
             Function<BeanDefinition, Object> createBean, SingletonBeanRegistry singletonBeanRegistry) {
         
@@ -37,7 +71,6 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         this.createBean = createBean;
         this.singletonBeanRegistry = singletonBeanRegistry;
     }
-    
 
     @Override
     public Object getBean(String beanName) throws BeansException {
@@ -51,12 +84,13 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         if (!beanPostProcessors.contains(beanPostProcessor)) {
             beanPostProcessors.add(beanPostProcessor);
         }
-
     }
 
-     /**
-     * Return the list of BeanPostProcessors that will get applied
-     * to beans created with this factory.
+    /**
+     * Returns the list of BeanPostProcessors that will be applied to beans
+     * created by this factory.
+     *
+     * @return the list of BeanPostProcessors
      */
     public List<BeanPostProcessor> getBeanPostProcessors() {
         return this.beanPostProcessors;
@@ -69,6 +103,15 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         return doGetBean(name);
     }
 
+    /**
+     * Template method for retrieving a bean instance, handling both
+     * regular beans and FactoryBean instances.
+     *
+     * @param <T> the type of bean to return
+     * @param beanName the name of the bean to retrieve
+     * @return the bean instance
+     * @throws BeansException if the bean cannot be created
+     */
     private <T> T doGetBean(String beanName) {
         Object sharedInstance = singletonBeanRegistry.getSingleton(beanName);
         if (sharedInstance != null && !(sharedInstance instanceof FactoryBean)) {
@@ -86,6 +129,13 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         return (T) createBean.apply(beanDefinition);
     }
 
+    /**
+     * Gets the object from a FactoryBean instance.
+     *
+     * @param sharedInstance the FactoryBean instance
+     * @param beanDefinition the bean definition
+     * @return the object created by the FactoryBean
+     */
     private Object getObjectForBeanInstance(Object sharedInstance, BeanDefinition beanDefinition) {
         Object cachedObject = beanRegistrySupport.getCachedObjectForFactoryBean(beanDefinition.beanName());
         if (cachedObject == null) {
@@ -93,5 +143,4 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         }
         return cachedObject;
     }
-    
 }
