@@ -34,22 +34,30 @@ you understand the essential principle of the Spring Framework.
 
 ## 🔧 Technical Highlights
 
-- **Clean Architecture**
-  - Modular design with clear separation of concerns
-  - Extensive use of interfaces for flexibility
-  - Comprehensive exception handling
+- **Functional Programming**
+  - Stream API for bean processing pipelines
+  - Optional for null-safe operations
+  - Lambda expressions for event handlers
+  - Method references for bean initialization
+  - Immutable collections throughout
+  - Records for immutable data carriers
 
 - **Design Patterns**
   - Factory Pattern for bean creation
   - Singleton Pattern for bean scoping
-  - Template Method Pattern for bean processing
+  - Template Method Pvattern for bean processing
   - Observer Pattern for event handling
 
 - **Best Practices**
+  - Prefer composition over inheritance
   - Comprehensive JavaDoc documentation
-  - Unit tests with high coverage
-  - Thread-safe implementations
   - Null-safe operations
+  - Thread-safe implementations
+
+- **Clean Architecture**
+  - Modular design with clear separation of concerns
+  - Extensive use of interfaces for flexibility
+  - Comprehensive exception handling
 
 ## 📋 Prerequisites
 
@@ -98,8 +106,6 @@ Comprehensive JavaDoc documentation is available for all public APIs. Generate t
 ```bash
 mvn javadoc:javadoc
 ```
-
-
 
 
 ## 📄 License
