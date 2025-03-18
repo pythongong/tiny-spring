@@ -13,27 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pythongong.beans;
+package com.pythongong.beans.aware;
 
-import java.util.Map;
+import com.pythongong.beans.factory.BeanFactory;
 import com.pythongong.exception.BeansException;
 
 /**
- * Extension of the {@link BeanFactory} interface to be implemented by bean factories
- * that can enumerate all their bean instances, rather than just accessing bean
- * instances by name on demand.
+ * Interface to be implemented by beans that wish to be aware of their
+ * owning {@link BeanFactory}. This allows beans to access their containing
+ * bean factory programmatically.
  *
  * @author Cheng Gong
  */
-public interface ListableBeanFactory extends BeanFactory {
+@FunctionalInterface
+public interface BeanFactoryAware extends Aware {
 
     /**
-     * Returns a map of all beans of the given type in the factory.
+     * Callback that supplies the owning factory to a bean instance.
      *
-     * @param <T> the required type of the beans
-     * @param type the class or interface to match
-     * @return a Map of bean names and their corresponding bean instances
-     * @throws BeansException if the beans could not be created
+     * @param beanFactory owning BeanFactory
+     * @throws BeansException in case of initialization errors
      */
-    <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException;
+    void setBeanFactory(BeanFactory beanFactory) throws BeansException;
 }

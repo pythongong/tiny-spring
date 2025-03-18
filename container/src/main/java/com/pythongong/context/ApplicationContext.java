@@ -1,6 +1,6 @@
 package com.pythongong.context;
 
-import com.pythongong.beans.ListableBeanFactory;
+import com.pythongong.beans.factory.ListableBeanFactory;
 import com.pythongong.context.event.ApplicationEventPublisher;
 import com.pythongong.exception.BeansException;
 

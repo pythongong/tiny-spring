@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pythongong.beans;
-
-import com.pythongong.exception.BeansException;
+package com.pythongong.beans.aware;
 
 /**
- * Interface to be implemented by beans that wish to be aware of their
- * owning {@link BeanFactory}. This allows beans to access their containing
- * bean factory programmatically.
+ * Marker interface to be implemented by beans that wish to be aware of their
+ * environment. Serves as a parent interface for all *Aware interfaces in the framework.
  *
  * @author Cheng Gong
  */
-@FunctionalInterface
-public interface BeanFactoryAware extends Aware {
-
-    /**
-     * Callback that supplies the owning factory to a bean instance.
-     *
-     * @param beanFactory owning BeanFactory
-     * @throws BeansException in case of initialization errors
-     */
-    void setBeanFactory(BeanFactory beanFactory) throws BeansException;
+public interface Aware {
 }

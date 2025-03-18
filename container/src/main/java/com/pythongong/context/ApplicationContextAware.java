@@ -1,6 +1,6 @@
 package com.pythongong.context;
 
-import com.pythongong.beans.Aware;
+import com.pythongong.beans.aware.Aware;
 import com.pythongong.exception.BeansException;
 
 @FunctionalInterface

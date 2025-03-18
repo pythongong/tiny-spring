@@ -16,33 +16,22 @@
 package com.pythongong.beans.config;
 
 /**
- * Represents a reference to another bean in the container.
- * This class is used to handle dependencies between beans during
- * the bean creation and wiring process.
+ * Interface to be implemented by objects used to create other objects.
+ * This is an alternative approach of creating objects compared to regular
+ * bean instantiation. While a regular bean is created directly by the container,
+ * a FactoryBean implementation allows for custom object creation logic.
  *
+ * @param <T> the type of object that this FactoryBean creates
  * @author Cheng Gong
- * @since 2025-03-18
  */
-public class BeanReference {
-    
-    /** Name of the referenced bean */
-    private String beanName;
+@FunctionalInterface
+public interface FactoryBean<T> {
 
     /**
-     * Creates a new bean reference with the specified bean name.
+     * Returns an instance of the object this factory creates.
      *
-     * @param beanName the name of the bean to reference
+     * @return the object instance
+     * @throws Exception if an error occurs while creating the object
      */
-    public BeanReference(String beanName) {
-        this.beanName = beanName;
-    }
-
-    /**
-     * Returns the name of the referenced bean.
-     *
-     * @return the bean name
-     */
-    public String getBeanName() {
-        return beanName;
-    }
+    T getObject() throws Exception;
 }

@@ -1,9 +1,9 @@
 package util.com.test.aware;
 
-import com.pythongong.beans.BeanClassLoaderAware;
-import com.pythongong.beans.BeanFactory;
-import com.pythongong.beans.BeanFactoryAware;
-import com.pythongong.beans.BeanNameAware;
+import com.pythongong.beans.aware.BeanClassLoaderAware;
+import com.pythongong.beans.aware.BeanFactoryAware;
+import com.pythongong.beans.aware.BeanNameAware;
+import com.pythongong.beans.factory.BeanFactory;
 import com.pythongong.context.ApplicationContext;
 import com.pythongong.context.ApplicationContextAware;
 import com.pythongong.exception.BeansException;

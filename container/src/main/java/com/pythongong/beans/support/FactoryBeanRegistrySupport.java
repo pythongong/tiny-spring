@@ -18,8 +18,8 @@ package com.pythongong.beans.support;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.pythongong.beans.FactoryBean;
 import com.pythongong.beans.config.BeanDefinition;
+import com.pythongong.beans.config.FactoryBean;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.util.CheckUtils;

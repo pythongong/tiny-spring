@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pythongong.beans;
+package com.pythongong.beans.aware;
 
 /**
- * Marker interface to be implemented by beans that wish to be aware of their
- * environment. Serves as a parent interface for all *Aware interfaces in the framework.
+ * Interface to be implemented by beans that wish to be aware of their
+ * ClassLoader. Usually used when a bean needs to perform dynamic class loading.
  *
  * @author Cheng Gong
  */
-public interface Aware {
+public interface BeanClassLoaderAware extends Aware {
+    
+    /**
+     * Supply the ClassLoader to a bean instance.
+     * Invoked after population of normal bean properties but before initialization.
+     *
+     * @param classLoader the ClassLoader to be used
+     */
+    void setBeanClassLoader(ClassLoader classLoader);
 }

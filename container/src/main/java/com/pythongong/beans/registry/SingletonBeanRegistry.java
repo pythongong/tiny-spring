@@ -13,21 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pythongong.beans;
+package com.pythongong.beans.registry;
 
 /**
- * Interface to be implemented by beans that wish to be aware of their
- * ClassLoader. Usually used when a bean needs to perform dynamic class loading.
+ * Interface that defines a registry for singleton beans.
+ * Used to track and manage singleton instances in a Spring container.
  *
  * @author Cheng Gong
+ * @since 2025-03-18
  */
-public interface BeanClassLoaderAware extends Aware {
+public interface SingletonBeanRegistry {
     
     /**
-     * Supply the ClassLoader to a bean instance.
-     * Invoked after population of normal bean properties but before initialization.
+     * Returns the singleton bean instance registered under the given name.
      *
-     * @param classLoader the ClassLoader to be used
+     * @param beanName the name of the bean to look for
+     * @return the registered singleton instance, or null if none found
      */
-    void setBeanClassLoader(ClassLoader classLoader);
+    Object getSingleton(String beanName);
+
+    /**
+     * Destroys all singleton beans in this registry.
+     * Typically called on shutdown of a bean factory.
+     */
+    void destroySingletons();
 }

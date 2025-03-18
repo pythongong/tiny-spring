@@ -5,7 +5,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.pythongong.beans.FactoryBean;
+import com.pythongong.beans.config.FactoryBean;
 import com.pythongong.stereotype.Component;
 import com.pythongong.util.ClassUtils;
 

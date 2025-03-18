@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pythongong.beans;
-
-import com.pythongong.beans.config.BeanDefinition;
+package com.pythongong.beans.aware;
 
 /**
- * Interface for registries that hold bean definitions.
- * Provides the ability to register bean definitions in a Spring container.
+ * Interface to be implemented by beans that want to be aware of their bean name
+ * in a bean factory. Note that it is not usually recommended that an object
+ * depend on its bean name, as this represents a potentially brittle dependence
+ * on external configuration.
  *
  * @author Cheng Gong
  */
-public interface BeanDefinitionRegistry {
+@FunctionalInterface
+public interface BeanNameAware extends Aware {
 
     /**
-     * Registers a new bean definition in this registry.
+     * Set the name of the bean in the bean factory that created this bean.
      *
-     * @param beanDefinition the bean definition to register
+     * @param name the name of the bean in the factory
      */
-    void registerBeanDefinition(BeanDefinition beanDefinition);
-} 
+    void setBeanName(String name);
+}

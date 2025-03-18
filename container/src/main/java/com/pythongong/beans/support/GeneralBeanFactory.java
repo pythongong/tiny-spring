@@ -19,11 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import com.pythongong.beans.ConfigurableBeanFactory;
-import com.pythongong.beans.FactoryBean;
-import com.pythongong.beans.SingletonBeanRegistry;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
+import com.pythongong.beans.config.FactoryBean;
+import com.pythongong.beans.factory.ConfigurableBeanFactory;
+import com.pythongong.beans.registry.SingletonBeanRegistry;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoScuhBeanException;
 import com.pythongong.util.CheckUtils;
