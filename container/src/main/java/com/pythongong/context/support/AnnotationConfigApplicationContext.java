@@ -24,7 +24,7 @@ import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanFactoryPostProcessor;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.factory.ConfigurableListableBeanFactory;
-import com.pythongong.beans.support.DefaultListableBeanFactory;
+import com.pythongong.beans.support.DefaultConfigurableListableBeanFactory;
 import com.pythongong.context.ApplicationContext;
 import com.pythongong.context.annotation.ConfigurableClassParser;
 import com.pythongong.context.event.ApplicationEvent;
@@ -59,7 +59,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     /**
      * The core container that holds bean definitions and handles bean instantiation.
      */
-    private DefaultListableBeanFactory beanFactory;
+    private DefaultConfigurableListableBeanFactory beanFactory;
 
     /**
      * Handles the publishing of application events to registered listeners.
@@ -87,7 +87,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      */
     @Override
     public void refresh() throws BeansException {
-        this.beanFactory = new DefaultListableBeanFactory();
+        this.beanFactory = new DefaultConfigurableListableBeanFactory();
         
         refreshBeanFactory();
 

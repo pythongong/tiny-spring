@@ -53,7 +53,7 @@ import com.pythongong.util.ClassUtils;
  *
  * @author Cheng Gong
  */
-public class DefaultListableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory, AutowireCapableBeanFactory {
+public class DefaultConfigurableListableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory, AutowireCapableBeanFactory {
 
     /** Map of bean definitions, keyed by bean name */
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
@@ -71,7 +71,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
      * Creates a new DefaultListableBeanFactory.
      * Initializes the singleton registry and general bean factory.
      */
-    public DefaultListableBeanFactory() {
+    public DefaultConfigurableListableBeanFactory() {
         singletonBeanRegistry = new DefaultSingletonBeanRegistry();
         generalBeanFactory = new GeneralBeanFactory(this::getBeanDefinition, this::createBean, singletonBeanRegistry);
     }

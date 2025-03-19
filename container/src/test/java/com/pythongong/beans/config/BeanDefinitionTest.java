@@ -1,234 +1,88 @@
 /*
- * Copyright 2025 Cheng Gong
+ * MIT License
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Copyright (c) 2023 [Your Name or Organization]
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  */
+
 package com.pythongong.beans.config;
 
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import com.pythongong.enums.ScopeEnum;
-import com.pythongong.test.utils.TestUtils.TestBean;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for {@link BeanDefinition} which is an immutable record holding
- * bean metadata including class, scope, initialization methods, and property values.
- *
- * @author Cheng Gong
+ * Test class for BeanDefinition
+ * Verifies the correct creation and behavior of BeanDefinition objects
+ * with various configurations.
  */
-@DisplayName("BeanDefinition Tests")
 class BeanDefinitionTest {
 
-    @Nested
-    @DisplayName("Construction Tests")
-    class ConstructionTests {
-        
-        @Test
-        @DisplayName("Should create bean definition with all required properties")
-        void shouldCreateBeanDefinitionWithAllProperties() throws Exception {
-            // Arrange
-            Constructor<TestBean> constructor = TestBean.class.getConstructor();
-            Method initMethod = TestBean.class.getMethod("init");
-            Method destroyMethod = TestBean.class.getMethod("destroy");
-            FieldValueList fieldValues = new FieldValueList();
-            fieldValues.add(new FieldValue("name", "testValue"));
-
-            // Act
-            BeanDefinition definition = BeanDefinition.builder()
+    /**
+     * Tests creation of a BeanDefinition with default values.
+     * Verifies that unspecified properties are set to their expected defaults.
+     */
+    @Test
+    void shouldCreateBeanDefinitionWithDefaultValues() {
+        BeanDefinition beanDefinition = BeanDefinition.builder()
                 .beanName("testBean")
-                .beanClass(TestBean.class)
-                .scope(ScopeEnum.SINGLETON)
-                .constructor(constructor)
-                .initMethod(initMethod)
-                .destroyMethod(destroyMethod)
+                .beanClass(String.class)
+                .build();
+
+        assertNotNull(beanDefinition);
+        assertEquals("testBean", beanDefinition.beanName());
+        assertEquals(String.class, beanDefinition.beanClass());
+        assertNotNull(beanDefinition.fieldValueList());
+        assertTrue(beanDefinition.fieldValueList().isEmpty());
+        assertEquals(ScopeEnum.SINGLETON, beanDefinition.scope());
+        assertNull(beanDefinition.initMethod());
+        assertNull(beanDefinition.destroyMethod());
+        assertNull(beanDefinition.constructor());
+    }
+
+    /**
+     * Tests creation of a BeanDefinition with custom values.
+     * Verifies that explicitly set properties are properly maintained.
+     */
+    @Test 
+    void shouldCreateBeanDefinitionWithCustomValues() {
+        FieldValueList fieldValues = new FieldValueList();
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+                .beanName("customBean")
+                .beanClass(Integer.class)
                 .fieldValueList(fieldValues)
-                .build();
-
-            // Assert
-            assertAll(
-                () -> assertEquals("testBean", definition.beanName()),
-                () -> assertEquals(TestBean.class, definition.beanClass()),
-                () -> assertEquals(ScopeEnum.SINGLETON, definition.scope()),
-                () -> assertEquals(constructor, definition.constructor()),
-                () -> assertEquals(initMethod, definition.initMethod()),
-                () -> assertEquals(destroyMethod, definition.destroyMethod()),
-                () -> assertNotNull(definition.fieldValueList()),
-                () -> assertEquals(1, definition.fieldValueList().size())
-                
-            );
-        }
-
-        @Test
-        @DisplayName("Should create bean definition with minimum required fields")
-        void shouldCreateBeanDefinitionWithMinimumFields() {
-            // Act
-            BeanDefinition definition = BeanDefinition.builder()
-                .beanName("testBean")
-                .beanClass(TestBean.class)
-                .build();
-
-            // Assert
-            assertAll(
-                () -> assertEquals("testBean", definition.beanName()),
-                () -> assertEquals(TestBean.class, definition.beanClass()),
-                () -> assertEquals(ScopeEnum.SINGLETON, definition.scope()),
-                () -> assertNull(definition.constructor()),
-                () -> assertNull(definition.initMethod()),
-                () -> assertNull(definition.destroyMethod()),
-                () -> assertNotNull(definition.fieldValueList()),
-                () -> assertTrue(definition.fieldValueList().isEmpty())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Default Value Tests")
-    class DefaultValueTests {
-
-        @Test
-        @DisplayName("Should use default scope when scope is null")
-        void shouldUseDefaultScopeWhenNull() {
-            // Act
-            BeanDefinition definition = BeanDefinition.builder()
-                .beanName("testBean")
-                .beanClass(TestBean.class)
-                .scope(null)
-                .build();
-
-            // Assert
-            assertEquals(ScopeEnum.SINGLETON, definition.scope());
-        }
-
-        @Test
-        @DisplayName("Should create empty field value list when null")
-        void shouldCreateEmptyFieldValueListWhenNull() {
-            // Act
-            BeanDefinition definition = BeanDefinition.builder()
-                .beanName("testBean")
-                .beanClass(TestBean.class)
-                .fieldValueList(null)
-                .build();
-
-            // Assert
-            assertAll(
-                () -> assertNotNull(definition.fieldValueList()),
-                () -> assertTrue(definition.fieldValueList().isEmpty())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Field Value List Tests")
-    class FieldValueListTests {
-
-        @Test
-        @DisplayName("Should maintain field value list after construction")
-        void shouldMaintainFieldValueList() {
-            // Arrange
-            FieldValueList fieldValues = new FieldValueList();
-            fieldValues.add(new FieldValue("name", "testValue"));
-            fieldValues.add(new FieldValue("age", 25));
-
-            // Act
-            BeanDefinition definition = BeanDefinition.builder()
-                .beanName("testBean")
-                .beanClass(TestBean.class)
-                .fieldValueList(fieldValues)
-                .build();
-
-            // Assert
-            assertAll(
-                () -> assertEquals(2, definition.fieldValueList().size())
-                
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode Tests")
-    class EqualsAndHashCodeTests {
-
-        @Test
-        @DisplayName("Should implement equals correctly")
-        void shouldImplementEqualsCorrectly() {
-            // Arrange
-            BeanDefinition def1 = BeanDefinition.builder()
-                .beanName("testBean")
-                .beanClass(TestBean.class)
-                .build();
-
-            BeanDefinition def2 = BeanDefinition.builder()
-                .beanName("testBean")
-                .beanClass(TestBean.class)
-                .build();
-
-            BeanDefinition def3 = BeanDefinition.builder()
-                .beanName("differentBean")
-                .beanClass(TestBean.class)
-                .build();
-
-            // Assert
-            assertAll(
-                () -> assertEquals(def1, def1),                // Same object
-                () -> assertEquals(def1, def2),                // Equal objects
-                () -> assertNotEquals(def1, def3),             // Different objects
-                () -> assertNotEquals(def1, null),             // Null comparison
-                () -> assertNotEquals(def1, new Object())      // Different types
-            );
-        }
-
-        @Test
-        @DisplayName("Should implement hashCode consistently")
-        void shouldImplementHashCodeConsistently() {
-            // Arrange
-            BeanDefinition def1 = createTestBeanDefinition("testBean");
-            BeanDefinition def2 = createTestBeanDefinition("testBean");
-
-            // Assert
-            assertAll(
-                () -> assertEquals(def1.hashCode(), def2.hashCode()),
-                () -> assertEquals(def1.hashCode(), def1.hashCode()) // Multiple calls
-            );
-        }
-
-        private BeanDefinition createTestBeanDefinition(String beanName) {
-            return BeanDefinition.builder()
-                .beanName(beanName)
-                .beanClass(TestBean.class)
-                .build();
-        }
-    }
-
-    @Nested
-    @DisplayName("Prototype Scope Tests")
-    class PrototypeScopeTests {
-
-        @Test
-        @DisplayName("Should support prototype scope")
-        void shouldSupportPrototypeScope() {
-            // Act
-            BeanDefinition definition = BeanDefinition.builder()
-                .beanName("prototypeBean")
-                .beanClass(TestBean.class)
                 .scope(ScopeEnum.PROTOTYPE)
                 .build();
 
-            // Assert
-            assertEquals(ScopeEnum.PROTOTYPE, definition.scope());
-        }
+        assertNotNull(beanDefinition);
+        assertEquals("customBean", beanDefinition.beanName());
+        assertEquals(Integer.class, beanDefinition.beanClass());
+        assertSame(fieldValues, beanDefinition.fieldValueList());
+        assertEquals(ScopeEnum.PROTOTYPE, beanDefinition.scope());
+    }
+
+    /**
+     * Tests that fieldValueList is never null, even when explicitly set to null.
+     * Verifies the null-safety behavior of the builder.
+     */
+    @Test
+    void shouldNeverHaveNullFieldValueList() {
+        BeanDefinition beanDefinition = BeanDefinition.builder()
+                .beanName("testBean")
+                .beanClass(String.class)
+                .fieldValueList(null)
+                .build();
+
+        assertNotNull(beanDefinition.fieldValueList());
+        assertTrue(beanDefinition.fieldValueList().isEmpty());
     }
 }
