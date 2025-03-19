@@ -266,10 +266,10 @@ public class ConfigurableClassParser {
      */
     private void fillPropertyValueList(BeanDefinition beandDefinition) {
         Class<?> beanClass = beandDefinition.beanClass();
-        PropertyValueList propertyValueList = beandDefinition.propertyValueList();
+        FieldValueList propertyValueList = beandDefinition.propertyValueList();
         Field[] fields = beanClass.getDeclaredFields();
         for (Field field : fields) {
-            PropertyValue prpertyValue = accessFieldAnnotations(field);
+            FieldValue prpertyValue = accessFieldAnnotations(field);
             if (prpertyValue == null) {
                 continue;
             }
@@ -283,7 +283,7 @@ public class ConfigurableClassParser {
      * @param field the field to process
      * @return the property value or null if no relevant annotations
      */
-    private PropertyValue accessFieldAnnotations(Field field) {
+    private FieldValue accessFieldAnnotations(Field field) {
         Annotation[] annotations = field.getAnnotations();
         for (Annotation annotation : annotations) {
             FiledAnnoEnum annotationTypeEnum = FiledAnnoEnum.fromAnnotation(annotation.annotationType());
@@ -306,9 +306,9 @@ public class ConfigurableClassParser {
      * @param field the annotated field
      * @return the property value
      */
-    private PropertyValue getValuedField(Value value, Field field) {
+    private FieldValue getValuedField(Value value, Field field) {
         String property = propertyResolver.getProperty(value.value());
-        return new PropertyValue(field.getName(), property);
+        return new FieldValue(field.getName(), property);
     }
 
     /**
@@ -318,16 +318,16 @@ public class ConfigurableClassParser {
      * @param field the annotated field
      * @return the property value
      */
-    private PropertyValue getAutowiredField(AutoWired autoWired, Field field) {
+    private FieldValue getAutowiredField(AutoWired autoWired, Field field) {
         String beanName = autoWired.name();
         if (!StringUtils.isEmpty(beanName)) {
-            return new PropertyValue(field.getName(), new BeanReference(beanName));
+            return new FieldValue(field.getName(), new BeanReference(beanName));
         }
 
         Class<?> fieldClass = field.getType();
         BeanDefinition beanDefinition = getBeanDefinitionByType(fieldClass);
         beanName = beanDefinition.beanName();
-        return new PropertyValue(field.getName(), new BeanReference(beanName));
+        return new FieldValue(field.getName(), new BeanReference(beanName));
     }
 
     /**

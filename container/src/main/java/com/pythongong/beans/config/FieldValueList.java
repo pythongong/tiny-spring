@@ -31,14 +31,14 @@ import lombok.EqualsAndHashCode;
  * @since 2025-03-18
  */
 @EqualsAndHashCode
-public class PropertyValueList implements Iterable<PropertyValue> {
+public class FieldValueList implements Iterable<FieldValue> {
     
-    private final List<PropertyValue> propertyValues;
+    private final List<FieldValue> propertyValues;
 
     /**
      * Creates a new empty PropertyValueList.
      */
-    public PropertyValueList() {
+    public FieldValueList() {
         this.propertyValues = new ArrayList<>();
     }
 
@@ -47,7 +47,7 @@ public class PropertyValueList implements Iterable<PropertyValue> {
      *
      * @param propertyValue the property value to add
      */
-    public void addPropertyValue(PropertyValue propertyValue) {
+    public void addPropertyValue(FieldValue propertyValue) {
         propertyValues.add(propertyValue);
     }
 
@@ -57,8 +57,8 @@ public class PropertyValueList implements Iterable<PropertyValue> {
      * @param propertyName the name of the property to find
      * @return the PropertyValue if found, null otherwise
      */
-    public PropertyValue getPropertyValue(String propertyName) {
-        for (PropertyValue propertyValue : propertyValues) {
+    public FieldValue getPropertyValue(String propertyName) {
+        for (FieldValue propertyValue : propertyValues) {
             if (propertyValue.name().equals(propertyName)) {
                 return propertyValue;
             }
@@ -72,8 +72,8 @@ public class PropertyValueList implements Iterable<PropertyValue> {
      * @return an Iterator over the PropertyValue objects
      */
     @Override
-    public Iterator<PropertyValue> iterator() {
-        return new Iterator<PropertyValue>() {
+    public Iterator<FieldValue> iterator() {
+        return new Iterator<FieldValue>() {
             private int index = propertyValues.size() - 1;
 
             @Override
@@ -82,7 +82,7 @@ public class PropertyValueList implements Iterable<PropertyValue> {
             }
 
             @Override
-            public PropertyValue next() {
+            public FieldValue next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }

@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.pythongong.exception.BeansException;
 
 /**
- * Test class for {@link PropertyValue}.
+ * Test class for {@link FieldValue}.
  *
  * @author Cheng Gong
  */
@@ -37,7 +37,7 @@ class PropertyValueTest {
     @DisplayName("Should create property value with valid inputs")
     void shouldCreatePropertyValueWithValidInputs() {
         // Act
-        PropertyValue propertyValue = new PropertyValue("testName", "testValue");
+        FieldValue propertyValue = new FieldValue("testName", "testValue");
 
         // Assert
         assertEquals("testName", propertyValue.name());
@@ -51,14 +51,14 @@ class PropertyValueTest {
     void shouldThrowExceptionForInvalidName(String name) {
         // Assert
         assertThrows(BeansException.class, 
-            () -> new PropertyValue(name, "testValue"));
+            () -> new FieldValue(name, "testValue"));
     }
 
     @Test
     @DisplayName("Should accept null value")
     void shouldAcceptNullValue() {
         // Act
-        PropertyValue propertyValue = new PropertyValue("testName", null);
+        FieldValue propertyValue = new FieldValue("testName", null);
 
         // Assert
         assertEquals("testName", propertyValue.name());
@@ -69,10 +69,10 @@ class PropertyValueTest {
     @DisplayName("Should implement equals and hashCode correctly")
     void shouldImplementEqualsAndHashCodeCorrectly() {
         // Arrange
-        PropertyValue pv1 = new PropertyValue("name", "value");
-        PropertyValue pv2 = new PropertyValue("name", "value");
-        PropertyValue pv3 = new PropertyValue("name", "different");
-        PropertyValue pv4 = new PropertyValue("different", "value");
+        FieldValue pv1 = new FieldValue("name", "value");
+        FieldValue pv2 = new FieldValue("name", "value");
+        FieldValue pv3 = new FieldValue("name", "different");
+        FieldValue pv4 = new FieldValue("different", "value");
 
         // Assert
         assertEquals(pv1, pv2);
@@ -85,7 +85,7 @@ class PropertyValueTest {
     @DisplayName("Should implement toString properly")
     void shouldImplementToStringProperly() {
         // Arrange
-        PropertyValue propertyValue = new PropertyValue("testName", "testValue");
+        FieldValue propertyValue = new FieldValue("testName", "testValue");
 
         // Act
         String toString = propertyValue.toString();

@@ -32,8 +32,8 @@ import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.config.BeanReference;
 import com.pythongong.beans.config.DisposableBean;
 import com.pythongong.beans.config.InitializingBean;
-import com.pythongong.beans.config.PropertyValue;
-import com.pythongong.beans.config.PropertyValueList;
+import com.pythongong.beans.config.FieldValue;
+import com.pythongong.beans.config.FieldValueList;
 import com.pythongong.beans.factory.AutowireCapableBeanFactory;
 import com.pythongong.beans.factory.ConfigurableListableBeanFactory;
 import com.pythongong.beans.registry.BeanDefinitionRegistry;
@@ -248,12 +248,12 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
      * Populates bean properties from its property values.
      */
     private void fillPropertyValues(BeanDefinition beanDefinition, Object bean) {
-        PropertyValueList propertyValueList = beanDefinition.propertyValueList();
+        FieldValueList propertyValueList = beanDefinition.propertyValueList();
         if (propertyValueList == null) {
             return;
         }
         Class<?> beanClass = beanDefinition.beanClass();
-        for (PropertyValue propertyValue : propertyValueList) {
+        for (FieldValue propertyValue : propertyValueList) {
             String propertyName = propertyValue.name();
             Object value = propertyValue.value();
 

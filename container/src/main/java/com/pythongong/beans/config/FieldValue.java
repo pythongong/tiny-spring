@@ -27,7 +27,7 @@ import com.pythongong.util.StringUtils;
  * 
  * @author Cheng Gong
  */
-public record PropertyValue(
+public record FieldValue(
     /**
      * The name of the property. Must not be null or empty.
      */
@@ -45,7 +45,7 @@ public record PropertyValue(
      * @param value the value of the property
      * @throws BeansException if name is null or empty
      */
-    public PropertyValue {
+    public FieldValue {
         if (StringUtils.isEmpty(name)) {
             throw new BeansException("Property name cannot be null or empty");
         }
