@@ -78,6 +78,7 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
 
     @Override
     public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
+        CheckUtils.emptyString(beanName, "DefaultListableBeanFactory.getBeanDefinition recevies empty bean name");
         return beanDefinitionMap.get(beanName);
     }
 
