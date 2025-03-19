@@ -31,17 +31,17 @@ import com.pythongong.exception.BeansException;
  * @author Cheng Gong
  */
 @DisplayName("Property Value Tests")
-class PropertyValueTest {
+class FieldValueTest {
 
     @Test
     @DisplayName("Should create property value with valid inputs")
-    void shouldCreatePropertyValueWithValidInputs() {
+    void shouldCreateFfeldValueWithValidInputs() {
         // Act
-        FieldValue propertyValue = new FieldValue("testName", "testValue");
+        FieldValue FfeldValue = new FieldValue("testName", "testValue");
 
         // Assert
-        assertEquals("testName", propertyValue.name());
-        assertEquals("testValue", propertyValue.value());
+        assertEquals("testName", FfeldValue.name());
+        assertEquals("testValue", FfeldValue.value());
     }
 
     @ParameterizedTest
@@ -58,11 +58,11 @@ class PropertyValueTest {
     @DisplayName("Should accept null value")
     void shouldAcceptNullValue() {
         // Act
-        FieldValue propertyValue = new FieldValue("testName", null);
+        FieldValue FfeldValue = new FieldValue("testName", null);
 
         // Assert
-        assertEquals("testName", propertyValue.name());
-        assertNull(propertyValue.value());
+        assertEquals("testName", FfeldValue.name());
+        assertNull(FfeldValue.value());
     }
 
     @Test
@@ -85,10 +85,10 @@ class PropertyValueTest {
     @DisplayName("Should implement toString properly")
     void shouldImplementToStringProperly() {
         // Arrange
-        FieldValue propertyValue = new FieldValue("testName", "testValue");
+        FieldValue FfeldValue = new FieldValue("testName", "testValue");
 
         // Act
-        String toString = propertyValue.toString();
+        String toString = FfeldValue.toString();
 
         // Assert
         assertTrue(toString.contains("testName"));
