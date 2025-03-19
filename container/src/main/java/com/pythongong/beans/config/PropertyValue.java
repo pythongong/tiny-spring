@@ -15,6 +15,9 @@
  */
 package com.pythongong.beans.config;
 
+import com.pythongong.exception.BeansException;
+import com.pythongong.util.StringUtils;
+
 /**
  * Represents a property value pair used in bean property configuration.
  * This record holds both the name of a property and its corresponding value.
@@ -40,11 +43,11 @@ public record PropertyValue(
      *
      * @param name  the name of the property
      * @param value the value of the property
-     * @throws IllegalArgumentException if name is null or empty
+     * @throws BeansException if name is null or empty
      */
     public PropertyValue {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Property name cannot be null or empty");
+        if (StringUtils.isEmpty(name)) {
+            throw new BeansException("Property name cannot be null or empty");
         }
     }
 }
