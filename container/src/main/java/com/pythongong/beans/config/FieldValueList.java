@@ -90,10 +90,20 @@ public class FieldValueList implements Iterable<FieldValue> {
         };
     }
 
+    /**
+     * Returns the number of filedValue in this list. 
+     *
+     * @return the number of filedValue in this list
+     */
     public int size() {
         return fieldValues.size();
     }
 
+     /**
+     * Returns {@code true} if this list contains no filedValue.
+     *
+     * @return {@code true} if this list contains no filedValue
+     */
     public boolean isEmpty() {
         return fieldValues.isEmpty();
     }
