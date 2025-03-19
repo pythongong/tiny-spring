@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
 import lombok.EqualsAndHashCode;
 
 /**
@@ -47,7 +46,7 @@ public class FieldValueList implements Iterable<FieldValue> {
      *
      * @param fieldValue the property value to add
      */
-    public void addfieldValue(FieldValue fieldValue) {
+    public void add(FieldValue fieldValue) {
         fieldValues.add(fieldValue);
     }
 
@@ -89,5 +88,13 @@ public class FieldValueList implements Iterable<FieldValue> {
                 return fieldValues.get(index--);
             }
         };
+    }
+
+    public int size() {
+        return fieldValues.size();
+    }
+
+    public boolean isEmpty() {
+        return fieldValues.isEmpty();
     }
 }

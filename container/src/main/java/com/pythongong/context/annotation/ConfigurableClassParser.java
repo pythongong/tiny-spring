@@ -273,7 +273,7 @@ public class ConfigurableClassParser {
             if (prpertyValue == null) {
                 continue;
             }
-            fieldValueList.addfieldValue(prpertyValue);
+            fieldValueList.add(prpertyValue);
         }
     }
 

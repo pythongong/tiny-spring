@@ -15,49 +15,40 @@
  */
 package com.pythongong.test.utils;
 
-import java.util.Properties;
-
 /**
- * Utility class for common test operations.
+ * Utility class containing test helper classes and methods.
  *
  * @author Cheng Gong
  */
 public class TestUtils {
-    
-    public static Properties createTestProperties() {
-        Properties properties = new Properties();
-        properties.setProperty("test.string.value", "testValue");
-        properties.setProperty("test.integer.value", "42");
-        properties.setProperty("test.boolean.value", "true");
-        return properties;
-    }
-    
+
+    /**
+     * Test bean class used in BeanDefinition tests.
+     */
     public static class TestBean {
         private String name;
         private int value;
-
-        public TestBean() {
-        }
-
-        public TestBean(String name, int value) {
-            this.name = name;
-            this.value = value;
-        }
-
-        public String getName() {
-            return name;
-        }
-
+        
+        public TestBean() {}
+        
+        public void init() {}
+        
+        public void destroy() {}
+        
         public void setName(String name) {
             this.name = name;
         }
-
-        public int getValue() {
-            return value;
-        }
-
+        
         public void setValue(int value) {
             this.value = value;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public int getValue() {
+            return value;
         }
     }
 }
