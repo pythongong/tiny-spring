@@ -112,7 +112,7 @@ public class ConfigurableClassParser {
     private Set<BeanDefinition> doParse(Set<Class<?>> beanClasses) {
         this.beanDefinitions = new HashSet<>();
         beanClasses.forEach(this::createBeanDefinition);
-        this.beanDefinitions.forEach(this::fillPropertyValueList);
+        this.beanDefinitions.forEach(this::fillfieldValueList);
         return this.beanDefinitions;
     }
 
@@ -264,16 +264,16 @@ public class ConfigurableClassParser {
      *
      * @param beandDefinition the bean definition to process
      */
-    private void fillPropertyValueList(BeanDefinition beandDefinition) {
+    private void fillfieldValueList(BeanDefinition beandDefinition) {
         Class<?> beanClass = beandDefinition.beanClass();
-        FieldValueList propertyValueList = beandDefinition.propertyValueList();
+        FieldValueList fieldValueList = beandDefinition.fieldValueList();
         Field[] fields = beanClass.getDeclaredFields();
         for (Field field : fields) {
             FieldValue prpertyValue = accessFieldAnnotations(field);
             if (prpertyValue == null) {
                 continue;
             }
-            propertyValueList.addPropertyValue(prpertyValue);
+            fieldValueList.addfieldValue(prpertyValue);
         }
     }
 

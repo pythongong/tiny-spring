@@ -199,7 +199,7 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
             singletonBeanRegistry.registerSingleton(beanName, bean);
         }
         
-        fillPropertyValues(beanDefinition, bean);
+        fillFieldValues(beanDefinition, bean);
 
         bean = initializeBean(bean, beanDefinition);
 
@@ -247,15 +247,15 @@ public class DefaultListableBeanFactory implements BeanDefinitionRegistry, Confi
     /**
      * Populates bean properties from its property values.
      */
-    private void fillPropertyValues(BeanDefinition beanDefinition, Object bean) {
-        FieldValueList propertyValueList = beanDefinition.propertyValueList();
-        if (propertyValueList == null) {
+    private void fillFieldValues(BeanDefinition beanDefinition, Object bean) {
+        FieldValueList fieldValueList = beanDefinition.fieldValueList();
+        if (fieldValueList == null) {
             return;
         }
         Class<?> beanClass = beanDefinition.beanClass();
-        for (FieldValue propertyValue : propertyValueList) {
-            String propertyName = propertyValue.name();
-            Object value = propertyValue.value();
+        for (FieldValue fieldValue : fieldValueList) {
+            String propertyName = fieldValue.name();
+            Object value = fieldValue.value();
 
             if (value instanceof BeanReference) {
                 BeanReference beanReference = (BeanReference) value;

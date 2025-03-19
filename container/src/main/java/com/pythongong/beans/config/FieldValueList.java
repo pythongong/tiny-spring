@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 import lombok.EqualsAndHashCode;
 
 /**
- * A collection of PropertyValue objects that holds bean property values.
+ * A collection of FieldValue objects that holds bean property values.
  * This class provides methods to add and retrieve property values, and
  * implements Iterable to allow iteration over the property values.
  *
@@ -33,34 +33,34 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 public class FieldValueList implements Iterable<FieldValue> {
     
-    private final List<FieldValue> propertyValues;
+    private final List<FieldValue> fieldValues;
 
     /**
-     * Creates a new empty PropertyValueList.
+     * Creates a new empty fieldValueList.
      */
     public FieldValueList() {
-        this.propertyValues = new ArrayList<>();
+        this.fieldValues = new ArrayList<>();
     }
 
     /**
-     * Adds a PropertyValue to this list.
+     * Adds a fieldValue to this list.
      *
-     * @param propertyValue the property value to add
+     * @param fieldValue the property value to add
      */
-    public void addPropertyValue(FieldValue propertyValue) {
-        propertyValues.add(propertyValue);
+    public void addfieldValue(FieldValue fieldValue) {
+        fieldValues.add(fieldValue);
     }
 
     /**
-     * Returns the PropertyValue with the given name.
+     * Returns the fieldValue with the given name.
      *
      * @param propertyName the name of the property to find
-     * @return the PropertyValue if found, null otherwise
+     * @return the fieldValue if found, null otherwise
      */
-    public FieldValue getPropertyValue(String propertyName) {
-        for (FieldValue propertyValue : propertyValues) {
-            if (propertyValue.name().equals(propertyName)) {
-                return propertyValue;
+    public FieldValue getfieldValue(String propertyName) {
+        for (FieldValue fieldValue : fieldValues) {
+            if (fieldValue.name().equals(propertyName)) {
+                return fieldValue;
             }
         }
         return null;
@@ -69,12 +69,12 @@ public class FieldValueList implements Iterable<FieldValue> {
     /**
      * Returns an iterator over the property values in reverse order.
      *
-     * @return an Iterator over the PropertyValue objects
+     * @return an Iterator over the fieldValue objects
      */
     @Override
     public Iterator<FieldValue> iterator() {
         return new Iterator<FieldValue>() {
-            private int index = propertyValues.size() - 1;
+            private int index = fieldValues.size() - 1;
 
             @Override
             public boolean hasNext() {
@@ -86,7 +86,7 @@ public class FieldValueList implements Iterable<FieldValue> {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
-                return propertyValues.get(index--);
+                return fieldValues.get(index--);
             }
         };
     }

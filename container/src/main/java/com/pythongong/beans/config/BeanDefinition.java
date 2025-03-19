@@ -45,7 +45,7 @@ public record BeanDefinition(
      * List of property values to be injected into the bean.
      * May be null, in which case an empty list will be created.
      */
-    FieldValueList propertyValueList,
+    FieldValueList fieldValueList,
 
     /**
      * Method to be called after bean properties are set.
@@ -73,10 +73,10 @@ public record BeanDefinition(
 ) {
     /**
      * Canonical constructor with default value handling.
-     * Ensures propertyValueList is never null and scope has a default value.
+     * Ensures fieldValueList is never null and scope has a default value.
      */
     public BeanDefinition {
-        propertyValueList = propertyValueList == null ? new FieldValueList() : propertyValueList;
+        fieldValueList = fieldValueList == null ? new FieldValueList() : fieldValueList;
         scope = scope != null ? scope : ScopeEnum.SINGLETON;
     }
 }
