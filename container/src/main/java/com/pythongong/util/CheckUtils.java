@@ -15,6 +15,8 @@
  */
 package com.pythongong.util;
 
+import java.util.Collection;
+
 import com.pythongong.exception.BeansException;
 
 /**
@@ -64,6 +66,12 @@ public class CheckUtils {
      */
     public static void emptyString(String str, String msg) {
         if (StringUtils.isEmpty(str)) {
+            throw new BeansException(msg);
+        }
+    }
+
+    public static void emptyCollection(Collection<?> collection, String msg) {
+        if (ClassUtils.isCollectionEmpty(collection)) {
             throw new BeansException(msg);
         }
     }

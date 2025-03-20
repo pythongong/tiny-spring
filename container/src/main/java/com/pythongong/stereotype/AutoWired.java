@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * @author Cheng Gong
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target(value = {ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Documented
 public @interface AutoWired {
 

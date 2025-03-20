@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,6 +75,13 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
     public DefaultConfigurableListableBeanFactory() {
         singletonBeanRegistry = new DefaultSingletonBeanRegistry();
         generalBeanFactory = new GeneralBeanFactory(this::getBeanDefinition, this::createBean, singletonBeanRegistry);
+    }
+
+    public List<BeanDefinition> getBeanDefinitionsOfType(Class<?> requiredType) throws BeansException {
+        CheckUtils.nullArgs(requiredType, "DefaultListableBeanFactory.getBeanDefinitionsOfType recevies null bean class");
+        return beanDefinitionMap.values().stream()
+            .filter(beanDefinition -> requiredType.isAssignableFrom(beanDefinition.beanClass()))
+            .toList();
     }
 
     @Override
@@ -260,7 +268,7 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
 
             if (value instanceof BeanReference) {
                 BeanReference beanReference = (BeanReference) value;
-                value = generalBeanFactory.getBean(beanReference.getBeanName());
+                value = generalBeanFactory.getBean(beanReference.beanName());
             }
 
             try {
@@ -326,7 +334,7 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
      * @throws BeansException if method injection fails
      */
     private void methodInject(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
-        Class<?> beanClass = beanDefinition.getClass();
+        Class<?> beanClass = beanDefinition.beanClass();
         Method[] methods = beanClass.getMethods();
         for (Method method : methods) {
             AutoWired autoWired = method.getAnnotation(AutoWired.class);
@@ -345,17 +353,38 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
                     beanClass, method.getName()));
             }
 
-            Object bean = generalBeanFactory.getBean(beanName);
-            
-            try {
-                method.invoke(wrappedBean, bean);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new BeansException(String.format("Class {%s}'s inject method {%s} failed", 
-                    beanClass, method.getName()), e);
-            }
+            Class<?> parameterType = method.getParameterTypes()[0];
 
-            break;
+            setInjectingParameter(wrappedBean, method, parameterType);
+
+          }
+    }
+
+    private void setInjectingParameter(Object wrappedBean, Method method, Class<?> parameterType) {
+        if (parameterType.isPrimitive()) {
+            throw new BeansException(String.format("Class {%s}'s inject method {%s} has primitive type arugment", 
+                parameterType, method.getName()));
         }
+
+        Object injectingBean = null;
+        List<BeanDefinition> beanDefinitions = getBeanDefinitionsOfType(parameterType);
+        if (ClassUtils.isCollectionEmpty(beanDefinitions)) {
+            throw new NoSuchBeanException(parameterType);
+        } else if (beanDefinitions.size() > 1) {
+            throw new BeansException(String.format("Can not specify arugment bean {%s} in inject method {%s} ", 
+                parameterType, method.getName()));
+            
+        } else {
+            injectingBean = getBean(beanDefinitions.get(0).beanName());
+        }
+    
+        try {
+            method.invoke(wrappedBean, injectingBean);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new BeansException(String.format("Class {%s}'s inject method {%s} failed", 
+                parameterType, method.getName()), e);
+        }
+
     }
 
     /**

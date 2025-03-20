@@ -16,6 +16,7 @@
 package com.pythongong.util;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 
 /**
  * Utility class for common class-related operations.
@@ -87,5 +88,9 @@ public class ClassUtils {
      */
     public static boolean isArrayEmpty(Object[] array) {
         return array == null || array.length == 0;
+    }
+
+    public static boolean isCollectionEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
     }
 }

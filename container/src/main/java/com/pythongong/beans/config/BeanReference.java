@@ -23,26 +23,8 @@ package com.pythongong.beans.config;
  * @author Cheng Gong
  * @since 2025-03-18
  */
-public class BeanReference {
-    
+public record BeanReference(
     /** Name of the referenced bean */
-    private String beanName;
-
-    /**
-     * Creates a new bean reference with the specified bean name.
-     *
-     * @param beanName the name of the bean to reference
-     */
-    public BeanReference(String beanName) {
-        this.beanName = beanName;
-    }
-
-    /**
-     * Returns the name of the referenced bean.
-     *
-     * @return the bean name
-     */
-    public String getBeanName() {
-        return beanName;
-    }
-}
+    String beanName
+) {
+} 
