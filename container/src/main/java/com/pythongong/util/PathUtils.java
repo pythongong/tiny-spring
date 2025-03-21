@@ -97,14 +97,19 @@ public class PathUtils {
      */
 	public static void findClassPathFileNames(ClassPathSerchParam param) {
 		CheckUtils.nullArgs(param, "PathUtils.findClassPathFileNames recevies null param");
-		if (! (param.serachFile() && param.serachJar())) {
+		if (!param.serachFile() && !param.serachJar()) {
 			return;
 		}
 
 		String packagePath = param.packagePath();
 		
 		try {
-			Enumeration<URL> enumUrls = ClassUtils.getDefaultClassLoader().getResources(packagePath);
+			ClassLoader classLoader = ClassUtils.getDefaultClassLoader();
+			if (classLoader == null) {
+				throw new BeansException("Class loader is null in PathUtils.findClassPathFileNames");
+				
+			}
+			Enumeration<URL> enumUrls = classLoader.getResources(packagePath);
 			while (enumUrls.hasMoreElements()) {
 				URL url = enumUrls.nextElement();
 				URI uri;

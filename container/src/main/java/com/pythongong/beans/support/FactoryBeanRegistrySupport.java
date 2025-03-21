@@ -23,7 +23,6 @@ import com.pythongong.beans.config.FactoryBean;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.util.CheckUtils;
-import com.pythongong.util.ClassUtils;
 
 /**
  * Support base class for bean factories that need to handle FactoryBean instances.
@@ -46,7 +45,7 @@ public class FactoryBeanRegistrySupport {
     protected Object getCachedObjectForFactoryBean(String beanName) {
         CheckUtils.emptyString(beanName, "FactoryBeanRegistrySupport.getCachedObjectForFactoryBean recevies empty bean name");
         Object cachedObject = factoryBeanObjectCache.get(beanName);
-        return cachedObject == ClassUtils.NULL_OBJECT ? null : cachedObject;
+        return cachedObject;
     }
 
     /**
@@ -78,11 +77,14 @@ public class FactoryBeanRegistrySupport {
         // Check if object is already cached
         Object cachedObject = factoryBeanObjectCache.get(beanName);
         if (cachedObject != null) {
-            return cachedObject == ClassUtils.NULL_OBJECT ? null : cachedObject;
+            return cachedObject;
         }
 
-        // Cache the object (use NULL_OBJECT as placeholder for null values)
-        factoryBeanObjectCache.put(beanName, curObject == null ? ClassUtils.NULL_OBJECT : curObject);
+        
+        if (curObject == null) {
+            throw new BeansException("FactoryBean returned null object: " + beanName);
+        }
+        factoryBeanObjectCache.put(beanName, curObject);
         return curObject;
     }
 }

@@ -30,11 +30,6 @@ public class ClassUtils {
     /** Private constructor to prevent instantiation of utility class */
     private ClassUtils(){}
 
-    /** 
-     * Special object used as a null placeholder in various framework operations
-     */
-    public static final Object NULL_OBJECT = new Object();
-
     /**
      * Default bean name for the application event multicaster
      */

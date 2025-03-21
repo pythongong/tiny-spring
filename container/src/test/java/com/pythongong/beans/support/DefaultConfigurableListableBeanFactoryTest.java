@@ -44,6 +44,7 @@ import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.stereotype.AutoWired;
+import com.pythongong.test.utils.TestBean;
 import com.pythongong.util.ClassUtils;
 
 import lombok.Getter;
@@ -500,10 +501,6 @@ class DefaultConfigurableListableBeanFactoryTest {
     
 }
 
-/**
-* Test support class
-*/
-class TestBean {}
 
 
 class SubTestBean extends TestBean {}
