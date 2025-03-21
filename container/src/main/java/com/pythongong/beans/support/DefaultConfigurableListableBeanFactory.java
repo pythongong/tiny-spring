@@ -108,10 +108,6 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
             }
         });
 
-        if (results.isEmpty()) {
-            throw new NoSuchBeanException(type);
-        }
-
         return results;
     }
 

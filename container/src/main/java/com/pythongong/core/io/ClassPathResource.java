@@ -18,7 +18,9 @@ package com.pythongong.core.io;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
+import com.pythongong.util.PathUtils;
 
 /**
  * Resource implementation for class path resources.
@@ -44,7 +46,8 @@ public class ClassPathResource implements Resource {
      * @param fileName the name of the resource file to load
      */
     public ClassPathResource(String fileName) {
-        this.fileName = fileName;
+        CheckUtils.emptyString(fileName, "ClassPathResource recevies empty file name");
+        this.fileName = fileName.substring(PathUtils.CLASSPATH_URL_PREFIX.length());
         this.classLoader = ClassUtils.getDefaultClassLoader();
     }
 

@@ -45,10 +45,12 @@ public class SimpleInstantiation implements InstantiationStrategy {
     public Object instance(Class<?> clazz, Constructor<?> constructor, Object[] args) throws BeansException {
         CheckUtils.nullArgs(clazz, "SimpleInstantiation.instance recevies null bean class");
         try {
+            constructor = constructor == null ? clazz.getDeclaredConstructor() : constructor;
             if (constructor == null) {
-                return clazz.getDeclaredConstructor().newInstance();
+                throw new BeansException(String.format("Failed to find default constructor for class {%s}", clazz.getName()));
             }
-            return constructor.newInstance(args);
+
+            return args == null ? constructor.newInstance() : constructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             throw new BeansException(String.format("Failed to instantiate class {%s}", clazz.getName()), e);

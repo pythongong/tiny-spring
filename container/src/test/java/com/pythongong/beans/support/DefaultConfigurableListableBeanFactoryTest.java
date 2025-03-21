@@ -42,7 +42,6 @@ import com.pythongong.context.event.ApplicationEventMulticaster;
 import com.pythongong.context.event.GeneralApplicationEventMulticaster;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
-import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.stereotype.AutoWired;
 import com.pythongong.test.utils.TestBean;
 import com.pythongong.util.ClassUtils;
@@ -269,20 +268,6 @@ class DefaultConfigurableListableBeanFactoryTest {
         );
     }
 
-    /**
-     * Tests getting beans of a specific type when no matching beans exist
-     */
-    @Test
-    @DisplayName("Should throw NoSuchBeanException when no beans of type exist")
-    void shouldThrowExceptionWhenNoBeansOfTypeExist() {
-        // When/Then
-        NoSuchBeanException exception = assertThrows(NoSuchBeanException.class, 
-            () -> beanFactory.getBeansOfType(String.class),
-            "Should throw NoSuchBeanException when no beans of type exist"
-        );
-        
-        assertNotNull(exception.getMessage(), "Exception message should not be null");
-    }
 
     @Test
     @DisplayName("Should get beans of assignable type")

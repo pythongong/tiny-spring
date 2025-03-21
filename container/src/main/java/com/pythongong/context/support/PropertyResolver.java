@@ -20,6 +20,9 @@ import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
+import com.pythongong.exception.NoSuchBeanException;
+import com.pythongong.util.CheckUtils;
+
 /**
  * A property resolver that handles property placeholder resolution and provides
  * access to configuration properties. This resolver supports both system environment
@@ -70,7 +73,12 @@ public class PropertyResolver {
      * @throws IOException if an error occurs while loading the properties
      */
     public void load(InputStream inputStream) throws IOException {
-        properties.load(inputStream);
+        CheckUtils.nullArgs(inputStream, "PropertyResolver.load recevies null InputStream");
+        try(inputStream) {
+            properties.load(inputStream);
+        } catch (IOException e) {
+            throw new IOException("Error loading properties", e);
+        } 
     }
 
     /**
@@ -79,14 +87,20 @@ public class PropertyResolver {
      *
      * @param key the property key to resolve
      * @return the resolved property value
-     * @throws NoSuchElementException if the property doesn't exist and no default value is specified
+     * @throws NoSuchBeanException the property doesn't exist and no default value is specified
      */
     public String getProperty(String key) {
+        CheckUtils.emptyString(key, "PropertyResolver.getProperty receives empty key");
         PropertyExpr propertyExpr = parsePropertyExpr(key);
-        String value = getProperty(key);
+        String value = null;
         if (propertyExpr != null && propertyExpr.defaultValue() != null) {
             value = properties.getProperty(key, propertyExpr.defaultValue());
-        } 
+        } else if (propertyExpr != null) {
+            value = properties.getProperty(propertyExpr.key());
+            
+        } else {
+            value = properties.getProperty(key);
+        }
         
         if (value == null) {
             throw new NoSuchElementException(key + " doesn't exist: ");

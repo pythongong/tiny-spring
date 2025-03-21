@@ -16,6 +16,12 @@
 package com.pythongong.util;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -72,5 +78,41 @@ class StringUtilsTest {
     @DisplayName("Should return false for string with special characters")
     void shouldReturnFalseForStringWithSpecialCharacters() {
         assertFalse(StringUtils.isEmpty("!@#$"));
+    }
+
+    // ... other test methods remain the same ...
+
+    @Test
+    @DisplayName("Should find JUnit Test interface in classpath from JAR")
+    void shouldFindJUnitTestInterfaceInClasspath() {
+        // Given
+        List<String> foundClasses = new ArrayList<>();
+        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> {
+            String fileName = filePath.getFileName().toString();
+            if (fileName.endsWith(".class")) {
+                foundClasses.add(fileName);
+            }
+        };
+
+        // Get package path for org.junit.jupiter.api.Test
+        String packagePath = Test.class.getPackage().getName().replace('.', '/');
+        
+        ClassPathSerchParam param = ClassPathSerchParam.builder()
+                .packagePath(packagePath)
+                .pathMapper(pathMapper)
+                .searchSudDirect(false)
+                .serachFile(false)
+                .serachJar(true)
+                .build();
+
+        // When
+        PathUtils.findClassPathFileNames(param);
+
+        // Then
+        assertFalse(foundClasses.isEmpty(), "Should find classes in JUnit package");
+        assertTrue(
+            foundClasses.contains("Test.class"),
+            "Should find Test.class interface from JUnit"
+        );
     }
 }
