@@ -15,8 +15,6 @@
  */
 package com.pythongong.enums;
 
-import com.pythongong.util.StringUtils;
-
 /**
  * Enumeration representing the possible scopes for beans in the framework.
  * Supports singleton and prototype scopes, with singleton being the default.
@@ -28,44 +26,11 @@ public enum ScopeEnum {
     /**
      * Singleton scope - only one instance of the bean is created
      */
-    SINGLETON("singleton"),
+    SINGLETON(),
 
     /**
      * Prototype scope - a new instance is created each time the bean is requested
      */
-    PROTOTYPE("prototype");
+    PROTOTYPE();
 
-    /**
-     * The string representation of the scope
-     */
-    private final String scope;
-
-    /**
-     * Constructor for ScopeEnum.
-     *
-     * @param scope the string representation of the scope
-     */
-    ScopeEnum(String scope) {
-        this.scope = scope;
-    }
-
-    /**
-     * Gets the enum constant from a scope string.
-     * Returns SINGLETON if the scope string is empty.
-     *
-     * @param scope the scope string to convert
-     * @return the corresponding ScopeEnum constant
-     * @throws IllegalArgumentException if the scope string is invalid and not empty
-     */
-    public static ScopeEnum fromScope(String scope) {
-        for (ScopeEnum scopeEnum : values()) {
-            if (scopeEnum.scope.equals(scope)) {
-                return scopeEnum;
-            }
-        }
-        if (!StringUtils.isEmpty(scope)) {
-            throw new IllegalArgumentException("Illegal scope: " + scope);
-        }
-        return SINGLETON;
-    }
 }

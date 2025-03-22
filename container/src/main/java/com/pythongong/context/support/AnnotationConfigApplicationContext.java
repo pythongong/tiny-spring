@@ -41,10 +41,14 @@ import com.pythongong.util.ClassPathSerchParam;
 import com.pythongong.util.PathUtils;
 
 /**
- * Central class for handling annotation-based configuration and bootstrapping of the application context.
- * This implementation allows for registration and processing of annotated classes as configuration sources.
- * It provides support for scanning packages, loading property files, and managing the complete lifecycle
- * of spring beans including initialization, dependency injection, and destruction.
+ * Central class for handling annotation-based configuration and bootstrapping
+ * of the application context.
+ * This implementation allows for registration and processing of annotated
+ * classes as configuration sources.
+ * It provides support for scanning packages, loading property files, and
+ * managing the complete lifecycle
+ * of spring beans including initialization, dependency injection, and
+ * destruction.
  * 
  * @author Cheng Gong
  */
@@ -57,7 +61,8 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     private final Class<?> configurationClass;
 
     /**
-     * The core container that holds bean definitions and handles bean instantiation.
+     * The core container that holds bean definitions and handles bean
+     * instantiation.
      */
     private DefaultConfigurableListableBeanFactory beanFactory;
 
@@ -67,10 +72,12 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     private ApplicationEventMulticaster applicationEventMulticaster;
 
     /**
-     * Creates a new AnnotationConfigApplicationContext with the specified configuration class.
+     * Creates a new AnnotationConfigApplicationContext with the specified
+     * configuration class.
      * The context will be immediately refreshed upon construction.
      *
-     * @param configurationClass the configuration class that defines the application context
+     * @param configurationClass the configuration class that defines the
+     *                           application context
      */
     public AnnotationConfigApplicationContext(Class<?> configurationClass) {
         CheckUtils.nullArgs(configurationClass, "AnnotationConfigApplicationContext receives null class");
@@ -79,8 +86,10 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     }
 
     /**
-     * Refreshes the application context, processing bean definitions and initializing
-     * the container. This method follows a strict initialization order to ensure proper
+     * Refreshes the application context, processing bean definitions and
+     * initializing
+     * the container. This method follows a strict initialization order to ensure
+     * proper
      * setup of all framework components.
      *
      * @throws BeansException if an error occurs during bean processing
@@ -88,11 +97,11 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     @Override
     public void refresh() throws BeansException {
         this.beanFactory = new DefaultConfigurableListableBeanFactory();
-        
+
         refreshBeanFactory();
 
         beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
-        
+
         invokeBeanFactoryPostProcessors(beanFactory);
 
         registerBeanPostProcessors(beanFactory);
@@ -128,7 +137,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     /**
      * Retrieves all beans of the specified type from the application context.
      *
-     * @param <T> the type of beans to retrieve
+     * @param <T>  the type of beans to retrieve
      * @param type the class type to match
      * @return a Map of bean names and their corresponding instances
      * @throws BeansException if an error occurs while retrieving beans
@@ -171,17 +180,17 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     private PropertyResolver createPropertyResolver() {
         Set<String> propertiesFiles = new HashSet<>();
         PathUtils.findClassPathFileNames(ClassPathSerchParam.builder()
-        .packagePath(PathUtils.ROOT_CLASS_PATH)
-        .searchSudDirect(false)
-        .serachJar(false)
-        .serachFile(true)
-        .pathMapper((basePath, filePath) -> {
-            String fileName = filePath.getFileName().toString();
-            if (fileName.endsWith(PathUtils.PROPERTY_SUFFIX)) {
-                propertiesFiles.add(fileName);
-            }
-        })
-        .build());
+                .packagePath(PathUtils.ROOT_CLASS_PATH)
+                .searchSudDirect(false)
+                .serachJar(false)
+                .serachFile(true)
+                .pathMapper((basePath, filePath) -> {
+                    String fileName = filePath.getFileName().toString();
+                    if (fileName.endsWith(PathUtils.PROPERTY_SUFFIX)) {
+                        propertiesFiles.add(fileName);
+                    }
+                })
+                .build());
 
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         PropertyResolver propertyResolver = new PropertyResolver();
@@ -211,8 +220,8 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     /**
      * Retrieves a bean of the specified type from the application context.
      *
-     * @param <T> the type of bean to retrieve
-     * @param name the name of the bean to retrieve
+     * @param <T>          the type of bean to retrieve
+     * @param name         the name of the bean to retrieve
      * @param requiredType the required type of bean
      * @return the bean instance
      * @throws BeansException if the bean cannot be found or created
@@ -238,7 +247,9 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      * @param beanFactory the bean factory to post-process
      */
     private void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-        Map<String, BeanFactoryPostProcessor> beanFactoryPostProcessorMap = beanFactory.getBeansOfType(BeanFactoryPostProcessor.class);
+
+        Map<String, BeanFactoryPostProcessor> beanFactoryPostProcessorMap = beanFactory
+                .getBeansOfType(BeanFactoryPostProcessor.class);
         for (BeanFactoryPostProcessor beanFactoryPostProcessor : beanFactoryPostProcessorMap.values()) {
             beanFactoryPostProcessor.postProcessBeanFactory(beanFactory);
         }

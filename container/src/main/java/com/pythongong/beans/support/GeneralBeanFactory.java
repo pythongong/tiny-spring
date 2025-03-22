@@ -30,7 +30,8 @@ import com.pythongong.util.CheckUtils;
 
 /**
  * General implementation of the ConfigurableBeanFactory interface.
- * This class provides the core functionality for bean instantiation and configuration,
+ * This class provides the core functionality for bean instantiation and
+ * configuration,
  * supporting both singleton and prototype scopes, as well as factory beans.
  *
  * @author Cheng Gong
@@ -56,13 +57,13 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
     /**
      * Constructs a new GeneralBeanFactory with the specified dependencies.
      *
-     * @param getBeanDefinition function to retrieve bean definitions
-     * @param createBean function to create bean instances
+     * @param getBeanDefinition     function to retrieve bean definitions
+     * @param createBean            function to create bean instances
      * @param singletonBeanRegistry registry for managing singleton beans
      */
     public GeneralBeanFactory(Function<String, BeanDefinition> getBeanDefinition,
             Function<BeanDefinition, Object> createBean, SingletonBeanRegistry singletonBeanRegistry) {
-        
+
         CheckUtils.nullArgs(singletonBeanRegistry, "GeneralBeanFactory recevies null SingletonBeanRegistry");
         CheckUtils.nullArgs(createBean, "GeneralBeanFactory recevies null createBean function");
         CheckUtils.nullArgs(getBeanDefinition, "GeneralBeanFactory recevies null getBeanDefinition function");
@@ -77,7 +78,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         CheckUtils.emptyString(beanName, "GeneralBeanFactory.getBean recevies empty bean name");
         return doGetBean(beanName);
     }
-    
+
     @Override
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         CheckUtils.nullArgs(beanPostProcessor, "GeneralBeanFactory.addBeanPostProcessor recevies null processor");
@@ -107,7 +108,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
      * Template method for retrieving a bean instance, handling both
      * regular beans and FactoryBean instances.
      *
-     * @param <T> the type of bean to return
+     * @param <T>      the type of bean to return
      * @param beanName the name of the bean to retrieve
      * @return the bean instance
      * @throws BeansException if the bean cannot be created
@@ -126,7 +127,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
             return (T) getObjectForBeanInstance(sharedInstance, beanDefinition);
         }
 
-        return (T) createBean.apply(beanDefinition);
+        return (T) getObjectForBeanInstance(createBean.apply(beanDefinition), beanDefinition);
     }
 
     /**
@@ -137,9 +138,17 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
      * @return the object created by the FactoryBean
      */
     private Object getObjectForBeanInstance(Object sharedInstance, BeanDefinition beanDefinition) {
+        if (!(sharedInstance instanceof FactoryBean)) {
+            return sharedInstance;
+
+        }
         Object cachedObject = beanRegistrySupport.getCachedObjectForFactoryBean(beanDefinition.beanName());
         if (cachedObject == null) {
-            cachedObject = beanRegistrySupport.getObjectFromFactoryBean((FactoryBean<?>) sharedInstance, beanDefinition);
+            cachedObject = beanRegistrySupport.getObjectFromFactoryBean((FactoryBean<?>) sharedInstance,
+                    beanDefinition);
+        }
+        if (cachedObject == null) {
+            throw new NoSuchBeanException(beanDefinition.beanName(), beanDefinition.beanClass());
         }
         return cachedObject;
     }

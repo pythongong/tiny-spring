@@ -20,75 +20,70 @@ import static org.mockito.Mockito.mockStatic;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Objects;
+
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pythongong.context.support.test_beans.PropertyTestConfiguration;
-import com.pythongong.context.support.test_beans.TestPropertyComponent;
+import com.pythongong.test.utils.TestConfiguration;
+import com.pythongong.exception.BeansException;
+import com.pythongong.test.utils.FactoryPostProcessedBean;
+import com.pythongong.test.utils.LifecycleTestBean;
+import com.pythongong.test.utils.ProxyBeanFactory;
+import com.pythongong.test.utils.TestComponent;
+import com.pythongong.test.utils.TestPropertyComponent;
+import com.pythongong.test.utils.TestUsingProxy;
 import com.pythongong.util.ClassUtils;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AnnotationConfigApplicationContext Tests")
 class AnnotationConfigApplicationContextTest {
-    
-    @TempDir
-    Path tempDir;
-
-    private static final String TEST_RESOURCES_PATH = "com/pythongong/context/support";
 
     private static ClassLoader testClassLoader;
-    
-    private Path propertiesFile;
 
-    // private MockedStatic<ClassUtils> mockedClassUtils;
+    private static Path propertiesFile;
 
     @BeforeAll
-    static void setUp() throws IOException {
-         // Create test directory structure in target/test-classes
-        Path testResourcesRoot = Paths.get("target", "test-classes", TEST_RESOURCES_PATH);
-        // Create URLClassLoader with test resources
-        URL testResourcesUrl = testResourcesRoot.toUri().toURL();
-        testClassLoader = new URLClassLoader(new URL[]{testResourcesUrl}, null);
-    }
+    static void setUp() throws IOException, URISyntaxException {
+        testClassLoader = Thread.currentThread().getContextClassLoader();
 
-    @BeforeEach
-    void setUpEach() throws IOException {
-        // Create test.properties file
-        // Create test directory structure in target/test-classes
-        Path testResourcesRoot = Paths.get("target", "test-classes");
-        propertiesFile = testResourcesRoot.resolve("test.properties");
+        Path testClassesDir = Path.of(new URI(Objects.requireNonNull(testClassLoader.getResource(".")).toString()));
+        ;
+        propertiesFile = testClassesDir.resolve("test.properties");
         try (FileWriter writer = new FileWriter(propertiesFile.toFile())) {
             writer.write("test.name=testValue\n");
             writer.write("test.version=1.0.0\n");
             writer.write("app.description=Test Application\n");
         }
-
-        
-    
+        // Verify file creation
+        assertTrue(Files.exists(propertiesFile));
     }
 
-    @AfterEach
-    void tearDownEach() throws IOException {
-        // Clean up the properties file
-        Files.deleteIfExists(propertiesFile);
+    @BeforeEach
+    void setUpEach() throws IOException {
+        try (MockedStatic<ClassUtils> mockedClassUtils = mockStatic(ClassUtils.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedClassUtils.when(() -> ClassUtils.getDefaultClassLoader()).thenReturn(testClassLoader);
+        }
+
     }
 
     @AfterAll
     static void tearDown() throws IOException {
+        // Clean up the properties file
+        Files.deleteIfExists(propertiesFile);
         // Close the test classloader
         if (testClassLoader instanceof URLClassLoader) {
             ((URLClassLoader) testClassLoader).close();
@@ -96,25 +91,130 @@ class AnnotationConfigApplicationContextTest {
     }
 
     @Test
+    @DisplayName("Should create a bean")
+    void shouldCreateBean() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+
+        // When
+        TestComponent component = context.getBean("testComponent", TestComponent.class);
+
+        // Then
+        assertNotNull(component);
+    }
+
+    @Test
+    @DisplayName("Should create a bean")
+    void shouldGetBeanByName() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+
+        // When
+        TestComponent component = (TestComponent) context.getBean("testComponent");
+
+        // Then
+        assertNotNull(component);
+    }
+
+    @Test
+    @DisplayName("Should create a bean")
+    void shouldGetBeansByType() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+
+        // When
+        Map<String, TestComponent> beans = context.getBeansOfType(TestComponent.class);
+
+        // Then
+        assertFalse(beans == null || beans.isEmpty());
+        assertTrue(beans.containsKey("testComponent"));
+    }
+
+    @Test
     @DisplayName("Should load properties from classpath")
     void shouldLoadPropertiesFromClasspath() throws IOException {
-        try (MockedStatic<ClassUtils> mockedClassUtils = mockStatic(ClassUtils.class, Mockito.CALLS_REAL_METHODS)) {
-            // Given
-            System.setProperty("java.class.path", tempDir.toString());
-            
-            // When
-            AnnotationConfigApplicationContext context = 
-                new AnnotationConfigApplicationContext(PropertyTestConfiguration.class);
-            
-            // Then
-            TestPropertyComponent bean = context.getBean("testPropertyComponent", TestPropertyComponent.class);
-            assertEquals("testValue", bean.getName(), "Should inject property value");
-            assertEquals("1.0.0", bean.getVersion(), "Should inject version property");
-            assertEquals("Test Application", bean.getDescription(), "Should inject description property");              
-        }
-        
-        
+        // When
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+
+        // Then
+        TestPropertyComponent bean = context.getBean("testPropertyComponent", TestPropertyComponent.class);
+        assertEquals("testValue", bean.getName(), "Should inject property value");
+        assertEquals("1.0.0", bean.getVersion(), "Should inject version property");
+        assertEquals("Test Application", bean.getDescription(), "Should inject description property");
+
     }
-    
-    
+
+    @Test
+    @DisplayName("Should register and apply BeanPostProcessor")
+    void shouldRegisterAndApplyBeanPostProcessor() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+
+        // When
+        TestComponent component = context.getBean("testComponent", TestComponent.class);
+
+        // Then
+        assertTrue(component.isPostProcessed(),
+                "Bean should be post-processed");
+    }
+
+    @Test
+    @DisplayName("Should handle bean lifecycle")
+    void shouldHandleBeanLifecycle() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+                TestConfiguration.class);
+        context.registerShutdownHook();
+
+        // When
+        LifecycleTestBean bean = context.getBean("lifecycleBean", LifecycleTestBean.class);
+
+        // Then
+        assertTrue(bean.isInitialized(), "Bean should be initialized");
+
+        // When
+        context.close();
+
+        // Then
+        assertTrue(bean.isDestroyed(), "Bean should be destroyed");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when configuration class is null")
+    void shouldThrowExceptionWhenConfigurationClassIsNull() {
+        assertThrows(BeansException.class,
+                () -> new AnnotationConfigApplicationContext(null));
+    }
+
+    @Test
+    @DisplayName("Should register and apply BeanFactoryPostProcessor")
+    void shouldRegisterAndApplyBeanFactoryPostProcessor() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+
+        // When
+        FactoryPostProcessedBean bean = context.getBean("beanFactoryPostProcessedBean", FactoryPostProcessedBean.class);
+
+        // Then
+        assertNotNull(bean);
+        assertEquals(FactoryPostProcessedBean.PROCESSED_NAME, bean.getName());
+    }
+
+    @Test
+    @DisplayName("Should handle prxoxy bean")
+    void shouldHandlePrxoyBean() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+                TestConfiguration.class);
+
+        // When
+        TestUsingProxy bean = context.getBean("testUsingProxy", TestUsingProxy.class);
+        assertNotNull(bean);
+
+        ProxyBeanFactory.data.forEach((id, name) -> {
+            assertEquals(name, bean.getName(id));
+        });
+
+    }
+
 }

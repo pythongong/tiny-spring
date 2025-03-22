@@ -1,4 +1,4 @@
-package com.pythongong.context.support.test_beans;
+package com.pythongong.test.utils;
 
 import com.pythongong.stereotype.Component;
 import com.pythongong.stereotype.Value;

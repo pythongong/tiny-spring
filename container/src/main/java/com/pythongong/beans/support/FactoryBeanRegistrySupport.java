@@ -25,7 +25,8 @@ import com.pythongong.exception.BeansException;
 import com.pythongong.util.CheckUtils;
 
 /**
- * Support base class for bean factories that need to handle FactoryBean instances.
+ * Support base class for bean factories that need to handle FactoryBean
+ * instances.
  * Provides caching capabilities for FactoryBean objects to improve performance
  * and ensure consistency in singleton scope.
  *
@@ -43,7 +44,8 @@ public class FactoryBeanRegistrySupport {
      * @return the cached object, or null if not found
      */
     protected Object getCachedObjectForFactoryBean(String beanName) {
-        CheckUtils.emptyString(beanName, "FactoryBeanRegistrySupport.getCachedObjectForFactoryBean recevies empty bean name");
+        CheckUtils.emptyString(beanName,
+                "FactoryBeanRegistrySupport.getCachedObjectForFactoryBean recevies empty bean name");
         Object cachedObject = factoryBeanObjectCache.get(beanName);
         return cachedObject;
     }
@@ -52,13 +54,14 @@ public class FactoryBeanRegistrySupport {
      * Obtains an object from the FactoryBean.
      * For singleton-scoped factory beans, the object will be cached.
      *
-     * @param factory the FactoryBean instance
+     * @param factory        the FactoryBean instance
      * @param beanDefinition the bean definition for the factory bean
      * @return the object obtained from the factory
      * @throws BeansException if the factory bean throws an exception
      */
     protected Object getObjectFromFactoryBean(FactoryBean<?> factory, BeanDefinition beanDefinition) {
-        CheckUtils.nullArgs(beanDefinition, "FactoryBeanRegistrySupport.getObjectFromFactoryBean recevies null bean definition");
+        CheckUtils.nullArgs(beanDefinition,
+                "FactoryBeanRegistrySupport.getObjectFromFactoryBean recevies null bean definition");
         CheckUtils.nullArgs(factory, "FactoryBeanRegistrySupport.getObjectFromFactoryBean recevies null factory bean");
 
         Object curObject = null;
@@ -80,7 +83,6 @@ public class FactoryBeanRegistrySupport {
             return cachedObject;
         }
 
-        
         if (curObject == null) {
             throw new BeansException("FactoryBean returned null object: " + beanName);
         }

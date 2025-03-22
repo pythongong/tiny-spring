@@ -26,22 +26,27 @@ import java.lang.annotation.Target;
  * When applied to a field, the container will attempt to inject a bean
  * of the matching type or name into that field.
  *
- * <p>Example usage:
- * <pre>{@code
- * @Component
- * public class UserService {
- *     @AutoWired
- *     private UserRepository userRepository;
+ * <p>
+ * Example usage:
+ * 
+ * <pre>
+ * {
+ *     &#64;code
+ *     &#64;Component
+ *     public class UserService {
+ *         &#64;AutoWired
+ *         private UserRepository userRepository;
  *
- *     @AutoWired(name = "primaryDataSource")
- *     private DataSource dataSource;
+ *         @AutoWired(name = "primaryDataSource")
+ *         private DataSource dataSource;
+ *     }
  * }
- * }</pre>
+ * </pre>
  *
  * @author Cheng Gong
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR})
+@Target(value = { ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR })
 @Documented
 public @interface AutoWired {
 
@@ -50,7 +55,8 @@ public @interface AutoWired {
      * If not specified, the container will attempt to find a bean
      * matching the field's type.
      *
-     * @return the name of the bean to inject, or empty string for type-based injection
+     * @return the name of the bean to inject, or empty string for type-based
+     *         injection
      */
-    String name() default "";
+    String value() default "";
 }

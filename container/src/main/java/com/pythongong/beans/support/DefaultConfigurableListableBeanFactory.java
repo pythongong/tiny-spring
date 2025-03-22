@@ -48,13 +48,17 @@ import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
 
 /**
- * Default implementation of the ConfigurableListableBeanFactory and BeanDefinitionRegistry interfaces.
- * This is a complete bean factory implementation that supports singleton and prototype beans,
- * Aware interfaces, lifecycle methods, property injection, and bean post processing.
+ * Default implementation of the ConfigurableListableBeanFactory and
+ * BeanDefinitionRegistry interfaces.
+ * This is a complete bean factory implementation that supports singleton and
+ * prototype beans,
+ * Aware interfaces, lifecycle methods, property injection, and bean post
+ * processing.
  *
  * @author Cheng Gong
  */
-public class DefaultConfigurableListableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory, AutowireCapableBeanFactory {
+public class DefaultConfigurableListableBeanFactory
+        implements BeanDefinitionRegistry, ConfigurableListableBeanFactory, AutowireCapableBeanFactory {
 
     /** Map of bean definitions, keyed by bean name */
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
@@ -67,7 +71,7 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
 
     /** Registry for singleton beans */
     private final DefaultSingletonBeanRegistry singletonBeanRegistry;
-    
+
     /**
      * Creates a new DefaultListableBeanFactory.
      * Initializes the singleton registry and general bean factory.
@@ -78,10 +82,11 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
     }
 
     public List<BeanDefinition> getBeanDefinitionsOfType(Class<?> requiredType) throws BeansException {
-        CheckUtils.nullArgs(requiredType, "DefaultListableBeanFactory.getBeanDefinitionsOfType recevies null bean class");
+        CheckUtils.nullArgs(requiredType,
+                "DefaultListableBeanFactory.getBeanDefinitionsOfType recevies null bean class");
         return beanDefinitionMap.values().stream()
-            .filter(beanDefinition -> requiredType.isAssignableFrom(beanDefinition.beanClass()))
-            .toList();
+                .filter(beanDefinition -> requiredType.isAssignableFrom(beanDefinition.beanClass()))
+                .toList();
     }
 
     @Override
@@ -92,8 +97,10 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
 
     @Override
     public void registerBeanDefinition(BeanDefinition beanDefinition) {
-        CheckUtils.nullArgs(beanDefinition, "DefaultListableBeanFactory.registerBeanDefinition recevies null bean definition");
-        CheckUtils.emptyString(beanDefinition.beanName(), "DefaultListableBeanFactory.registerBeanDefinition recevies empty bean name");
+        CheckUtils.nullArgs(beanDefinition,
+                "DefaultListableBeanFactory.registerBeanDefinition recevies null bean definition");
+        CheckUtils.emptyString(beanDefinition.beanName(),
+                "DefaultListableBeanFactory.registerBeanDefinition recevies empty bean name");
         beanDefinitionMap.put(beanDefinition.beanName(), beanDefinition);
     }
 
@@ -144,7 +151,8 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
     @Override
     public ApplicationEventMulticaster initApplicationEventMulticaster() {
         GeneralApplicationEventMulticaster applicationEventMulticaster = new GeneralApplicationEventMulticaster();
-        singletonBeanRegistry.registerSingleton(ClassUtils.APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
+        singletonBeanRegistry.registerSingleton(ClassUtils.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
+                applicationEventMulticaster);
         return applicationEventMulticaster;
     }
 
@@ -152,31 +160,33 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
      * Applies BeanPostProcessors to the given bean instance before initialization.
      *
      * @param existingBean the existing bean instance
-     * @param beanName the name of the bean
+     * @param beanName     the name of the bean
      * @return the bean instance to use, either the original or a wrapped one
      */
     @Override
-    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
-         Object result = existingBean;
-         for (BeanPostProcessor processor : generalBeanFactory.getBeanPostProcessors()) {
-             Object current = processor.postProcessBeforeInitialization(result, beanName);
-             if (current == null) {
+    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
+            throws BeansException {
+        Object result = existingBean;
+        for (BeanPostProcessor processor : generalBeanFactory.getBeanPostProcessors()) {
+            Object current = processor.postProcessBeforeInitialization(result, beanName);
+            if (current == null) {
                 return result;
-             }
-             result = current;
-         }
-         return result;
+            }
+            result = current;
+        }
+        return result;
     }
 
     /**
      * Applies BeanPostProcessors to the given bean instance after initialization.
      *
      * @param existingBean the existing bean instance
-     * @param beanName the name of the bean
+     * @param beanName     the name of the bean
      * @return the bean instance to use, either the original or a wrapped one
      */
     @Override
-    public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) throws BeansException {
+    public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
+            throws BeansException {
         Object result = existingBean;
         for (BeanPostProcessor processor : generalBeanFactory.getBeanPostProcessors()) {
             Object current = processor.postProcessAfterInitialization(result, beanName);
@@ -197,13 +207,13 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
     protected Object createBean(BeanDefinition beanDefinition) throws BeansException {
         Object bean;
         String beanName = beanDefinition.beanName();
-        
+
         bean = createBeanInstance(beanDefinition);
 
         if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
             singletonBeanRegistry.registerSingleton(beanName, bean);
         }
-        
+
         fillFieldValues(beanDefinition, bean);
 
         bean = initializeBean(bean, beanDefinition);
@@ -226,9 +236,8 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
         }
         if (bean instanceof DisposableBean || beanDefinition.destroyMethod() != null) {
             singletonBeanRegistry.registerDisposableBean(
-                beanDefinition.beanName(), 
-                new DisposableBeanAdapter(bean, beanDefinition.destroyMethod())
-            );
+                    beanDefinition.beanName(),
+                    new DisposableBeanAdapter(bean, beanDefinition.destroyMethod()));
         }
     }
 
@@ -288,9 +297,9 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
         Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
         try {
-            invokeInitMethods(beanName, wrappedBean, beanDefinition);
+            invokeInitMethods(wrappedBean, beanDefinition);
         } catch (Exception e) {
-            throw new BeansException("DefaultListableBeanFactory.invokeInitMethods failed", e);
+            throw new BeansException(String.format("{%s} invokes init method failed", beanName), e);
         }
 
         methodInject(beanName, wrappedBean, beanDefinition);
@@ -310,22 +319,22 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
         if (bean instanceof BeanFactoryAware) {
             ((BeanFactoryAware) bean).setBeanFactory(this);
         }
-        
-        if (bean instanceof BeanClassLoaderAware){
+
+        if (bean instanceof BeanClassLoaderAware) {
             ((BeanClassLoaderAware) bean).setBeanClassLoader(ClassUtils.getDefaultClassLoader());
         }
         if (bean instanceof BeanNameAware) {
             ((BeanNameAware) bean).setBeanName(beanName);
         }
     }
-    
+
     /**
      * Performs method injection for methods annotated with @AutoWired.
      * This method processes methods with a single parameter that should be
      * autowired with a bean from the container.
      *
-     * @param beanName the name of the bean being processed
-     * @param wrappedBean the bean instance being configured
+     * @param beanName       the name of the bean being processed
+     * @param wrappedBean    the bean instance being configured
      * @param beanDefinition the bean definition
      * @throws BeansException if method injection fails
      */
@@ -340,26 +349,26 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
             int count = method.getParameterCount();
 
             if (count == 0) {
-                throw new BeansException(String.format("Class {%s}'s inject method {%s} has no arugment", 
-                    beanClass, method.getName()));
+                throw new BeansException(String.format("Class {%s}'s inject method {%s} has no arugment",
+                        beanClass, method.getName()));
             }
 
             if (count > 1) {
-                throw new BeansException(String.format("Class {%s}'s inject method {%s} has no arugment", 
-                    beanClass, method.getName()));
+                throw new BeansException(String.format("Class {%s}'s inject method {%s} has no arugment",
+                        beanClass, method.getName()));
             }
 
             Class<?> parameterType = method.getParameterTypes()[0];
 
             setInjectingParameter(wrappedBean, method, parameterType);
 
-          }
+        }
     }
 
     private void setInjectingParameter(Object wrappedBean, Method method, Class<?> parameterType) {
         if (parameterType.isPrimitive()) {
-            throw new BeansException(String.format("Class {%s}'s inject method {%s} has primitive type arugment", 
-                parameterType, method.getName()));
+            throw new BeansException(String.format("Class {%s}'s inject method {%s} has primitive type arugment",
+                    parameterType, method.getName()));
         }
 
         Object injectingBean = null;
@@ -367,18 +376,18 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
         if (ClassUtils.isCollectionEmpty(beanDefinitions)) {
             throw new NoSuchBeanException(parameterType);
         } else if (beanDefinitions.size() > 1) {
-            throw new BeansException(String.format("Can not specify arugment bean {%s} in inject method {%s} ", 
-                parameterType, method.getName()));
-            
+            throw new BeansException(String.format("Can not specify arugment bean {%s} in inject method {%s} ",
+                    parameterType, method.getName()));
+
         } else {
             injectingBean = getBean(beanDefinitions.get(0).beanName());
         }
-    
+
         try {
             method.invoke(wrappedBean, injectingBean);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new BeansException(String.format("Class {%s}'s inject method {%s} failed", 
-                parameterType, method.getName()), e);
+            throw new BeansException(String.format("Class {%s}'s inject method {%s} failed",
+                    parameterType, method.getName()), e);
         }
 
     }
@@ -387,12 +396,12 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
      * Invokes initialization methods on the bean if it implements InitializingBean
      * or has a custom init method specified.
      *
-     * @param beanName the name of the bean
-     * @param wrappedBean the bean instance
+     * @param beanName       the name of the bean
+     * @param wrappedBean    the bean instance
      * @param beanDefinition the bean definition
      * @throws Exception if initialization fails
      */
-    private void invokeInitMethods(String beanName, Object wrappedBean, BeanDefinition beanDefinition) 
+    private void invokeInitMethods(Object wrappedBean, BeanDefinition beanDefinition)
             throws Exception {
         if (wrappedBean instanceof InitializingBean) {
             ((InitializingBean) wrappedBean).afterPropertiesSet();
@@ -403,6 +412,8 @@ public class DefaultConfigurableListableBeanFactory implements BeanDefinitionReg
         if (initMethod == null) {
             return;
         }
+
+        initMethod.setAccessible(true);
 
         initMethod.invoke(wrappedBean);
     }

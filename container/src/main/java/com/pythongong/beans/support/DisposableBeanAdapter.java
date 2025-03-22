@@ -20,9 +20,12 @@ import com.pythongong.beans.config.DisposableBean;
 import com.pythongong.util.CheckUtils;
 
 /**
- * Adapter that implements the DisposableBean interface for any bean that needs to be
+ * Adapter that implements the DisposableBean interface for any bean that needs
+ * to be
  * cleaned up on container shutdown.
- * <p>This adapter handles both DisposableBean implementations and custom destroy methods,
+ * <p>
+ * This adapter handles both DisposableBean implementations and custom destroy
+ * methods,
  * making it possible to invoke bean destruction through a unified interface.
  *
  * @author Cheng Gong
@@ -39,7 +42,7 @@ public class DisposableBeanAdapter implements DisposableBean {
     /**
      * Creates a new DisposableBeanAdapter.
      *
-     * @param bean the bean instance that needs destruction
+     * @param bean          the bean instance that needs destruction
      * @param destroyMethod the method to be called for cleanup
      * @throws IllegalArgumentException if bean or destroyMethod is null
      */
@@ -63,6 +66,7 @@ public class DisposableBeanAdapter implements DisposableBean {
         if (bean instanceof DisposableBean) {
             ((DisposableBean) bean).destroy();
         }
+        destroyMethod.setAccessible(true);
         destroyMethod.invoke(bean);
     }
 }

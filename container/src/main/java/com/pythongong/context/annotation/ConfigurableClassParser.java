@@ -33,17 +33,22 @@ import com.pythongong.util.ClassUtils;
 import com.pythongong.util.StringUtils;
 
 /**
- * Parser that processes configuration classes and component scanning to create bean definitions.
- * <p>This class handles configuration classes marked with {@link Configuration} and processes
- * component scanning through {@link ComponentScan}. It creates bean definitions from both
+ * Parser that processes configuration classes and component scanning to create
+ * bean definitions.
+ * <p>
+ * This class handles configuration classes marked with {@link Configuration}
+ * and processes
+ * component scanning through {@link ComponentScan}. It creates bean definitions
+ * from both
  * annotated classes and {@link Bean} methods in configuration classes.
  * 
- * <p>Key responsibilities:
+ * <p>
+ * Key responsibilities:
  * <ul>
- *   <li>Component scanning and bean definition creation</li>
- *   <li>Processing of {@link Configuration} classes</li>
- *   <li>Handling of dependency injection annotations</li>
- *   <li>Processing of bean lifecycle annotations</li>
+ * <li>Component scanning and bean definition creation</li>
+ * <li>Processing of {@link Configuration} classes</li>
+ * <li>Handling of dependency injection annotations</li>
+ * <li>Processing of bean lifecycle annotations</li>
  * </ul>
  *
  * @author Cheng Gong
@@ -75,10 +80,11 @@ public class ConfigurableClassParser {
         this.propertyResolver = propertyResolver;
         beanDefinitions = new HashSet<>();
     }
-    
+
     /**
      * Parses a configuration class to discover and create bean definitions.
-     * <p>Processes {@link ComponentScan} configuration and scans for components
+     * <p>
+     * Processes {@link ComponentScan} configuration and scans for components
      * in the specified base packages.
      *
      * @param declaredClass the configuration class to parse
@@ -97,8 +103,8 @@ public class ConfigurableClassParser {
         }
 
         String[] basePackages = componentScan.basePackages();
-        Set<Class<?>> beanClasses = scanner.scan(ClassUtils.isArrayEmpty(basePackages) ? 
-            new String[]{declaredClass.getPackageName()} : basePackages);
+        Set<Class<?>> beanClasses = scanner.scan(
+                ClassUtils.isArrayEmpty(basePackages) ? new String[] { declaredClass.getPackageName() } : basePackages);
 
         return doParse(beanClasses);
     }
@@ -118,7 +124,8 @@ public class ConfigurableClassParser {
 
     /**
      * Creates a bean definition from a component class.
-     * <p>Processes component configuration including scope, lifecycle methods,
+     * <p>
+     * Processes component configuration including scope, lifecycle methods,
      * and factory methods for {@link Configuration} classes.
      *
      * @param beanClass the class to create a bean definition for
@@ -126,13 +133,13 @@ public class ConfigurableClassParser {
      */
     private void createBeanDefinition(Class<?> beanClass) {
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .constructor(getConfigurableConstrucor(beanClass))
-            .beanName(generateBeanName(beanClass))
-            .beanClass(beanClass)
-            .initMethod(findInitOrDestoryMethod(beanClass, PostConstruct.class))
-            .destroyMethod(findInitOrDestoryMethod(beanClass, PreDestroy.class))
-            .scope(extractScope(beanClass))
-            .build();
+                .constructor(getConfigurableConstrucor(beanClass))
+                .beanName(generateBeanName(beanClass))
+                .beanClass(beanClass)
+                .initMethod(findInitOrDestoryMethod(beanClass, PostConstruct.class))
+                .destroyMethod(findInitOrDestoryMethod(beanClass, PreDestroy.class))
+                .scope(extractScope(beanClass))
+                .build();
 
         addBeanDef(beanDefinition);
 
@@ -142,31 +149,32 @@ public class ConfigurableClassParser {
     }
 
     /**
-     * Creates bean definitions for methods marked with {@link Bean} in configuration classes.
+     * Creates bean definitions for methods marked with {@link Bean} in
+     * configuration classes.
      *
      * @param beanClass the configuration class to process
      */
     private void createFactoryBeanDefinitions(Class<?> beanClass) {
         Method[] methods = beanClass.getMethods();
         Arrays.stream(methods)
-            .filter(method -> method.isAnnotationPresent(Bean.class))
-            .forEach(method -> {
-                Bean beanAnno = method.getAnnotation(Bean.class);
-                String beanName = beanAnno.value();
-                if (StringUtils.isEmpty(beanName)) {
-                    beanName = method.getReturnType().getName();
-                }
-                
-                FactoryBean<Object> factoryBean = () -> method;
-                ScopeEnum scope = extractScope(method.getClass());
-                BeanDefinition beanDefinition = BeanDefinition.builder()
-                    .beanName(beanName)
-                    .beanClass(factoryBean.getClass())
-                    .scope(scope)
-                    .build();
+                .filter(method -> method.isAnnotationPresent(Bean.class))
+                .forEach(method -> {
+                    Bean beanAnno = method.getAnnotation(Bean.class);
+                    String beanName = beanAnno.value();
+                    if (StringUtils.isEmpty(beanName)) {
+                        beanName = method.getReturnType().getName();
+                    }
 
-                addBeanDef(beanDefinition);
-            });
+                    FactoryBean<Object> factoryBean = () -> method;
+                    ScopeEnum scope = extractScope(method.getClass());
+                    BeanDefinition beanDefinition = BeanDefinition.builder()
+                            .beanName(beanName)
+                            .beanClass(factoryBean.getClass())
+                            .scope(scope)
+                            .build();
+
+                    addBeanDef(beanDefinition);
+                });
     }
 
     /**
@@ -202,14 +210,15 @@ public class ConfigurableClassParser {
     private Constructor<?> getConfigurableConstrucor(Class<?> beanClass) {
         Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
         List<Constructor<?>> configurabeConsturctors = Arrays.stream(declaredConstructors)
-            .filter(constructor -> constructor.isAnnotationPresent(AutoWired.class)).toList();
+                .filter(constructor -> constructor.isAnnotationPresent(AutoWired.class)).toList();
 
         if (configurabeConsturctors.isEmpty()) {
             return null;
         }
-        
+
         if (configurabeConsturctors.size() > 1) {
-            throw new BeansException(String.format("Mulitiple constructor injections found in: { %s }", beanClass.getName()));
+            throw new BeansException(
+                    String.format("Mulitiple constructor injections found in: { %s }", beanClass.getName()));
         }
         return configurabeConsturctors.get(0);
     }
@@ -231,29 +240,29 @@ public class ConfigurableClassParser {
     /**
      * Finds initialization or destruction methods.
      *
-     * @param beanClass the class to check for lifecycle methods
+     * @param beanClass      the class to check for lifecycle methods
      * @param anotationClass the lifecycle annotation to look for
      * @return the lifecycle method or null if none found
      * @throws BeansException if multiple lifecycle methods are found
      */
     private Method findInitOrDestoryMethod(Class<?> beanClass, Class<? extends Annotation> anotationClass) {
         List<Method> methods = Arrays.stream(beanClass.getDeclaredMethods())
-            .filter(method -> method.isAnnotationPresent(anotationClass)).map(method -> {
-                if (method.getParameterCount() != 0) {
-                    throw new BeansException(
-                        String.format("Method '%s' with @%s must not have argument: %s", 
-                        method.getName(), anotationClass.getSimpleName(), beanClass.getName()));
-                }
-                return method;
-            }).toList();
+                .filter(method -> method.isAnnotationPresent(anotationClass)).map(method -> {
+                    if (method.getParameterCount() != 0) {
+                        throw new BeansException(
+                                String.format("Method '%s' with @%s must not have argument: %s",
+                                        method.getName(), anotationClass.getSimpleName(), beanClass.getName()));
+                    }
+                    return method;
+                }).toList();
 
         if (methods.isEmpty()) {
             return null;
         }
 
         if (methods.size() > 1) {
-            throw new BeansException(String.format("Multiple methods with @%s found in class: %s"
-                , anotationClass.getSimpleName(), beanClass.getName()));
+            throw new BeansException(String.format("Multiple methods with @%s found in class: %s",
+                    anotationClass.getSimpleName(), beanClass.getName()));
         }
 
         return methods.get(0);
@@ -315,11 +324,11 @@ public class ConfigurableClassParser {
      * Creates a property value for an {@link AutoWired} annotated field.
      *
      * @param autoWired the AutoWired annotation
-     * @param field the annotated field
+     * @param field     the annotated field
      * @return the property value
      */
     private FieldValue getAutowiredField(AutoWired autoWired, Field field) {
-        String beanName = autoWired.name();
+        String beanName = autoWired.value();
         if (!StringUtils.isEmpty(beanName)) {
             return new FieldValue(field.getName(), new BeanReference(beanName));
         }
@@ -336,12 +345,12 @@ public class ConfigurableClassParser {
      * @param requiredType the required bean type
      * @return the matching bean definition
      * @throws NoSuchElementException if no matching bean is found
-     * @throws BeansException if multiple matching beans are found
+     * @throws BeansException         if multiple matching beans are found
      */
     private BeanDefinition getBeanDefinitionByType(Class<?> requiredType) {
         List<BeanDefinition> requiredDefs = beanDefinitions.stream()
-            .filter(beanDefinition -> beanDefinition.beanClass().equals(requiredType))
-            .toList();
+                .filter(beanDefinition -> beanDefinition.beanClass().equals(requiredType))
+                .toList();
 
         if (requiredDefs.isEmpty()) {
             throw new NoSuchElementException();
