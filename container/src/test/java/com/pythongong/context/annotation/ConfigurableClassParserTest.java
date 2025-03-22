@@ -29,18 +29,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.pythongong.context.support.PropertyResolver;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.exception.BeansException;
-import com.pythongong.stereotype.Component;
 import com.pythongong.stereotype.ComponentScan;
 import com.pythongong.stereotype.Configuration;
-import com.pythongong.stereotype.PostConstruct;
-import com.pythongong.stereotype.PreDestroy;
-import com.pythongong.stereotype.Scope;
+import com.pythongong.test.utils.LifecycleTestBean;
+import com.pythongong.test.utils.TestConfiguration;
+import com.pythongong.test.utils.TestConfugrableBean;
+import com.pythongong.util.StringUtils;
 import com.pythongong.enums.ScopeEnum;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConfigurableClassParser Tests")
 class ConfigurableClassParserTest {
-    
+
     private PropertyResolver propertyResolver;
     private ConfigurableClassParser parser;
 
@@ -48,6 +48,9 @@ class ConfigurableClassParserTest {
     void setUp() {
         Properties props = new Properties();
         props.setProperty("test.property", "testValue");
+        props.setProperty("test.name", "testValue\n");
+        props.setProperty("test.version", "1.0.0\n");
+        props.setProperty("app.description", "Test Application\n");
         propertyResolver = new PropertyResolver(props);
         parser = new ConfigurableClassParser(propertyResolver);
     }
@@ -55,53 +58,53 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should throw exception for null property resolver")
     void shouldThrowExceptionForNullPropertyResolver() {
-        assertThrows(BeansException.class, 
-            () -> new ConfigurableClassParser(null),
-            "Should throw BeansException for null PropertyResolver");
+        assertThrows(BeansException.class,
+                () -> new ConfigurableClassParser(null),
+                "Should throw BeansException for null PropertyResolver");
     }
 
     @Test
     @DisplayName("Should throw exception for null class")
     void shouldThrowExceptionForNullClass() {
-        assertThrows(BeansException.class, 
-            () -> parser.parse(null),
-            "Should throw BeansException for null class");
+        assertThrows(BeansException.class,
+                () -> parser.parse(null),
+                "Should throw BeansException for null class");
     }
 
     @Test
     @DisplayName("Should return empty set for non-annotated class")
     void shouldReturnEmptySetForNonAnnotatedClass() {
-        Set<BeanDefinition> definitions = parser.parse(NonAnnotatedClass.class);
-        assertTrue(definitions.isEmpty(), 
-            "Should return empty set for class without ComponentScan");
+        Set<BeanDefinition> definitions = parser.parse(getClass());
+        assertTrue(definitions.isEmpty(),
+                "Should return empty set for class without ComponentScan");
     }
 
     @Test
     @DisplayName("Should parse ComponentScan with empty basePackages")
     void shouldParseComponentScanWithEmptyBasePackages() {
-        Set<BeanDefinition> definitions = parser.parse(EmptyBasePackagesConfig.class);
-        assertFalse(definitions.isEmpty(), 
-            "Should find components in the declaring class package");
+        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
+        assertFalse(definitions.isEmpty(),
+                "Should find components in the declaring class package");
     }
 
     @Test
     @DisplayName("Should parse ComponentScan with explicit basePackages")
     void shouldParseComponentScanWithExplicitBasePackages() {
-        Set<BeanDefinition> definitions = parser.parse(ExplicitBasePackagesConfig.class);
-        assertFalse(definitions.isEmpty(), 
-            "Should find components in specified packages");
+        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
+        assertFalse(definitions.isEmpty(),
+                "Should find components in specified packages");
     }
 
     @Test
     @DisplayName("Should parse bean with lifecycle methods")
     void shouldParseBeanWithLifecycleMethods() {
-        Set<BeanDefinition> definitions = parser.parse(LifecycleConfig.class);
-        
+        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
+
         BeanDefinition lifecycleBean = definitions.stream()
-            .filter(def -> def.beanClass().equals(LifecycleComponent.class))
-            .findFirst()
-            .orElse(null);
-            
+                .filter(def -> def.beanClass().equals(LifecycleTestBean.class))
+                .findFirst()
+                .orElse(null);
+
         assertNotNull(lifecycleBean, "Should find lifecycle component");
         assertNotNull(lifecycleBean.initMethod(), "Should have init method");
         assertNotNull(lifecycleBean.destroyMethod(), "Should have destroy method");
@@ -110,51 +113,38 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should parse bean with custom scope")
     void shouldParseBeanWithCustomScope() {
-        Set<BeanDefinition> definitions = parser.parse(ScopeConfig.class);
-        
+        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
+
         BeanDefinition prototypeBean = definitions.stream()
-            .filter(def -> def.beanClass().equals(PrototypeComponent.class))
-            .findFirst()
-            .orElse(null);
-            
+                .filter(def -> def.scope().equals(ScopeEnum.PROTOTYPE))
+                .findFirst()
+                .orElse(null);
+
         assertNotNull(prototypeBean, "Should find prototype component");
-        assertEquals(ScopeEnum.PROTOTYPE, prototypeBean.scope(), 
-            "Should have prototype scope");
+        assertEquals(ScopeEnum.PROTOTYPE, prototypeBean.scope(),
+                "Should have prototype scope");
+    }
+
+    @Test
+    @DisplayName("Should parse configurable factory component")
+    void shouldParseConfigurableFactoryComponent() {
+        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
+
+        BeanDefinition factoryBean = definitions.stream()
+                .filter(def -> def.beanClass().equals(TestConfugrableBean.class))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(factoryBean);
+        assertFalse(StringUtils.isEmpty(factoryBean.factoryName()));
+        assertEquals(factoryBean.factoryName(), "testConfigurableFactory");
+        assertNotNull(factoryBean.factoryMethod());
+        assertEquals(factoryBean.factoryMethod().getName(), "createTestConfugrableBean");
     }
 
     // Test configurations
     @Configuration
     @ComponentScan(basePackages = {})
-    static class EmptyBasePackagesConfig {}
-
-    @Configuration
-    @ComponentScan(basePackages = "com.pythongong.context.annotation")
-    static class ExplicitBasePackagesConfig {}
-
-    @Configuration
-    @ComponentScan(basePackages = "com.pythongong.context.annotation")
-    static class LifecycleConfig {}
-
-    @Configuration
-    @ComponentScan(basePackages = "com.pythongong.context.annotation")
-    static class ScopeConfig {}
-
-    static class NonAnnotatedClass {}
-
-    // Test components
-    @Component
-    static class SimpleComponent {}
-
-    @Component
-    static class LifecycleComponent {
-        @PostConstruct
-        void init() {}
-        
-        @PreDestroy
-        void destroy() {}
+    static class EmptyBasePackagesConfig {
     }
-
-    @Component
-    @Scope(ScopeEnum.PROTOTYPE)
-    static class PrototypeComponent {}
 }

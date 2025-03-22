@@ -16,31 +16,23 @@
 package com.pythongong.context.annotation;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pythongong.core.filter.TypeFilter;
 import com.pythongong.exception.BeansException;
-import com.pythongong.stereotype.Component;
 import com.pythongong.util.ClassUtils;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConfigurableClassScanner Tests")
 class ConfigurableClassScannerTest {
 
-    @Mock
-    private TypeFilter mockFilter;
-    
+    private static String basePackage = "com.pythongong.test.utils";
+
     private ConfigurableClassScanner scanner;
 
     @BeforeEach
@@ -49,75 +41,28 @@ class ConfigurableClassScannerTest {
     }
 
     @Test
-    @DisplayName("Should create scanner with default Component filter")
-    void shouldCreateScannerWithDefaultFilter() {
-        // When
-        ConfigurableClassScanner scanner = new ConfigurableClassScanner();
-        Set<Class<?>> classes = scanner.scan(getClass().getPackage().getName());
-
-        // Then
-        assertFalse(classes.isEmpty(), "Should find Component annotated classes");
-        assertTrue(classes.stream()
-            .anyMatch(clazz -> clazz.isAnnotationPresent(Component.class)),
-            "Should contain at least one Component annotated class");
-    }
-
-    @Test
-    @DisplayName("Should create scanner with custom filters")
-    void shouldCreateScannerWithCustomFilters() {
-        // Given
-        List<TypeFilter> filters = new ArrayList<>();
-        filters.add(mockFilter);
-        when(mockFilter.match(any())).thenReturn(true);
-
-        // When
-        ConfigurableClassScanner scanner = new ConfigurableClassScanner(filters);
-        Set<Class<?>> classes = scanner.scan(getClass().getPackage().getName());
-
-        // Then
-        assertFalse(classes.isEmpty());
-        verify(mockFilter, atLeastOnce()).match(any());
-    }
-
-    @Test
-    @DisplayName("Should add include filter")
-    void shouldAddIncludeFilter() {
-        // Given
-        scanner.addIncludeFilter(mockFilter);
-        when(mockFilter.match(any())).thenReturn(true);
-
-        // When
-        Set<Class<?>> classes = scanner.scan(getClass().getPackage().getName());
-
-        // Then
-        assertFalse(classes.isEmpty());
-        verify(mockFilter, atLeastOnce()).match(any());
-    }
-
-    @Test
     @DisplayName("Should throw exception for empty package array")
     void shouldThrowExceptionForEmptyPackageArray() {
         // When/Then
-        assertThrows(BeansException.class, 
-            () -> scanner.scan(new String[]{}),
-            "Should throw BeansException for empty package array");
+        assertThrows(BeansException.class,
+                () -> scanner.scan(new String[] {}),
+                "Should throw BeansException for empty package array");
     }
 
     @Test
     @DisplayName("Should scan multiple packages")
     void shouldScanMultiplePackages() {
         // Given
-        String pkg1 = "com.pythongong.context.annotation";
         String pkg2 = "com.pythongong.core.filter";
-        
+
         // When
-        Set<Class<?>> classes = scanner.scan(pkg1, pkg2);
+        Set<Class<?>> classes = scanner.scan(basePackage, pkg2);
 
         // Then
         assertFalse(classes.isEmpty());
         assertTrue(classes.stream()
-            .anyMatch(c -> c.getPackage().getName().equals(pkg1) ||
-                         c.getPackage().getName().equals(pkg2)));
+                .anyMatch(c -> c.getPackage().getName().equals(basePackage) ||
+                        c.getPackage().getName().equals(pkg2)));
     }
 
     @Test
@@ -128,9 +73,4 @@ class ConfigurableClassScannerTest {
         assertTrue(ClassUtils.isCollectionEmpty(classes));
     }
 
-    
 }
-
-// Test component class
-@Component
-class TestComponent {}

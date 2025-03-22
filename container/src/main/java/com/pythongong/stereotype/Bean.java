@@ -25,21 +25,26 @@ import java.lang.annotation.Target;
  * Indicates that a method produces a bean to be managed by the container.
  * The method must be defined within a @Configuration class.
  *
- * <p>Example usage:
- * <pre>{@code
- * @Configuration
- * public class AppConfig {
- *     @Bean
- *     public DataSource dataSource() {
- *         return new BasicDataSource();
- *     }
+ * <p>
+ * Example usage:
+ * 
+ * <pre>
+ * {
+ *     &#64;code
+ *     &#64;Configuration
+ *     public class AppConfig {
+ *         @Bean
+ *         public DataSource dataSource() {
+ *             return new BasicDataSource();
+ *         }
  *
- *     @Bean("userService")
- *     public UserService userService() {
- *         return new UserServiceImpl();
+ *         &#64;Bean("userService")
+ *         public UserService userService() {
+ *             return new UserServiceImpl();
+ *         }
  *     }
  * }
- * }</pre>
+ * </pre>
  *
  * @author Cheng Gong
  */
@@ -47,7 +52,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Documented
 public @interface Bean {
-    
+
     /**
      * The name of the bean. If not specified, the container will
      * use the method name as the bean name.
@@ -55,4 +60,18 @@ public @interface Bean {
      * @return the name of the bean
      */
     String value() default "";
+
+    /**
+     * Initialize method name
+     * 
+     * @return the name of the initialization method
+     */
+    String init() default "";
+
+    /**
+     * Destroy method name
+     * 
+     * @return the name of the destroy method
+     */
+    String destroy() default "";
 }

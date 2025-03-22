@@ -16,17 +16,14 @@
 package com.pythongong.context.annotation;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import com.pythongong.core.filter.AnnotationTypeFilter;
-import com.pythongong.core.filter.TypeFilter;
 import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.Component;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassPathSerchParam;
+import com.pythongong.util.ClassUtils;
 import com.pythongong.util.PathUtils;
 import com.pythongong.util.StringUtils;
 
@@ -46,35 +43,13 @@ import com.pythongong.util.StringUtils;
  */
 public class ConfigurableClassScanner {
 
-    /** List of filters that determine matching classes */
-    private final List<TypeFilter> includeFilters;
-
-    /**
-     * Creates a new scanner with default filters.
-     * By default, includes the {@link Component} annotation filter.
-     */
-    public ConfigurableClassScanner() {
-        this(null);
-    }
-
     /**
      * Creates a new scanner with the specified filters.
      * Always adds the {@link Component} annotation filter to the provided list.
      *
      * @param includeFilters the filters to use, or null for defaults only
      */
-    public ConfigurableClassScanner(List<TypeFilter> includeFilters) {
-        this.includeFilters = includeFilters == null ? new ArrayList<>() : includeFilters;
-        this.includeFilters.add(new AnnotationTypeFilter(Component.class));
-    }
-
-    /**
-     * Adds an include filter to the inclusion list.
-     *
-     * @param includeFilter the filter to add
-     */
-    public void addIncludeFilter(TypeFilter includeFilter) {
-        this.includeFilters.add(includeFilter);
+    public ConfigurableClassScanner() {
     }
 
     /**
@@ -90,6 +65,7 @@ public class ConfigurableClassScanner {
 
         Set<Class<?>> beanClasses = new HashSet<>();
         for (String basePackage : basePackages) {
+            CheckUtils.emptyString(basePackage, "ConfigurableClassScanner.scan recevies empty package name");
             beanClasses.addAll(scanCandidateComponents(basePackage));
         }
         return beanClasses;
@@ -154,16 +130,14 @@ public class ConfigurableClassScanner {
      * @throws BeansException if the class has invalid modifiers
      */
     private boolean isCandidateComponent(Class<?> clazz) {
-        for (TypeFilter typeFilter : includeFilters) {
-            if (!typeFilter.match(clazz)) {
-                continue;
-            }
-            int modifiers = clazz.getModifiers();
-            if (!Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers)) {
-                throw new BeansException(String.format("Class: {%s}'s' modifer has invalid midifier", clazz.getName()));
-            }
-            return true;
+        Component component = ClassUtils.findAnnotation(clazz, Component.class);
+        if (component == null) {
+            return false;
         }
-        return false;
+        int modifiers = clazz.getModifiers();
+        if (!Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers)) {
+            throw new BeansException(String.format("Class: {%s}'s' modifer has invalid midifier", clazz.getName()));
+        }
+        return true;
     }
 }

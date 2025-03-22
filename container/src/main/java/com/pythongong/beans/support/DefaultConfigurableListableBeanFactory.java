@@ -44,8 +44,10 @@ import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.stereotype.AutoWired;
+import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
+import com.pythongong.util.StringUtils;
 
 /**
  * Default implementation of the ConfigurableListableBeanFactory and
@@ -81,6 +83,7 @@ public class DefaultConfigurableListableBeanFactory
         generalBeanFactory = new GeneralBeanFactory(this::getBeanDefinition, this::createBean, singletonBeanRegistry);
     }
 
+    @Nullable
     public List<BeanDefinition> getBeanDefinitionsOfType(Class<?> requiredType) throws BeansException {
         CheckUtils.nullArgs(requiredType,
                 "DefaultListableBeanFactory.getBeanDefinitionsOfType recevies null bean class");
@@ -90,6 +93,7 @@ public class DefaultConfigurableListableBeanFactory
     }
 
     @Override
+    @Nullable
     public BeanDefinition getBeanDefinition(String beanName) throws BeansException {
         CheckUtils.emptyString(beanName, "DefaultListableBeanFactory.getBeanDefinition recevies empty bean name");
         return beanDefinitionMap.get(beanName);
@@ -99,8 +103,6 @@ public class DefaultConfigurableListableBeanFactory
     public void registerBeanDefinition(BeanDefinition beanDefinition) {
         CheckUtils.nullArgs(beanDefinition,
                 "DefaultListableBeanFactory.registerBeanDefinition recevies null bean definition");
-        CheckUtils.emptyString(beanDefinition.beanName(),
-                "DefaultListableBeanFactory.registerBeanDefinition recevies empty bean name");
         beanDefinitionMap.put(beanDefinition.beanName(), beanDefinition);
     }
 
@@ -123,11 +125,13 @@ public class DefaultConfigurableListableBeanFactory
         beanDefinitionMap.keySet().forEach(this::getBean);
     }
 
+    @Nullable
     @Override
     public Object getBean(String name) throws BeansException {
         return this.generalBeanFactory.getBean(name);
     }
 
+    @Nullable
     @Override
     public Object getSingleton(String beanName) {
         return singletonBeanRegistry.getSingleton(beanName);
@@ -143,6 +147,7 @@ public class DefaultConfigurableListableBeanFactory
         generalBeanFactory.addBeanPostProcessor(beanPostProcessor);
     }
 
+    @Nullable
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
         return generalBeanFactory.getBean(name, requiredType);
@@ -234,7 +239,10 @@ public class DefaultConfigurableListableBeanFactory
         if (!ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
             return;
         }
-        if (bean instanceof DisposableBean || beanDefinition.destroyMethod() != null) {
+
+        if (bean instanceof DisposableBean) {
+            singletonBeanRegistry.registerDisposableBean(beanDefinition.beanName(), (DisposableBean) bean);
+        } else if (beanDefinition.destroyMethod() != null) {
             singletonBeanRegistry.registerDisposableBean(
                     beanDefinition.beanName(),
                     new DisposableBeanAdapter(bean, beanDefinition.destroyMethod()));
@@ -245,17 +253,62 @@ public class DefaultConfigurableListableBeanFactory
      * Creates a new instance of a bean using its constructor.
      */
     private Object createBeanInstance(BeanDefinition beanDefinition) {
+        if (!StringUtils.isEmpty(beanDefinition.factoryName())) {
+            return createBeanInstanceByFactory(beanDefinition);
+        }
+
+        return createBeanInstanceByConstructor(beanDefinition);
+
+    }
+
+    private Object createBeanInstanceByFactory(BeanDefinition beanDefinition) {
+        String factoryName = beanDefinition.factoryName();
+        Object factory = getBean(factoryName);
+        Method factoryMethod = beanDefinition.factoryMethod();
+        if (factoryMethod == null) {
+            throw new BeansException(String.format("Bean {%s} doesn't have factory method in factory {%s}",
+                    beanDefinition.beanName(), factoryName));
+        }
+
+        Class<?>[] parameterTypes = factoryMethod.getParameterTypes();
+        Object[] arguBeans = createArguBeans(parameterTypes);
+        factoryMethod.setAccessible(true);
+
+        try {
+            return arguBeans == null ? factoryMethod.invoke(factory) : factoryMethod.invoke(factory, arguBeans);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new BeansException(
+                    String.format("Bean {%s} can't be created by factory method {%s} in factory {%s}",
+                            beanDefinition.beanName(), factoryMethod.getName(), factoryName));
+        }
+
+    }
+
+    private Object createBeanInstanceByConstructor(BeanDefinition beanDefinition) {
         Constructor<?> constructorToUse = beanDefinition.constructor();
         Class<?> beanClass = beanDefinition.beanClass();
-        if (constructorToUse == null) {
-            return instantiationStrategy.instance(beanClass, constructorToUse, null);
+        Class<?>[] parameterTypes = null;
+        if (constructorToUse != null) {
+            parameterTypes = constructorToUse.getParameterTypes();
         }
-        Class<?>[] parameterTypes = constructorToUse.getParameterTypes();
+        return instantiationStrategy.instance(beanClass, constructorToUse, createArguBeans(parameterTypes));
+    }
+
+    private Object[] createArguBeans(Class<?>[] parameterTypes) {
+        if (ClassUtils.isArrayEmpty(parameterTypes)) {
+            return null;
+        }
+
         Object[] args = new Object[parameterTypes.length];
         for (int i = 0; i < args.length; i++) {
-            args[i] = getBeansOfType(parameterTypes[i]);
+            Map<String, ?> beansOfType = getBeansOfType(parameterTypes[i]);
+            if (beansOfType.size() == 1) {
+                args[i] = beansOfType.values().iterator().next();
+            } else {
+                throw new NoSuchBeanException(parameterTypes[i]);
+            }
         }
-        return instantiationStrategy.instance(beanClass, constructorToUse, args);
+        return args;
     }
 
     /**

@@ -117,7 +117,7 @@ public class ConfigurableClassParser {
      */
     private Set<BeanDefinition> doParse(Set<Class<?>> beanClasses) {
         this.beanDefinitions = new HashSet<>();
-        beanClasses.forEach(beanClass -> createBeanDefinition(beanClass, null));
+        beanClasses.forEach(beanClass -> createBeanDefinition(beanClass));
         this.beanDefinitions.forEach(this::fillfieldValueList);
         return this.beanDefinitions;
     }
@@ -131,10 +131,11 @@ public class ConfigurableClassParser {
      * @param beanClass the class to create a bean definition for
      * @throws DuplicateBeanException if a bean definition already exists
      */
-    private void createBeanDefinition(Class<?> beanClass, String beanName) {
+    private void createBeanDefinition(Class<?> beanClass) {
+        String beanName = generateBeanName(beanClass);
         BeanDefinition beanDefinition = BeanDefinition.builder()
-                .constructor(getConfigurableConstrucor(beanClass))
-                .beanName(StringUtils.isEmpty(beanName) ? generateBeanName(beanClass) : beanName)
+                .constructor(getSuitableConstrucor(beanClass))
+                .beanName(beanName)
                 .beanClass(beanClass)
                 .initMethod(findInitOrDestoryMethod(beanClass, PostConstruct.class))
                 .destroyMethod(findInitOrDestoryMethod(beanClass, PreDestroy.class))
@@ -144,7 +145,7 @@ public class ConfigurableClassParser {
         addBeanDef(beanDefinition);
 
         if (beanClass.isAnnotationPresent(Configuration.class)) {
-            createFactoryBeanDefinitions(beanClass);
+            createFactoryBeanDefinitions(beanClass, beanName);
         }
     }
 
@@ -153,19 +154,50 @@ public class ConfigurableClassParser {
      * configuration classes.
      *
      * @param beanClass the configuration class to process
+     * @param beanName2
      */
-    private void createFactoryBeanDefinitions(Class<?> beanClass) {
+    private void createFactoryBeanDefinitions(Class<?> beanClass, String factoryName) {
         Method[] methods = beanClass.getMethods();
         Arrays.stream(methods)
                 .filter(method -> method.isAnnotationPresent(Bean.class))
                 .forEach(method -> {
                     Bean beanAnno = method.getAnnotation(Bean.class);
-                    String beanName = beanAnno.value();
                     Class<?> returnType = method.getReturnType();
                     if (returnType == null) {
                         throw new BeansException("Bean method must have a return type: " + method.getName());
                     }
-                    createBeanDefinition(returnType, beanName);
+
+                    String beanName = beanAnno.value();
+                    if (StringUtils.isEmpty(beanName)) {
+                        beanName = returnType.getName();
+                    }
+
+                    Method initMethod = null;
+                    Method destroyMethod = null;
+                    try {
+                        String initMethoName = beanAnno.init();
+                        if (!initMethoName.isEmpty()) {
+                            initMethod = beanClass.getMethod(initMethoName);
+                        }
+                        String destroyMethodName = beanAnno.destroy();
+                        if (!destroyMethodName.isEmpty()) {
+                            destroyMethod = beanClass.getMethod(destroyMethodName);
+                        }
+                    } catch (NoSuchMethodException e) {
+                        throw new BeansException("Bean method init or destroy method not found: " + method.getName());
+                    }
+
+                    BeanDefinition beanDefinition = BeanDefinition.builder()
+                            .beanName(StringUtils.isEmpty(beanName) ? method.getName() : beanName)
+                            .beanClass(returnType)
+                            .initMethod(initMethod)
+                            .destroyMethod(destroyMethod)
+                            .scope(extractScope(returnType))
+                            .factoryName(factoryName)
+                            .factoryMethod(method)
+                            .build();
+
+                    addBeanDef(beanDefinition);
                 });
     }
 
@@ -199,18 +231,23 @@ public class ConfigurableClassParser {
      * @return the autowired constructor or null if none found
      * @throws BeansException if multiple autowired constructors are found
      */
-    private Constructor<?> getConfigurableConstrucor(Class<?> beanClass) {
+    private Constructor<?> getSuitableConstrucor(Class<?> beanClass) {
         Constructor<?>[] declaredConstructors = beanClass.getDeclaredConstructors();
         List<Constructor<?>> configurabeConsturctors = Arrays.stream(declaredConstructors)
                 .filter(constructor -> constructor.isAnnotationPresent(AutoWired.class)).toList();
 
         if (configurabeConsturctors.isEmpty()) {
-            return null;
+            try {
+                return beanClass.getDeclaredConstructor();
+            } catch (NoSuchMethodException | SecurityException e) {
+                throw new BeansException(
+                        String.format("{%s} doesn't have a suitable constructor", beanClass.getName()));
+            }
         }
 
         if (configurabeConsturctors.size() > 1) {
             throw new BeansException(
-                    String.format("Mulitiple constructor injections found in: { %s }", beanClass.getName()));
+                    String.format("Mulitiple constructor injections're found in {%s}", beanClass.getName()));
         }
         return configurabeConsturctors.get(0);
     }

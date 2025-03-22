@@ -46,12 +46,16 @@ class SimpleInstantiationTest {
 
     /**
      * Tests instantiation with default constructor
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws BeansException
      */
     @Test
     @DisplayName("Should create instance using default constructor")
-    void shouldCreateInstanceUsingDefaultConstructor() {
+    void shouldCreateInstanceUsingDefaultConstructor() throws BeansException, NoSuchMethodException, SecurityException {
         // When
-        Object result = instantiation.instance(TestBean.class, null, null);
+        Object result = instantiation.instance(TestBean.class, TestBean.class.getDeclaredConstructor(), null);
 
         // Then
         assertNotNull(result);
@@ -66,7 +70,7 @@ class SimpleInstantiationTest {
     void shouldCreateInstanceUsingParameterizedConstructor() throws Exception {
         // Given
         Constructor<TestBeanWithParam> constructor = TestBeanWithParam.class.getConstructor(String.class);
-        Object[] args = new Object[]{"test"};
+        Object[] args = new Object[] { "test" };
 
         // When
         Object result = instantiation.instance(TestBeanWithParam.class, constructor, args);
@@ -83,10 +87,9 @@ class SimpleInstantiationTest {
     @Test
     @DisplayName("Should throw exception when class is null")
     void shouldThrowExceptionWhenClassIsNull() {
-        assertThrows(BeansException.class, 
-            () -> instantiation.instance(null, null, null),
-            "Should throw IllegalArgumentException for null class"
-        );
+        assertThrows(BeansException.class,
+                () -> instantiation.instance(null, null, null),
+                "Should throw IllegalArgumentException for null class");
     }
 
     /**
@@ -95,10 +98,9 @@ class SimpleInstantiationTest {
     @Test
     @DisplayName("Should throw exception when instantiation fails")
     void shouldThrowExceptionWhenInstantiationFails() {
-        assertThrows(BeansException.class, 
-            () -> instantiation.instance(TestBeanWithPrivateConstructor.class, null, null),
-            "Should throw BeansException when instantiation fails"
-        );
+        assertThrows(BeansException.class,
+                () -> instantiation.instance(TestBeanWithPrivateConstructor.class, null, null),
+                "Should throw BeansException when instantiation fails");
     }
 
     /**
@@ -109,23 +111,19 @@ class SimpleInstantiationTest {
     void shouldThrowExceptionWhenConstructorParametersDontMatch() throws Exception {
         // Given
         Constructor<TestBeanWithParam> constructor = TestBeanWithParam.class.getConstructor(String.class);
-        Object[] args = new Object[]{1}; // Wrong parameter type
+        Object[] args = new Object[] { 1 }; // Wrong parameter type
 
         // When/Then
-        assertThrows(BeansException.class, 
-            () -> instantiation.instance(TestBeanWithParam.class, constructor, args),
-            "Should throw BeansException when constructor parameters don't match"
-        );
+        assertThrows(BeansException.class,
+                () -> instantiation.instance(TestBeanWithParam.class, constructor, args),
+                "Should throw BeansException when constructor parameters don't match");
     }
 
-    
 }
-
-
 
 class TestBeanWithParam {
     private final String name;
-    
+
     public TestBeanWithParam(String name) {
         this.name = name;
     }
@@ -136,5 +134,6 @@ class TestBeanWithParam {
 }
 
 class TestBeanWithPrivateConstructor {
-    private TestBeanWithPrivateConstructor() {}
+    private TestBeanWithPrivateConstructor() {
+    }
 }

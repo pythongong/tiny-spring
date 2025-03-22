@@ -29,24 +29,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pythongong.beans.aware.BeanFactoryAware;
-import com.pythongong.beans.aware.BeanNameAware;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
-import com.pythongong.beans.config.DisposableBean;
 import com.pythongong.beans.config.FieldValue;
 import com.pythongong.beans.config.FieldValueList;
-import com.pythongong.beans.config.InitializingBean;
-import com.pythongong.beans.factory.BeanFactory;
 import com.pythongong.context.event.ApplicationEventMulticaster;
 import com.pythongong.context.event.GeneralApplicationEventMulticaster;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
-import com.pythongong.stereotype.AutoWired;
+import com.pythongong.test.utils.AwareBean;
+import com.pythongong.test.utils.BeanWithMethodInjection;
+import com.pythongong.test.utils.BeanWithProperties;
+import com.pythongong.test.utils.SubTestBean;
 import com.pythongong.test.utils.TestBean;
+import com.pythongong.test.utils.TestDisposableBean;
+import com.pythongong.test.utils.TestInitializingBean;
 import com.pythongong.util.ClassUtils;
-
-import lombok.Getter;
 
 /**
  * Unit tests for {@link DefaultConfigurableListableBeanFactory}.
@@ -79,17 +77,21 @@ class DefaultConfigurableListableBeanFactoryTest {
 
     /**
      * Tests the registration and retrieval of a bean definition
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
      */
     @Test
     @DisplayName("Should register and retrieve bean definition successfully")
-    void shouldRegisterAndRetrieveBeanDefinition() {
+    void shouldRegisterAndRetrieveBeanDefinition() throws NoSuchMethodException, SecurityException {
         // Given
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("testBean")
-            .beanClass(TestBean.class)
-            .scope(ScopeEnum.SINGLETON)
-            .fieldValueList(new FieldValueList())
-            .build();
+                .beanName("testBean")
+                .beanClass(TestBean.class)
+                .constructor(TestBean.class.getConstructor())
+                .scope(ScopeEnum.SINGLETON)
+                .fieldValueList(new FieldValueList())
+                .build();
 
         // When
         beanFactory.registerBeanDefinition(beanDefinition);
@@ -106,32 +108,10 @@ class DefaultConfigurableListableBeanFactoryTest {
     @Test
     @DisplayName("Should throw exception when registering null bean definition")
     void shouldThrowExceptionWhenRegisteringNullBeanDefinition() {
-        assertThrows(BeansException.class, 
-            () -> beanFactory.registerBeanDefinition(null),
-            "Should throw BeansException for null bean definition"
-        );
+        assertThrows(BeansException.class,
+                () -> beanFactory.registerBeanDefinition(null),
+                "Should throw BeansException for null bean definition");
     }
-
-    /**
-     * Tests the registration validation for bean definition with empty name
-     */
-    @Test
-    @DisplayName("Should throw exception when registering bean definition with empty name")
-    void shouldThrowExceptionWhenRegisteringBeanDefinitionWithEmptyName() {
-        // Given
-        BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("")
-            .beanClass(TestBean.class)
-            .build();
-
-        // When/Then
-        assertThrows(BeansException.class, 
-            () -> beanFactory.registerBeanDefinition(beanDefinition),
-            "Should throw BeansException for empty bean name"
-        );
-    }
-
-    
 
     /**
      * Tests the initialization of the application event multicaster
@@ -144,14 +124,14 @@ class DefaultConfigurableListableBeanFactoryTest {
 
         // Then
         assertNotNull(multicaster, "ApplicationEventMulticaster should not be null");
-        assertTrue(multicaster instanceof GeneralApplicationEventMulticaster, 
-            "Multicaster should be instance of GeneralApplicationEventMulticaster");
-        
+        assertTrue(multicaster instanceof GeneralApplicationEventMulticaster,
+                "Multicaster should be instance of GeneralApplicationEventMulticaster");
+
         Object registeredMulticaster = beanFactory.getSingleton(
-            ClassUtils.APPLICATION_EVENT_MULTICASTER_BEAN_NAME);
+                ClassUtils.APPLICATION_EVENT_MULTICASTER_BEAN_NAME);
         assertNotNull(registeredMulticaster, "Registered multicaster should not be null");
-        assertEquals(multicaster, registeredMulticaster, 
-            "Registered multicaster should match the initialized one");
+        assertEquals(multicaster, registeredMulticaster,
+                "Registered multicaster should match the initialized one");
     }
 
     /**
@@ -163,11 +143,11 @@ class DefaultConfigurableListableBeanFactoryTest {
         // Given
         String beanName = "testBean";
         Object bean = new Object();
-        
+
         when(mockBeanPostProcessor.postProcessBeforeInitialization(any(), anyString()))
-            .thenReturn(bean);
+                .thenReturn(bean);
         when(mockBeanPostProcessor.postProcessAfterInitialization(any(), anyString()))
-            .thenReturn(bean);
+                .thenReturn(bean);
 
         // When
         beanFactory.addBeanPostProcessor(mockBeanPostProcessor);
@@ -181,20 +161,22 @@ class DefaultConfigurableListableBeanFactoryTest {
         verify(mockBeanPostProcessor).postProcessAfterInitialization(bean, beanName);
     }
 
-    
-
     /**
      * Tests the pre-instantiation of singletons
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
      */
     @Test
     @DisplayName("Should pre-instantiate singletons")
-    void shouldPreInstantiateSingletons() {
+    void shouldPreInstantiateSingletons() throws NoSuchMethodException, SecurityException {
         // Given
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("testBean")
-            .beanClass(TestBean.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("testBean")
+                .beanClass(TestBean.class)
+                .constructor(TestBean.class.getConstructor())
+                .scope(ScopeEnum.SINGLETON)
+                .build();
 
         beanFactory.registerBeanDefinition(beanDefinition);
 
@@ -202,8 +184,8 @@ class DefaultConfigurableListableBeanFactoryTest {
         beanFactory.preInstantiateSingletons();
 
         // Then
-        assertNotNull(beanFactory.getSingleton("testBean"), 
-            "Singleton bean should be instantiated");
+        assertNotNull(beanFactory.getSingleton("testBean"),
+                "Singleton bean should be instantiated");
     }
 
     /**
@@ -215,9 +197,9 @@ class DefaultConfigurableListableBeanFactoryTest {
         // Given
         String beanName = "testBean";
         Object bean = new Object();
-        
+
         when(mockBeanPostProcessor.postProcessBeforeInitialization(any(), anyString()))
-            .thenReturn(null);
+                .thenReturn(null);
 
         // When
         beanFactory.addBeanPostProcessor(mockBeanPostProcessor);
@@ -227,24 +209,28 @@ class DefaultConfigurableListableBeanFactoryTest {
         assertEquals(bean, result, "Should return original bean when processor returns null");
         verify(mockBeanPostProcessor).postProcessBeforeInitialization(bean, beanName);
     }
+
     /**
      * Tests for getBeansOfType method
+     * 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
      */
     @Test
     @DisplayName("Should get all beans of specified type")
-    void shouldGetBeansOfSpecifiedType() {
+    void shouldGetBeansOfSpecifiedType() throws NoSuchMethodException, SecurityException {
         // Given
         BeanDefinition beanDef1 = BeanDefinition.builder()
-            .beanName("testBean1")
-            .beanClass(TestBean.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("testBean1")
+                .beanClass(TestBean.class)
+                .constructor(TestBean.class.getConstructor())
+                .build();
 
         BeanDefinition beanDef2 = BeanDefinition.builder()
-            .beanName("testBean2") 
-            .beanClass(TestBean.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("testBean2")
+                .constructor(TestBean.class.getConstructor())
+                .beanClass(TestBean.class)
+                .build();
 
         beanFactory.registerBeanDefinition(beanDef1);
         beanFactory.registerBeanDefinition(beanDef2);
@@ -260,25 +246,23 @@ class DefaultConfigurableListableBeanFactoryTest {
     }
 
     @Test
-    @DisplayName("Should throw exception when getting beans with null type") 
+    @DisplayName("Should throw exception when getting beans with null type")
     void shouldThrowExceptionWhenGettingBeansWithNullType() {
         assertThrows(BeansException.class,
-            () -> beanFactory.getBeansOfType(null),
-            "Should throw BeansException when type is null"
-        );
+                () -> beanFactory.getBeansOfType(null),
+                "Should throw BeansException when type is null");
     }
-
 
     @Test
     @DisplayName("Should get beans of assignable type")
-    void shouldGetBeansOfAssignableType() {
-        
+    void shouldGetBeansOfAssignableType() throws NoSuchMethodException, SecurityException {
 
         BeanDefinition beanDef = BeanDefinition.builder()
-            .beanName("subTestBean")
-            .beanClass(SubTestBean.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("subTestBean")
+                .beanClass(SubTestBean.class)
+                .constructor(SubTestBean.class.getConstructor())
+                .scope(ScopeEnum.SINGLETON)
+                .build();
 
         beanFactory.registerBeanDefinition(beanDef);
 
@@ -294,20 +278,18 @@ class DefaultConfigurableListableBeanFactoryTest {
 
     @Test
     public void testDestroySingletons() throws NoSuchMethodException, SecurityException {
-        
 
         // Create factory and register bean
         DefaultConfigurableListableBeanFactory factory = new DefaultConfigurableListableBeanFactory();
-        
+
         // Register bean definition
         BeanDefinition bd = BeanDefinition.builder()
-           .beanName("testBean")
-           .beanClass(TestDisposableBean.class)
-           .scope(ScopeEnum.SINGLETON)
-           .destroyMethod(TestDisposableBean.class.getMethod("isDestroyed" ))
-           .build();
+                .beanName("testBean")
+                .beanClass(TestDisposableBean.class)
+                .constructor(TestDisposableBean.class.getConstructor())
+                .destroyMethod(TestDisposableBean.class.getMethod("isDestroyed"))
+                .build();
         factory.registerBeanDefinition(bd);
-
 
         // Verify bean is registered
         TestDisposableBean testBean = (TestDisposableBean) factory.getBean("testBean");
@@ -322,22 +304,21 @@ class DefaultConfigurableListableBeanFactoryTest {
         assertTrue(testBean.isDestroyed());
     }
 
-    
-
     @Test
     @DisplayName("Should create singleton bean with property values")
-    void shouldCreateSingletonBeanWithPropertyValues() {
+    void shouldCreateSingletonBeanWithPropertyValues() throws NoSuchMethodException, SecurityException {
         // Given
         String propertyValue = "test value";
         FieldValueList fieldValues = new FieldValueList();
         fieldValues.add(new FieldValue("testProperty", propertyValue));
-        
+
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("beanWithProperties")
-            .beanClass(BeanWithProperties.class)
-            .scope(ScopeEnum.SINGLETON)
-            .fieldValueList(fieldValues)
-            .build();
+                .beanName("beanWithProperties")
+                .beanClass(BeanWithProperties.class)
+                .constructor(BeanWithProperties.class.getConstructor())
+                .scope(ScopeEnum.SINGLETON)
+                .fieldValueList(fieldValues)
+                .build();
 
         // When
         beanFactory.registerBeanDefinition(beanDefinition);
@@ -353,11 +334,12 @@ class DefaultConfigurableListableBeanFactoryTest {
     void shouldHandleBeanInitializing() throws NoSuchMethodException, SecurityException {
         // Given
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("initializingBean")
-            .beanClass(TestInitializingBean.class)
-            .initMethod(TestInitializingBean.class.getMethod("afterPropertiesSet"))
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("initializingBean")
+                .beanClass(TestInitializingBean.class)
+                .constructor(TestInitializingBean.class.getConstructor())
+                .initMethod(TestInitializingBean.class.getMethod("afterPropertiesSet"))
+                .scope(ScopeEnum.SINGLETON)
+                .build();
 
         // When
         beanFactory.registerBeanDefinition(beanDefinition);
@@ -368,16 +350,15 @@ class DefaultConfigurableListableBeanFactoryTest {
         assertTrue(bean.isInitialized());
     }
 
-    
-
     @Test
     @DisplayName("Should get bean definition by name and throw exception for empty name")
-    void shouldGetBeanDefinitionAndHandleEmptyName() {
+    void shouldGetBeanDefinitionAndHandleEmptyName() throws NoSuchMethodException, SecurityException {
         // Given
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("testBean")
-            .beanClass(TestBean.class)
-            .build();
+                .beanName("testBean")
+                .beanClass(TestBean.class)
+                .constructor(TestBean.class.getConstructor())
+                .build();
         beanFactory.registerBeanDefinition(beanDefinition);
 
         // When/Then
@@ -387,41 +368,21 @@ class DefaultConfigurableListableBeanFactoryTest {
         assertEquals(beanDefinition, retrieved);
 
         // Should throw exception for empty name
-        assertThrows(BeansException.class, 
-            () -> beanFactory.getBeanDefinition(""),
-            "Should throw exception for empty bean name"
-        );
-    }
-
-    @Test
-    @DisplayName("Should create and initialize bean with init method")
-    void shouldCreateAndInitializeBeanWithInitMethod() throws Exception {
-        
-
-        BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("initBean")
-            .beanClass(BeanWithInit.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
-
-        // When
-        beanFactory.registerBeanDefinition(beanDefinition);
-        BeanWithInit bean = (BeanWithInit) beanFactory.getBean("initBean");
-
-        // Then
-        assertNotNull(bean);
-        assertTrue(bean.isInitialized(), "Bean should be initialized");
+        assertThrows(BeansException.class,
+                () -> beanFactory.getBeanDefinition(""),
+                "Should throw exception for empty bean name");
     }
 
     @Test
     @DisplayName("Should handle aware interfaces correctly")
-    void shouldHandleAwareInterfaces() {
+    void shouldHandleAwareInterfaces() throws NoSuchMethodException, SecurityException {
 
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("awareBean")
-            .beanClass(AwareBean.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("awareBean")
+                .beanClass(AwareBean.class)
+                .constructor(AwareBean.class.getConstructor())
+                .scope(ScopeEnum.SINGLETON)
+                .build();
 
         // When
         beanFactory.registerBeanDefinition(beanDefinition);
@@ -436,13 +397,14 @@ class DefaultConfigurableListableBeanFactoryTest {
 
     @Test
     @DisplayName("Should handle prototype scope beans")
-    void shouldHandlePrototypeScopeBeans() {
+    void shouldHandlePrototypeScopeBeans() throws NoSuchMethodException, SecurityException {
         // Given
         BeanDefinition beanDefinition = BeanDefinition.builder()
-            .beanName("prototypeBean")
-            .beanClass(TestBean.class)
-            .scope(ScopeEnum.PROTOTYPE)
-            .build();
+                .beanName("prototypeBean")
+                .beanClass(TestBean.class)
+                .constructor(TestBean.class.getConstructor())
+                .scope(ScopeEnum.PROTOTYPE)
+                .build();
 
         // When
         beanFactory.registerBeanDefinition(beanDefinition);
@@ -457,24 +419,26 @@ class DefaultConfigurableListableBeanFactoryTest {
 
     @Test
     @DisplayName("Should inject dependencies correctly")
-    void shouldInjectDependenciesCorrectly() {
+    void shouldInjectDependenciesCorrectly() throws NoSuchMethodException, SecurityException {
         // Given
         BeanDefinition dependencyDef = BeanDefinition.builder()
-            .beanName("dependency")
-            .beanClass(TestBean.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("dependency")
+                .beanClass(TestBean.class)
+                .constructor(TestBean.class.getConstructor())
+                .scope(ScopeEnum.SINGLETON)
+                .build();
 
         BeanDefinition mainBeanDef = BeanDefinition.builder()
-            .beanName("mainBean")
-            .beanClass(BeanWithMethodInjection.class)
-            .scope(ScopeEnum.SINGLETON)
-            .build();
+                .beanName("mainBean")
+                .beanClass(BeanWithMethodInjection.class)
+                .constructor(BeanWithMethodInjection.class.getConstructor())
+                .scope(ScopeEnum.SINGLETON)
+                .build();
 
         // When
         beanFactory.registerBeanDefinition(dependencyDef);
         beanFactory.registerBeanDefinition(mainBeanDef);
-        
+
         BeanWithMethodInjection mainBean = (BeanWithMethodInjection) beanFactory.getBean("mainBean");
         TestBean dependency = (TestBean) beanFactory.getBean("dependency");
 
@@ -483,106 +447,5 @@ class DefaultConfigurableListableBeanFactoryTest {
         assertNotNull(mainBean.getTestBean());
         assertTrue(dependency == mainBean.getTestBean());
     }
-    
-}
 
-
-
-class SubTestBean extends TestBean {}
-
-class TestDisposableBean implements DisposableBean {
-    private boolean destroyed = false;
-    
-    @Override
-    public void destroy() {
-        destroyed = true;
-    }
-    
-    public boolean isDestroyed() {
-        return destroyed;
-    }
-}
-
-class BeanWithInit implements InitializingBean {
-    private boolean initialized = false;
-    
-    @Override
-    public void afterPropertiesSet() {
-        initialized = true;
-    }
-    
-    public boolean isInitialized() {
-        return initialized;
-    }
-}
-
-@Getter
-class AwareBean implements BeanNameAware, BeanFactoryAware {
-    private String beanName;
-    private BeanFactory beanFactory;
-    
-    @Override
-    public void setBeanName(String name) {
-        this.beanName = name;
-    }
-    
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-    }
-}
-
-
-// Additional test support classes
-class BeanWithProperties {
-    private String testProperty;
-    
-    public String getTestProperty() {
-        return testProperty;
-    }
-    
-    public void setTestProperty(String testProperty) {
-        this.testProperty = testProperty;
-    }
-}
-
-class TestInitializingBean implements InitializingBean {
-    private boolean initialized = false;
-    
-    @Override
-    public void afterPropertiesSet() {
-        initialized = true;
-    }
-    
-    
-    public boolean isInitialized() {
-        return initialized;
-    }
-    
-}
-
-class BeanWithMethodInjection {
-    private TestBean testBean;
-    
-    @AutoWired
-    public void setTestBean(TestBean testBean) {
-        this.testBean = testBean;
-    }
-    
-    public TestBean getTestBean() {
-        return testBean;
-    }
-}
-
-class BeanWithConstructorInjection {
-    private TestBean testBean;
-    
-    @AutoWired
-    public BeanWithConstructorInjection(TestBean testBean) {
-        this.testBean = testBean;
-    }
-    
-    public TestBean getTestBean() {
-        return testBean;
-    }
 }

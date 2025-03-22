@@ -19,11 +19,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import com.pythongong.exception.BeansException;
+import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
 
 /**
  * Simple implementation of the {@link InstantiationStrategy} interface.
- * <p>Creates new bean instances through constructor reflection.
+ * <p>
+ * Creates new bean instances through constructor reflection.
  * If no constructor is specified, uses the default constructor.
  *
  * @author pythongong
@@ -32,27 +34,29 @@ import com.pythongong.util.CheckUtils;
 public class SimpleInstantiation implements InstantiationStrategy {
 
     /**
-     * Creates a new instance of the specified class using either the provided constructor
+     * Creates a new instance of the specified class using either the provided
+     * constructor
      * or the default constructor if none is specified.
      *
-     * @param clazz the class to instantiate
-     * @param constructor the constructor to use, may be null for default constructor
-     * @param args the arguments to pass to the constructor, may be null
+     * @param clazz       the class to instantiate
+     * @param constructor the constructor to use, may be null for default
+     *                    constructor
+     * @param args        the arguments to pass to the constructor, may be null
      * @return the new instance
      * @throws BeansException if instantiation fails
      */
     @Override
-    public Object instance(Class<?> clazz, Constructor<?> constructor, Object[] args) throws BeansException {
+    public Object instance(Class<?> clazz, @Nullable Constructor<?> constructor, Object[] args) throws BeansException {
         CheckUtils.nullArgs(clazz, "SimpleInstantiation.instance recevies null bean class");
         try {
             constructor = constructor == null ? clazz.getDeclaredConstructor() : constructor;
             if (constructor == null) {
-                throw new BeansException(String.format("Failed to find default constructor for class {%s}", clazz.getName()));
-            }
+                throw new BeansException(String.format("Failed to find constructor for class {%s}", clazz.getName()));
 
+            }
             return args == null ? constructor.newInstance() : constructor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
+                | SecurityException | NoSuchMethodException e) {
             throw new BeansException(String.format("Failed to instantiate class {%s}", clazz.getName()), e);
         }
     }
