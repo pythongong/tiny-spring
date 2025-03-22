@@ -117,7 +117,7 @@ public class ConfigurableClassParser {
      */
     private Set<BeanDefinition> doParse(Set<Class<?>> beanClasses) {
         this.beanDefinitions = new HashSet<>();
-        beanClasses.forEach(this::createBeanDefinition);
+        beanClasses.forEach(beanClass -> createBeanDefinition(beanClass, null));
         this.beanDefinitions.forEach(this::fillfieldValueList);
         return this.beanDefinitions;
     }
@@ -131,10 +131,10 @@ public class ConfigurableClassParser {
      * @param beanClass the class to create a bean definition for
      * @throws DuplicateBeanException if a bean definition already exists
      */
-    private void createBeanDefinition(Class<?> beanClass) {
+    private void createBeanDefinition(Class<?> beanClass, String beanName) {
         BeanDefinition beanDefinition = BeanDefinition.builder()
                 .constructor(getConfigurableConstrucor(beanClass))
-                .beanName(generateBeanName(beanClass))
+                .beanName(StringUtils.isEmpty(beanName) ? generateBeanName(beanClass) : beanName)
                 .beanClass(beanClass)
                 .initMethod(findInitOrDestoryMethod(beanClass, PostConstruct.class))
                 .destroyMethod(findInitOrDestoryMethod(beanClass, PreDestroy.class))
@@ -161,19 +161,11 @@ public class ConfigurableClassParser {
                 .forEach(method -> {
                     Bean beanAnno = method.getAnnotation(Bean.class);
                     String beanName = beanAnno.value();
-                    if (StringUtils.isEmpty(beanName)) {
-                        beanName = method.getReturnType().getName();
+                    Class<?> returnType = method.getReturnType();
+                    if (returnType == null) {
+                        throw new BeansException("Bean method must have a return type: " + method.getName());
                     }
-
-                    FactoryBean<Object> factoryBean = () -> method;
-                    ScopeEnum scope = extractScope(method.getClass());
-                    BeanDefinition beanDefinition = BeanDefinition.builder()
-                            .beanName(beanName)
-                            .beanClass(factoryBean.getClass())
-                            .scope(scope)
-                            .build();
-
-                    addBeanDef(beanDefinition);
+                    createBeanDefinition(returnType, beanName);
                 });
     }
 
@@ -230,11 +222,16 @@ public class ConfigurableClassParser {
      * @return the bean name
      */
     private String generateBeanName(Class<?> beanClass) {
-        Component component = ClassUtils.findAnnotation(beanClass, Component.class);
-        if (component == null || component.value().isBlank()) {
-            return beanClass.getName();
+        Component component = beanClass.getAnnotation(Component.class);
+        if (component != null && !StringUtils.isEmpty(component.value())) {
+            return component.value();
         }
-        return component.value();
+
+        Configuration configuration = beanClass.getAnnotation(Configuration.class);
+        if (configuration != null && !StringUtils.isEmpty(configuration.value())) {
+            return configuration.value();
+        }
+        return beanClass.getName();
     }
 
     /**

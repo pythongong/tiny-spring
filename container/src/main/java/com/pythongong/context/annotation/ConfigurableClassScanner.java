@@ -32,8 +32,11 @@ import com.pythongong.util.StringUtils;
 
 /**
  * Configurable scanner that detects candidate components on the classpath.
- * <p>By default, identifies classes annotated with the {@link Component} annotation.
- * Can be configured with custom type filters to identify additional component types.
+ * <p>
+ * By default, identifies classes annotated with the {@link Component}
+ * annotation.
+ * Can be configured with custom type filters to identify additional component
+ * types.
  * Scans both classes in directories and within JAR files.
  * 
  * @author Cheng Gong
@@ -42,7 +45,7 @@ import com.pythongong.util.StringUtils;
  * @see AnnotationTypeFilter
  */
 public class ConfigurableClassScanner {
-    
+
     /** List of filters that determine matching classes */
     private final List<TypeFilter> includeFilters;
 
@@ -80,7 +83,7 @@ public class ConfigurableClassScanner {
      * @param basePackages the packages to scan
      * @return a set of candidate component classes
      * @throws IllegalArgumentException if basePackages is empty
-     * @throws BeansException if a candidate class cannot be loaded
+     * @throws BeansException           if a candidate class cannot be loaded
      */
     public Set<Class<?>> scan(String... basePackages) {
         CheckUtils.emptyArray(basePackages, "ConfigurableClassScanner.scan recevies empty package names");
@@ -104,27 +107,27 @@ public class ConfigurableClassScanner {
         String packagePath = PathUtils.convertPackageToPath(basePackage);
 
         PathUtils.findClassPathFileNames(ClassPathSerchParam.builder()
-            .packagePath(packagePath)
-            .serachJar(true)
-            .serachFile(true)
-            .searchSudDirect(true)
-            .pathMapper((basePath, filePath) -> {
-                String filePathStr = filePath.toString();
-                if (!filePathStr.endsWith(PathUtils.CLASS_FILE_SUFFIX)) {
-                    return;
-                }
-                String basePathStr = basePath.toString();
-                // For Jar file system, it's 0
-                int startIndex = basePathStr.length() - packagePath.length();
-                int endIndex = filePathStr.length() - PathUtils.CLASS_FILE_SUFFIX.length();
-                String className = filePathStr.substring(startIndex, endIndex);
-                className = className.replace(PathUtils.PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR)
-                    .replace(PathUtils.SYSTEM_PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR);
-                if (!StringUtils.isEmpty(className)) {
-                    classNames.add(className);
-                }
-            })
-            .build());
+                .packagePath(packagePath)
+                .serachJar(true)
+                .serachFile(true)
+                .searchSudDirect(true)
+                .pathMapper((basePath, filePath) -> {
+                    String filePathStr = filePath.toString();
+                    if (!filePathStr.endsWith(PathUtils.CLASS_FILE_SUFFIX)) {
+                        return;
+                    }
+                    String basePathStr = basePath.toString();
+                    // For Jar file system, it's 0
+                    int startIndex = basePathStr.length() - packagePath.length();
+                    int endIndex = filePathStr.length() - PathUtils.CLASS_FILE_SUFFIX.length();
+                    String className = filePathStr.substring(startIndex, endIndex);
+                    className = className.replace(PathUtils.PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR)
+                            .replace(PathUtils.SYSTEM_PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR);
+                    if (!StringUtils.isEmpty(className)) {
+                        classNames.add(className);
+                    }
+                })
+                .build());
 
         Set<Class<?>> beanClasses = new HashSet<>();
         classNames.forEach(className -> {
@@ -134,14 +137,16 @@ public class ConfigurableClassScanner {
                     beanClasses.add(clazz);
                 }
             } catch (ClassNotFoundException e) {
-                throw new BeansException(String.format("Can not find class: {%s} in packge: {%s} ", className, basePackage), e);
+                throw new BeansException(
+                        String.format("Can not find class: {%s} in packge: {%s} ", className, basePackage), e);
             }
         });
         return beanClasses;
     }
 
     /**
-     * Checks if a class is a candidate component by applying the configured filters.
+     * Checks if a class is a candidate component by applying the configured
+     * filters.
      * Class must not be private or abstract to be considered a candidate.
      *
      * @param clazz the class to check
@@ -154,7 +159,7 @@ public class ConfigurableClassScanner {
                 continue;
             }
             int modifiers = clazz.getModifiers();
-            if (Modifier.isPrivate(modifiers) || Modifier.isAbstract(modifiers)) {
+            if (!Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers)) {
                 throw new BeansException(String.format("Class: {%s}'s' modifer has invalid midifier", clazz.getName()));
             }
             return true;

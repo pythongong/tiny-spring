@@ -26,24 +26,29 @@ import java.lang.annotation.Target;
  * may be processed by the container to generate bean definitions.
  * Configuration classes are typically the primary source of bean definitions.
  *
- * <p>Example usage:
- * <pre>{@code
- * @Configuration
- * @ComponentScan("com.example")
- * public class AppConfig {
- *     @Bean
- *     public DataSource dataSource() {
- *         DataSource ds = new BasicDataSource();
- *         ds.setUrl("jdbc:mysql://localhost/db");
- *         return ds;
- *     }
+ * <p>
+ * Example usage:
+ * 
+ * <pre>
+ * {
+ *     &#64;code
+ *     &#64;Configuration
+ *     &#64;ComponentScan("com.example")
+ *     public class AppConfig {
+ *         &#64;Bean
+ *         public DataSource dataSource() {
+ *             DataSource ds = new BasicDataSource();
+ *             ds.setUrl("jdbc:mysql://localhost/db");
+ *             return ds;
+ *         }
  *
- *     @Bean
- *     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
- *         return new JdbcTemplate(dataSource);
+ *         @Bean
+ *         public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+ *             return new JdbcTemplate(dataSource);
+ *         }
  *     }
  * }
- * }</pre>
+ * </pre>
  *
  * @author Cheng Gong
  */
@@ -52,4 +57,13 @@ import java.lang.annotation.Target;
 @Documented
 @Component
 public @interface Configuration {
+
+    /**
+     * The value may indicate a suggestion for a logical component name.
+     * If not specified, the container will generate a name based on
+     * the class name.
+     *
+     * @return the suggested component name, if any
+     */
+    String value() default "";
 }

@@ -204,7 +204,7 @@ public class DefaultConfigurableListableBeanFactory
      * @param beanDefinition the bean definition to create an instance from
      * @return the created bean instance
      */
-    protected Object createBean(BeanDefinition beanDefinition) throws BeansException {
+    private Object createBean(BeanDefinition beanDefinition) throws BeansException {
         Object bean;
         String beanName = beanDefinition.beanName();
 
