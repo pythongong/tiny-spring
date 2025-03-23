@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import com.pythongong.util.CheckUtils;
 import com.pythongong.util.PathUtils;
 
 /**
@@ -41,6 +42,7 @@ public class DefaultResourceLoader implements ResourceLoader {
      */
     @Override
     public Resource getResource(String location) {
+        CheckUtils.emptyString(location, "DefaultResourceLoader.getResource receves empty location");
         if (location.startsWith(PathUtils.CLASSPATH_URL_PREFIX)) {
             return new ClassPathResource(location);
         }

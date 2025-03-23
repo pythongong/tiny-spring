@@ -21,9 +21,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
+import com.pythongong.util.CheckUtils;
+
 /**
  * Resource implementation for URLs.
- * Supports reading resources from remote locations via HTTP or other URL protocols.
+ * Supports reading resources from remote locations via HTTP or other URL
+ * protocols.
  *
  * @author Cheng Gong
  */
@@ -40,12 +43,14 @@ public class RemoteResource implements Resource {
      * @param url the URL of the remote resource
      */
     public RemoteResource(URL url) {
+        CheckUtils.nullArgs(url, "RemoteResourc recevies null url");
         this.url = url;
     }
 
     /**
      * Opens a connection to the remote resource and returns an input stream.
-     * For HTTP connections, ensures proper cleanup by disconnecting if an error occurs.
+     * For HTTP connections, ensures proper cleanup by disconnecting if an error
+     * occurs.
      *
      * @return an InputStream for reading from the remote resource
      * @throws IOException if an I/O error occurs
@@ -57,7 +62,7 @@ public class RemoteResource implements Resource {
             return connection.getInputStream();
         } catch (IOException e) {
             if (connection instanceof HttpURLConnection) {
-                ((HttpURLConnection)connection).disconnect();
+                ((HttpURLConnection) connection).disconnect();
             }
             throw e;
         }

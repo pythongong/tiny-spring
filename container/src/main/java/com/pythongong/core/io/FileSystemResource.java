@@ -20,6 +20,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.pythongong.util.CheckUtils;
+
 /**
  * Resource implementation for files in the file system.
  * Supports reading resources from the local file system.
@@ -39,6 +41,7 @@ public class FileSystemResource implements Resource {
      * @param file the File object representing the resource
      */
     public FileSystemResource(File file) {
+        CheckUtils.nullArgs(file, "FileSystemResource recevies null file");
         this.file = file;
     }
 
