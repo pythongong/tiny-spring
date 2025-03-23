@@ -22,8 +22,9 @@ package com.pythongong.beans.config;
  *
  * @author Cheng Gong
  */
+@FunctionalInterface
 public interface DisposableBean {
-    
+
     /**
      * Invoked by the containing {@code BeanFactory} on destruction of a bean.
      *

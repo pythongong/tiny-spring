@@ -18,13 +18,13 @@ package com.pythongong.beans.config;
 /**
  * Interface to be implemented by objects used to create other objects.
  * This is an alternative approach of creating objects compared to regular
- * bean instantiation. While a regular bean is created directly by the container,
+ * bean instantiation. While a regular bean is created directly by the
+ * container,
  * a FactoryBean implementation allows for custom object creation logic.
  *
  * @param <T> the type of object that this FactoryBean creates
  * @author Cheng Gong
  */
-@FunctionalInterface
 public interface FactoryBean<T> {
 
     /**
@@ -34,4 +34,11 @@ public interface FactoryBean<T> {
      * @throws Exception if an error occurs while creating the object
      */
     T getObject() throws Exception;
+
+    /**
+     * Returns if the object created by this factory is a singleton.
+     * 
+     * @return if the object is a singleton
+     */
+    boolean isSingleton();
 }

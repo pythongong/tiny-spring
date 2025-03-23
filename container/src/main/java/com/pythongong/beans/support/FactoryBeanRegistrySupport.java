@@ -18,10 +18,9 @@ package com.pythongong.beans.support;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.FactoryBean;
-import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
+import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
 
 /**
@@ -43,7 +42,8 @@ public class FactoryBeanRegistrySupport {
      * @param beanName the name of the bean to retrieve from cache
      * @return the cached object, or null if not found
      */
-    protected Object getCachedObjectForFactoryBean(String beanName) {
+    @Nullable
+    Object getCachedObjectForFactoryBean(String beanName) {
         CheckUtils.emptyString(beanName,
                 "FactoryBeanRegistrySupport.getCachedObjectForFactoryBean recevies empty bean name");
         Object cachedObject = factoryBeanObjectCache.get(beanName);
@@ -59,13 +59,10 @@ public class FactoryBeanRegistrySupport {
      * @return the object obtained from the factory
      * @throws BeansException if the factory bean throws an exception
      */
-    protected Object getObjectFromFactoryBean(FactoryBean<?> factory, BeanDefinition beanDefinition) {
-        CheckUtils.nullArgs(beanDefinition,
-                "FactoryBeanRegistrySupport.getObjectFromFactoryBean recevies null bean definition");
+    @Nullable
+    Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName) {
         CheckUtils.nullArgs(factory, "FactoryBeanRegistrySupport.getObjectFromFactoryBean recevies null factory bean");
-
         Object curObject = null;
-        String beanName = beanDefinition.beanName();
         try {
             curObject = factory.getObject();
         } catch (Exception e) {
@@ -73,10 +70,12 @@ public class FactoryBeanRegistrySupport {
         }
 
         // For non-singleton scoped beans, return without caching
-        if (!ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
+        if (!factory.isSingleton()) {
             return curObject;
         }
 
+        CheckUtils.emptyString(beanName,
+                "FactoryBeanRegistrySupport.getObjectFromFactoryBean recevies empty bean name");
         // Check if object is already cached
         Object cachedObject = factoryBeanObjectCache.get(beanName);
         if (cachedObject != null) {

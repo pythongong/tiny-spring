@@ -53,9 +53,9 @@ class SimpleInstantiationTest {
      */
     @Test
     @DisplayName("Should create instance using default constructor")
-    void shouldCreateInstanceUsingDefaultConstructor() throws BeansException, NoSuchMethodException, SecurityException {
+    void shouldCreateInstanceUsingDefaultConstructor() {
         // When
-        Object result = instantiation.instance(TestBean.class, TestBean.class.getDeclaredConstructor(), null);
+        Object result = instantiation.instance(TestBean.class, null, null);
 
         // Then
         assertNotNull(result);

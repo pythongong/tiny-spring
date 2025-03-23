@@ -22,8 +22,9 @@ package com.pythongong.beans.config;
  *
  * @author Cheng Gong
  */
+@FunctionalInterface
 public interface InitializingBean {
-    
+
     /**
      * Invoked by the containing BeanFactory after all properties have been set.
      *

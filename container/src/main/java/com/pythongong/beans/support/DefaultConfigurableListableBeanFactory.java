@@ -243,9 +243,15 @@ public class DefaultConfigurableListableBeanFactory
         if (bean instanceof DisposableBean) {
             singletonBeanRegistry.registerDisposableBean(beanDefinition.beanName(), (DisposableBean) bean);
         } else if (beanDefinition.destroyMethod() != null) {
-            singletonBeanRegistry.registerDisposableBean(
-                    beanDefinition.beanName(),
-                    new DisposableBeanAdapter(bean, beanDefinition.destroyMethod()));
+            singletonBeanRegistry.registerDisposableBean(beanDefinition.beanName(), () -> {
+                try {
+                    Method destroyMethod = beanDefinition.destroyMethod();
+                    destroyMethod.setAccessible(true);
+                    destroyMethod.invoke(bean);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new BeansException(String.format("Fail to destory {%s} bean", beanDefinition.beanName()), e);
+                }
+            });
         }
     }
 

@@ -25,9 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.FactoryBean;
-import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.test.utils.TestBean;
 
@@ -47,9 +45,6 @@ class FactoryBeanRegistrySupportTest {
 
     @Mock
     private FactoryBean<TestBean> mockFactoryBean;
-
-    @Mock
-    private BeanDefinition mockBeanDefinition;
 
     @BeforeEach
     void setUp() {
@@ -75,10 +70,9 @@ class FactoryBeanRegistrySupportTest {
     @Test
     @DisplayName("Should throw exception for empty bean name")
     void shouldThrowExceptionForEmptyBeanName() {
-        assertThrows(BeansException.class, 
-            () -> registrySupport.getCachedObjectForFactoryBean(""),
-            "Should throw BeansException for empty bean name"
-        );
+        assertThrows(BeansException.class,
+                () -> registrySupport.getCachedObjectForFactoryBean(""),
+                "Should throw BeansException for empty bean name");
     }
 
     /**
@@ -90,14 +84,13 @@ class FactoryBeanRegistrySupportTest {
         // Given
         String beanName = "testBean";
         TestBean expectedObject = new TestBean();
-        
-        when(mockBeanDefinition.beanName()).thenReturn(beanName);
-        when(mockBeanDefinition.scope()).thenReturn(ScopeEnum.SINGLETON);
+
         when(mockFactoryBean.getObject()).thenReturn(expectedObject);
+        when(mockFactoryBean.isSingleton()).thenReturn(true);
 
         // When
-        TestBean result1 = (TestBean)registrySupport.getObjectFromFactoryBean(mockFactoryBean, mockBeanDefinition);
-        TestBean result2 = (TestBean)registrySupport.getObjectFromFactoryBean(mockFactoryBean, mockBeanDefinition);
+        TestBean result1 = (TestBean) registrySupport.getObjectFromFactoryBean(mockFactoryBean, beanName);
+        TestBean result2 = (TestBean) registrySupport.getObjectFromFactoryBean(mockFactoryBean, beanName);
 
         // Then
         assertNotNull(result1);
@@ -113,19 +106,29 @@ class FactoryBeanRegistrySupportTest {
     void shouldCreateNewObjectForPrototypeFactoryBean() throws Exception {
         // Given
         String beanName = "testBean";
-        TestBean expectedObject = new TestBean();
-        
-        when(mockBeanDefinition.beanName()).thenReturn(beanName);
-        when(mockBeanDefinition.scope()).thenReturn(ScopeEnum.PROTOTYPE);
-        when(mockFactoryBean.getObject()).thenReturn(expectedObject);
+
+        FactoryBean<TestBean> factoryBean = new FactoryBean<TestBean>() {
+
+            @Override
+            public TestBean getObject() throws Exception {
+                return new TestBean();
+            }
+
+            @Override
+            public boolean isSingleton() {
+                return false;
+            }
+
+        };
 
         // When
-        TestBean result1 = (TestBean)registrySupport.getObjectFromFactoryBean(mockFactoryBean, mockBeanDefinition);
-        TestBean result2 = (TestBean)registrySupport.getObjectFromFactoryBean(mockFactoryBean, mockBeanDefinition);
+        TestBean result1 = (TestBean) registrySupport.getObjectFromFactoryBean(factoryBean, beanName);
+        TestBean result2 = (TestBean) registrySupport.getObjectFromFactoryBean(factoryBean, beanName);
 
         // Then
         assertNotNull(result1);
         assertNotNull(result2);
+        assertTrue(result1 != result2);
     }
 
     /**
@@ -136,14 +139,13 @@ class FactoryBeanRegistrySupportTest {
     void shouldHandleNullObjectFromFactoryBean() throws Exception {
         // Given
         String beanName = "testBean";
-        when(mockBeanDefinition.beanName()).thenReturn(beanName);
-        when(mockBeanDefinition.scope()).thenReturn(ScopeEnum.SINGLETON);
-        when(mockFactoryBean.getObject()).thenReturn(null);
 
-        assertThrows(BeansException.class, 
-            () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean, mockBeanDefinition),
-            "Should throw BeansException for null factory bean"
-        );
+        when(mockFactoryBean.getObject()).thenReturn(null);
+        when(mockFactoryBean.isSingleton()).thenReturn(true);
+
+        assertThrows(BeansException.class,
+                () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean, beanName),
+                "Should throw BeansException for null factory bean");
     }
 
     /**
@@ -153,33 +155,30 @@ class FactoryBeanRegistrySupportTest {
     @DisplayName("Should handle factory bean exception")
     void shouldHandleFactoryBeanException() throws Exception {
         // Given
-        when(mockBeanDefinition.beanName()).thenReturn("testBean");
         when(mockFactoryBean.getObject()).thenThrow(new Exception("Factory error"));
 
         // When/Then
-        assertThrows(BeansException.class, 
-            () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean, mockBeanDefinition),
-            "Should throw BeansException when factory bean throws exception"
-        );
+        assertThrows(BeansException.class,
+                () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean,
+                        "testBean"),
+                "Should throw BeansException when factory bean throws exception");
     }
 
     /**
      * Tests validation of null parameters
+     * 
+     * @throws Exception
      */
     @Test
     @DisplayName("Should validate null parameters")
-    void shouldValidateNullParameters() {
-        assertThrows(BeansException.class, 
-            () -> registrySupport.getObjectFromFactoryBean(null, mockBeanDefinition),
-            "Should throw BeansException for null factory bean"
-        );
-
-        assertThrows(BeansException.class, 
-            () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean, null),
-            "Should throw BeansException for null bean definition"
-        );
+    void shouldValidateNullParameters() throws Exception {
+        assertThrows(BeansException.class,
+                () -> registrySupport.getObjectFromFactoryBean(null, "testBean"),
+                "Should throw BeansException for null factory bean");
+        when(mockFactoryBean.isSingleton()).thenReturn(true);
+        assertThrows(BeansException.class,
+                () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean, null),
+                "Should throw BeansException for null bean definition");
     }
 
-
-   
 }

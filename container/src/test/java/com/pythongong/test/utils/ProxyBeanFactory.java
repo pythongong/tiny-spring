@@ -31,4 +31,9 @@ public class ProxyBeanFactory implements FactoryBean<TestProxyBean> {
                 handler);
     }
 
+    @Override
+    public boolean isSingleton() {
+        return true;
+    }
+
 }

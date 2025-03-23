@@ -115,19 +115,15 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
      */
     private <T> T doGetBean(String beanName) {
         Object sharedInstance = singletonBeanRegistry.getSingleton(beanName);
-        if (sharedInstance != null && !(sharedInstance instanceof FactoryBean)) {
-            return (T) sharedInstance;
+        if (sharedInstance != null) {
+            return (T) getObjectForBeanInstance(sharedInstance, beanName);
         }
         BeanDefinition beanDefinition = getBeanDefinition.apply(beanName);
         if (beanDefinition == null) {
             throw new NoSuchBeanException(String.format("No bean is definited as: {%s}", beanName));
         }
 
-        if (sharedInstance != null) {
-            return (T) getObjectForBeanInstance(sharedInstance, beanDefinition);
-        }
-
-        return (T) getObjectForBeanInstance(createBean.apply(beanDefinition), beanDefinition);
+        return (T) getObjectForBeanInstance(createBean.apply(beanDefinition), beanName);
     }
 
     /**
@@ -137,18 +133,20 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
      * @param beanDefinition the bean definition
      * @return the object created by the FactoryBean
      */
-    private Object getObjectForBeanInstance(Object sharedInstance, BeanDefinition beanDefinition) {
+    private Object getObjectForBeanInstance(Object sharedInstance, String beanName) {
         if (!(sharedInstance instanceof FactoryBean)) {
             return sharedInstance;
 
         }
-        Object cachedObject = beanRegistrySupport.getCachedObjectForFactoryBean(beanDefinition.beanName());
+
+        Object cachedObject = beanRegistrySupport.getCachedObjectForFactoryBean(beanName);
         if (cachedObject == null) {
             cachedObject = beanRegistrySupport.getObjectFromFactoryBean((FactoryBean<?>) sharedInstance,
-                    beanDefinition);
+                    beanName);
         }
+
         if (cachedObject == null) {
-            throw new NoSuchBeanException(beanDefinition.beanName(), beanDefinition.beanClass());
+            throw new NoSuchBeanException(beanName, sharedInstance.getClass());
         }
         return cachedObject;
     }

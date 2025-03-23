@@ -40,6 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pythongong.test.utils.TestConfiguration;
 import com.pythongong.exception.BeansException;
+import com.pythongong.test.utils.ContextRefreshListener;
 import com.pythongong.test.utils.FactoryPostProcessedBean;
 import com.pythongong.test.utils.LifecycleTestBean;
 import com.pythongong.test.utils.ProxyBeanFactory;
@@ -215,6 +216,20 @@ class AnnotationConfigApplicationContextTest {
             assertEquals(name, bean.getName(id));
         });
 
+    }
+
+    @Test
+    @DisplayName("Should publish refresh event")
+    void shouldPublishRefreshEvent() {
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+                TestConfiguration.class);
+
+        // When
+        ContextRefreshListener listener = context.getBean("contextRefreshListener", ContextRefreshListener.class);
+
+        // Then
+        assertTrue(listener.isRefreshed(), "Context should be refreshed");
     }
 
 }

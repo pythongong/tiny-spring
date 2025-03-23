@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 import com.pythongong.beans.config.DisposableBean;
 import com.pythongong.beans.registry.SingletonBeanRegistry;
 import com.pythongong.exception.BeansException;
@@ -31,7 +30,8 @@ import com.pythongong.util.CheckUtils;
 /**
  * Default implementation of the SingletonBeanRegistry interface, providing a
  * central registry for shared bean instances.
- * <p>Supports registration of disposable beans, which will be destroyed when
+ * <p>
+ * Supports registration of disposable beans, which will be destroyed when
  * the registry is destroyed. Uses thread-safe collections to support concurrent
  * access to singleton beans.
  *
@@ -51,11 +51,12 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      * Register a disposable bean for later destruction.
      *
      * @param beanName the name of the bean
-     * @param bean the disposable bean instance
+     * @param bean     the disposable bean instance
      * @throws IllegalArgumentException if beanName is empty or bean is null
      */
     public void registerDisposableBean(String beanName, DisposableBean bean) {
-        CheckUtils.emptyString(beanName, "DefaultSingletonBeanRegistry.registerDisposableBean receives empty bean name");
+        CheckUtils.emptyString(beanName,
+                "DefaultSingletonBeanRegistry.registerDisposableBean receives empty bean name");
         CheckUtils.nullArgs(bean, "DefaultSingletonBeanRegistry.registerDisposableBean receives null bean");
         disposableBeanMap.put(beanName, bean);
     }
@@ -88,7 +89,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      * Register the given existing object as singleton in the bean registry.
      *
      * @param beanName the name of the bean
-     * @param bean the bean instance
+     * @param bean     the bean instance
      * @throws IllegalArgumentException if beanName is empty or bean is null
      */
     protected void registerSingleton(String beanName, Object bean) {
@@ -96,4 +97,5 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
         CheckUtils.nullArgs(bean, "DefaultSingletonBeanRegistry.registerSingleton receives null bean");
         singletonObjects.put(beanName, bean);
     }
+
 }

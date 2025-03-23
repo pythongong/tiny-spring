@@ -24,6 +24,7 @@ import java.util.EventListener;
  * @param <E> the type of event to listen for
  * @author Cheng Gong
  */
+@FunctionalInterface
 public interface ApplicationListener<E extends ApplicationEvent> extends EventListener {
 
     /**
