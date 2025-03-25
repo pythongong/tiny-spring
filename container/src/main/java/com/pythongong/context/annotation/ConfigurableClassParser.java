@@ -137,8 +137,8 @@ public class ConfigurableClassParser {
                 .constructor(getSuitableConstrucor(beanClass))
                 .beanName(beanName)
                 .beanClass(beanClass)
-                .initMethod(findInitOrDestoryMethod(beanClass, PostConstruct.class))
-                .destroyMethod(findInitOrDestoryMethod(beanClass, PreDestroy.class))
+                .initMethodName(findInitOrDestoryMethod(beanClass, PostConstruct.class))
+                .destroyMethodName(findInitOrDestoryMethod(beanClass, PreDestroy.class))
                 .scope(extractScope(beanClass))
                 .build();
 
@@ -166,35 +166,18 @@ public class ConfigurableClassParser {
                     if (returnType == null) {
                         throw new BeansException("Bean method must have a return type: " + method.getName());
                     }
-
                     String beanName = beanAnno.value();
-                    if (StringUtils.isEmpty(beanName)) {
-                        beanName = returnType.getName();
-                    }
 
-                    Method initMethod = null;
-                    Method destroyMethod = null;
-                    try {
-                        String initMethoName = beanAnno.init();
-                        if (!initMethoName.isEmpty()) {
-                            initMethod = beanClass.getMethod(initMethoName);
-                        }
-                        String destroyMethodName = beanAnno.destroy();
-                        if (!destroyMethodName.isEmpty()) {
-                            destroyMethod = beanClass.getMethod(destroyMethodName);
-                        }
-                    } catch (NoSuchMethodException e) {
-                        throw new BeansException("Bean method init or destroy method not found: " + method.getName());
-                    }
+                    FactpryDefinition factpryDefinition = new FactpryDefinition(factoryName, method.getName(),
+                            method.getParameterTypes());
 
                     BeanDefinition beanDefinition = BeanDefinition.builder()
-                            .beanName(StringUtils.isEmpty(beanName) ? method.getName() : beanName)
+                            .beanName(StringUtils.isEmpty(beanName) ? returnType.getName() : beanName)
                             .beanClass(returnType)
-                            .initMethod(initMethod)
-                            .destroyMethod(destroyMethod)
+                            .initMethodName(beanAnno.init())
+                            .destroyMethodName(beanAnno.destroy())
                             .scope(extractScope(returnType))
-                            .factoryName(factoryName)
-                            .factoryMethod(method)
+                            .factpryDefinition(factpryDefinition)
                             .build();
 
                     addBeanDef(beanDefinition);
@@ -279,7 +262,7 @@ public class ConfigurableClassParser {
      * @return the lifecycle method or null if none found
      * @throws BeansException if multiple lifecycle methods are found
      */
-    private Method findInitOrDestoryMethod(Class<?> beanClass, Class<? extends Annotation> anotationClass) {
+    private String findInitOrDestoryMethod(Class<?> beanClass, Class<? extends Annotation> anotationClass) {
         List<Method> methods = Arrays.stream(beanClass.getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(anotationClass)).map(method -> {
                     if (method.getParameterCount() != 0) {
@@ -299,7 +282,7 @@ public class ConfigurableClassParser {
                     anotationClass.getSimpleName(), beanClass.getName()));
         }
 
-        return methods.get(0);
+        return methods.get(0).getName();
     }
 
     /**

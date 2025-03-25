@@ -19,8 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.pythongong.exception.BeansException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +38,7 @@ public class FileSystemResourceTests {
     @Test
     @DisplayName("Constructor should throw exception when File is null")
     void constructorShouldThrowExceptionWhenFileIsNull() {
-        assertThrows(BeansException.class, () -> new FileSystemResource((File) null));
+        assertThrows(IllegalArgumentException.class, () -> new FileSystemResource((File) null));
     }
 
     @Test

@@ -52,11 +52,11 @@ import com.pythongong.exception.BeansException;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PathUtils Tests")
 class PathUtilsTest {
-    
+
     private static final String TEST_RESOURCES_PATH = "pathutils_test";
     private static final List<Path> createdPaths = new ArrayList<>();
     private final List<String> foundFiles = new ArrayList<>();
-    
+
     private static Path testResourcesRoot;
     private static ClassLoader testClassLoader;
     private MockedStatic<ClassUtils> mockedClassUtils;
@@ -67,10 +67,10 @@ class PathUtilsTest {
         testResourcesRoot = Paths.get("target", "test-classes", TEST_RESOURCES_PATH);
         createTestDirectories();
         createTestFiles();
-        
+
         // Create URLClassLoader with test resources
         URL testResourcesUrl = testResourcesRoot.toUri().toURL();
-        testClassLoader = new URLClassLoader(new URL[]{testResourcesUrl}, null);
+        testClassLoader = new URLClassLoader(new URL[] { testResourcesUrl }, null);
     }
 
     @BeforeEach
@@ -130,9 +130,8 @@ class PathUtilsTest {
     @DisplayName("Should find files in classpath without subdirectories")
     void shouldFindFilesWithoutSubdirectories() throws IOException {
         // Given
-        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> 
-            foundFiles.add(filePath.getFileName().toString());
-        
+        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
+
         ClassPathSerchParam param = ClassPathSerchParam.builder()
                 .packagePath(PathUtils.ROOT_CLASS_PATH)
                 .pathMapper(pathMapper)
@@ -156,8 +155,7 @@ class PathUtilsTest {
     @DisplayName("Should find files including subdirectories")
     void shouldFindFilesWithSubdirectories() {
         // Given
-        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> 
-            foundFiles.add(filePath.getFileName().toString());
+        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
                 .packagePath(PathUtils.ROOT_CLASS_PATH)
@@ -206,8 +204,7 @@ class PathUtilsTest {
     @DisplayName("Should handle non-existent classpath resource")
     void shouldHandleNonExistentClasspathResource() {
         // Given
-        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> 
-            foundFiles.add(filePath.getFileName().toString());
+        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
                 .packagePath("non/existent/path")
@@ -227,17 +224,16 @@ class PathUtilsTest {
     @Test
     @DisplayName("Should throw exception when search parameter is null")
     void shouldThrowExceptionWhenParamIsNull() {
-        assertThrows(BeansException.class, 
-            () -> PathUtils.findClassPathFileNames(null),
-            "Should throw BeansException when param is null");
+        assertThrows(IllegalArgumentException.class,
+                () -> PathUtils.findClassPathFileNames(null),
+                "Should throw IllegalArgumentException when param is null");
     }
 
     @Test
     @DisplayName("Should not search when both file and jar search are disabled")
     void shouldNotSearchWhenBothSearchesDisabled() {
         // Given
-        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> 
-            foundFiles.add(filePath.getFileName().toString());
+        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
                 .packagePath(PathUtils.ROOT_CLASS_PATH)
@@ -273,15 +269,15 @@ class PathUtilsTest {
     void shouldMaintainForwardSlashes() {
         // Given
         String packageName = "com.test.package";
-        
+
         // When
         String result = PathUtils.convertPackageToPath(packageName);
 
         // Then
-        assertFalse(result.contains("\\"), 
-            "Should not contain Windows-style backslashes");
-        assertTrue(result.contains("/"), 
-            "Should contain forward slashes");
+        assertFalse(result.contains("\\"),
+                "Should not contain Windows-style backslashes");
+        assertTrue(result.contains("/"),
+                "Should contain forward slashes");
     }
 
     @Test
@@ -289,9 +285,8 @@ class PathUtilsTest {
     void shouldHandleNullClassloader() {
         // Given
         mockedClassUtils.when(ClassUtils::getDefaultClassLoader).thenReturn(null);
-        
-        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> 
-            foundFiles.add(filePath.getFileName().toString());
+
+        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
                 .packagePath(PathUtils.ROOT_CLASS_PATH)
@@ -304,5 +299,5 @@ class PathUtilsTest {
         // When/Then
         assertThrows(BeansException.class, () -> PathUtils.findClassPathFileNames(param));
     }
-    
+
 }

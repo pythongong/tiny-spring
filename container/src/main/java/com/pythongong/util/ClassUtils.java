@@ -26,9 +26,12 @@ import java.util.Collection;
  * @author Cheng Gong
  */
 public class ClassUtils {
-    
+
     /** Private constructor to prevent instantiation of utility class */
-    private ClassUtils(){}
+    private ClassUtils() {
+    }
+
+    public static int BIG_INITIAL_SIZE = 256;
 
     /**
      * Default bean name for the application event multicaster
@@ -52,8 +55,8 @@ public class ClassUtils {
      * This method will search through meta-annotations if the target annotation
      * is not directly present on the class.
      *
-     * @param <A> the type of annotation to find
-     * @param target the class to search on
+     * @param <A>       the type of annotation to find
+     * @param target    the class to search on
      * @param annoClass the annotation class to look for
      * @return the found annotation or null if not found
      */

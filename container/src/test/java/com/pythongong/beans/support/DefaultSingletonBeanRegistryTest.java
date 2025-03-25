@@ -21,11 +21,11 @@ import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.pythongong.beans.config.DisposableBean;
-import com.pythongong.exception.BeansException;
 
 /**
  * Test class for DefaultSingletonBeanRegistry
- * Verifies the singleton bean registration, retrieval and destruction functionality
+ * Verifies the singleton bean registration, retrieval and destruction
+ * functionality
  */
 public class DefaultSingletonBeanRegistryTest {
 
@@ -40,23 +40,19 @@ public class DefaultSingletonBeanRegistryTest {
     void testGetAndRegisterSingleton() {
         Object bean = new Object();
         String beanName = "testBean";
-        
+
         registry.registerSingleton(beanName, bean);
         assertSame(bean, registry.getSingleton(beanName));
     }
 
     @Test
     void testRegisterSingletonWithEmptyName() {
-        assertThrows(BeansException.class, () -> 
-            registry.registerSingleton("", new Object())
-        );
+        assertThrows(IllegalArgumentException.class, () -> registry.registerSingleton("", new Object()));
     }
 
     @Test
     void testRegisterSingletonWithNullBean() {
-        assertThrows(BeansException.class, () -> 
-            registry.registerSingleton("test", null)
-        );
+        assertThrows(IllegalArgumentException.class, () -> registry.registerSingleton("test", null));
     }
 
     @Test
@@ -72,17 +68,13 @@ public class DefaultSingletonBeanRegistryTest {
 
     @Test
     void testRegisterDisposableBeanWithEmptyName() {
-        assertThrows(BeansException.class, () ->
-            registry.registerDisposableBean("", mock(DisposableBean.class))
-        );
+        assertThrows(IllegalArgumentException.class,
+                () -> registry.registerDisposableBean("", mock(DisposableBean.class)));
     }
 
     @Test
     void testRegisterDisposableBeanWithNullBean() {
-        assertThrows(BeansException.class, () ->
-            registry.registerDisposableBean("test", null)
-        );
+        assertThrows(IllegalArgumentException.class, () -> registry.registerDisposableBean("test", null));
     }
 
-    
 }

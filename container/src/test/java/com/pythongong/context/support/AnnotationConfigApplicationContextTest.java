@@ -38,15 +38,14 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pythongong.test.utils.TestConfiguration;
-import com.pythongong.exception.BeansException;
-import com.pythongong.test.utils.ContextRefreshListener;
-import com.pythongong.test.utils.FactoryPostProcessedBean;
-import com.pythongong.test.utils.LifecycleTestBean;
-import com.pythongong.test.utils.ProxyBeanFactory;
-import com.pythongong.test.utils.TestComponent;
-import com.pythongong.test.utils.TestPropertyComponent;
-import com.pythongong.test.utils.TestUsingProxy;
+import com.pythongong.test.ioc.normal.ContextRefreshListener;
+import com.pythongong.test.ioc.normal.FactoryPostProcessedBean;
+import com.pythongong.test.ioc.normal.LifecycleTestBean;
+import com.pythongong.test.ioc.normal.ProxyBeanFactory;
+import com.pythongong.test.ioc.normal.TestComponent;
+import com.pythongong.test.ioc.normal.TestConfiguration;
+import com.pythongong.test.ioc.normal.TestPropertyComponent;
+import com.pythongong.test.ioc.normal.TestUsingProxy;
 import com.pythongong.util.ClassUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -183,7 +182,7 @@ class AnnotationConfigApplicationContextTest {
     @Test
     @DisplayName("Should throw exception when configuration class is null")
     void shouldThrowExceptionWhenConfigurationClassIsNull() {
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> new AnnotationConfigApplicationContext(null));
     }
 

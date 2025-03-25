@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.pythongong.exception.BeansException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +39,7 @@ public class DefaultResourceLoaderTests {
     @Test
     @DisplayName("getResource should throw exception when location is null")
     void getResourceShouldThrowExceptionWhenLocationIsNull() {
-        assertThrows(BeansException.class, () -> resourceLoader.getResource(null));
+        assertThrows(IllegalArgumentException.class, () -> resourceLoader.getResource(null));
     }
 
     @Test

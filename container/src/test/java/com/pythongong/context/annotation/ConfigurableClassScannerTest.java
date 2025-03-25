@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pythongong.exception.BeansException;
 import com.pythongong.util.ClassUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,9 +43,9 @@ class ConfigurableClassScannerTest {
     @DisplayName("Should throw exception for empty package array")
     void shouldThrowExceptionForEmptyPackageArray() {
         // When/Then
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> scanner.scan(new String[] {}),
-                "Should throw BeansException for empty package array");
+                "Should throw IllegalArgumentException for empty package array");
     }
 
     @Test

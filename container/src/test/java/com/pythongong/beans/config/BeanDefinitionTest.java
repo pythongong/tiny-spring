@@ -44,8 +44,8 @@ class BeanDefinitionTest {
         assertNotNull(beanDefinition.fieldValueList());
         assertTrue(beanDefinition.fieldValueList().isEmpty());
         assertEquals(ScopeEnum.SINGLETON, beanDefinition.scope());
-        assertNull(beanDefinition.initMethod());
-        assertNull(beanDefinition.destroyMethod());
+        assertNull(beanDefinition.initMethodName());
+        assertNull(beanDefinition.destroyMethodName());
         assertNull(beanDefinition.constructor());
     }
 
@@ -53,7 +53,7 @@ class BeanDefinitionTest {
      * Tests creation of a BeanDefinition with custom values.
      * Verifies that explicitly set properties are properly maintained.
      */
-    @Test 
+    @Test
     void shouldCreateBeanDefinitionWithCustomValues() {
         FieldValueList fieldValues = new FieldValueList();
         BeanDefinition beanDefinition = BeanDefinition.builder()

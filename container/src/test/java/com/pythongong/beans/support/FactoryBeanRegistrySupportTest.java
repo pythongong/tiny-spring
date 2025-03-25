@@ -27,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pythongong.beans.config.FactoryBean;
 import com.pythongong.exception.BeansException;
-import com.pythongong.test.utils.TestBean;
+import com.pythongong.test.ioc.normal.TestBean;
 
 /**
  * Unit tests for {@link FactoryBeanRegistrySupport}.
@@ -70,9 +70,9 @@ class FactoryBeanRegistrySupportTest {
     @Test
     @DisplayName("Should throw exception for empty bean name")
     void shouldThrowExceptionForEmptyBeanName() {
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> registrySupport.getCachedObjectForFactoryBean(""),
-                "Should throw BeansException for empty bean name");
+                "Should throw IllegalArgumentException for empty bean name");
     }
 
     /**
@@ -145,7 +145,7 @@ class FactoryBeanRegistrySupportTest {
 
         assertThrows(BeansException.class,
                 () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean, beanName),
-                "Should throw BeansException for null factory bean");
+                "Should throw IllegalArgumentException for null factory bean");
     }
 
     /**
@@ -161,7 +161,7 @@ class FactoryBeanRegistrySupportTest {
         assertThrows(BeansException.class,
                 () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean,
                         "testBean"),
-                "Should throw BeansException when factory bean throws exception");
+                "Should throw IllegalArgumentException when factory bean throws exception");
     }
 
     /**
@@ -172,13 +172,13 @@ class FactoryBeanRegistrySupportTest {
     @Test
     @DisplayName("Should validate null parameters")
     void shouldValidateNullParameters() throws Exception {
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> registrySupport.getObjectFromFactoryBean(null, "testBean"),
-                "Should throw BeansException for null factory bean");
+                "Should throw IllegalArgumentException for null factory bean");
         when(mockFactoryBean.isSingleton()).thenReturn(true);
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> registrySupport.getObjectFromFactoryBean(mockFactoryBean, null),
-                "Should throw BeansException for null bean definition");
+                "Should throw IllegalArgumentException for null bean definition");
     }
 
 }

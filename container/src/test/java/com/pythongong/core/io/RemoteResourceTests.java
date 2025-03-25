@@ -18,7 +18,6 @@ package com.pythongong.core.io;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import com.pythongong.exception.BeansException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,7 +47,7 @@ public class RemoteResourceTests {
     @Test
     @DisplayName("Constructor should throw exception when URL is null")
     void constructorShouldThrowExceptionWhenUrlIsNull() {
-        assertThrows(BeansException.class, () -> new RemoteResource(null));
+        assertThrows(IllegalArgumentException.class, () -> new RemoteResource(null));
     }
 
     @Test

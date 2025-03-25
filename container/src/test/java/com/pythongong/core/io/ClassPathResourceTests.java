@@ -17,8 +17,6 @@ package com.pythongong.core.io;
 
 import org.junit.jupiter.api.Test;
 
-import com.pythongong.exception.BeansException;
-
 import org.junit.jupiter.api.DisplayName;
 
 import java.io.IOException;
@@ -37,13 +35,13 @@ public class ClassPathResourceTests {
     @Test
     @DisplayName("Constructor should throw exception when fileName is null")
     void constructorShouldThrowExceptionWhenFileNameIsNull() {
-        assertThrows(BeansException.class, () -> new ClassPathResource(null));
+        assertThrows(IllegalArgumentException.class, () -> new ClassPathResource(null));
     }
 
     @Test
     @DisplayName("Constructor should throw exception when fileName is empty")
     void constructorShouldThrowExceptionWhenFileNameIsEmpty() {
-        assertThrows(BeansException.class, () -> new ClassPathResource(""));
+        assertThrows(IllegalArgumentException.class, () -> new ClassPathResource(""));
     }
 
     @Test

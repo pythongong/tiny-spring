@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.registry.SingletonBeanRegistry;
-import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoSuchBeanException;
 
 /**
@@ -67,14 +66,12 @@ class GeneralBeanFactoryTest {
     /**
      * Tests constructor validation for null arguments.
      */
-    @Test 
+    @Test
     void whenNullArgs_thenThrowsException() {
-        assertThrows(BeansException.class, () -> 
-            new GeneralBeanFactory(null, createBean, singletonRegistry));
-        assertThrows(BeansException.class, () -> 
-            new GeneralBeanFactory(getBeanDefinition, null, singletonRegistry));
-        assertThrows(BeansException.class, () -> 
-            new GeneralBeanFactory(getBeanDefinition, createBean, null));
+        assertThrows(IllegalArgumentException.class, () -> new GeneralBeanFactory(null, createBean, singletonRegistry));
+        assertThrows(IllegalArgumentException.class,
+                () -> new GeneralBeanFactory(getBeanDefinition, null, singletonRegistry));
+        assertThrows(IllegalArgumentException.class, () -> new GeneralBeanFactory(getBeanDefinition, createBean, null));
     }
 
     /**
@@ -82,10 +79,8 @@ class GeneralBeanFactoryTest {
      */
     @Test
     void whenGetBeanWithEmptyName_thenThrowsException() {
-        assertThrows(BeansException.class, () -> 
-            beanFactory.getBean(""));
-        assertThrows(BeansException.class, () -> 
-            beanFactory.getBean(null));
+        assertThrows(IllegalArgumentException.class, () -> beanFactory.getBean(""));
+        assertThrows(IllegalArgumentException.class, () -> beanFactory.getBean(null));
     }
 
     /**
@@ -111,9 +106,8 @@ class GeneralBeanFactoryTest {
     void whenBeanNotDefined_thenThrowsException() {
         String beanName = "nonExistentBean";
         when(getBeanDefinition.apply(beanName)).thenReturn(null);
-        
-        assertThrows(NoSuchBeanException.class, () -> 
-            beanFactory.getBean(beanName));
+
+        assertThrows(NoSuchBeanException.class, () -> beanFactory.getBean(beanName));
     }
 
     /**
@@ -123,7 +117,7 @@ class GeneralBeanFactoryTest {
     void whenAddBeanPostProcessor_thenProcessorAdded() {
         BeanPostProcessor processor = mock(BeanPostProcessor.class);
         beanFactory.addBeanPostProcessor(processor);
-        
+
         assertTrue(beanFactory.getBeanPostProcessors().contains(processor));
     }
 
@@ -132,8 +126,7 @@ class GeneralBeanFactoryTest {
      */
     @Test
     void whenAddNullPostProcessor_thenThrowsException() {
-        assertThrows(BeansException.class, () -> 
-            beanFactory.addBeanPostProcessor(null));
+        assertThrows(IllegalArgumentException.class, () -> beanFactory.addBeanPostProcessor(null));
     }
 
     /**
@@ -144,7 +137,7 @@ class GeneralBeanFactoryTest {
         BeanPostProcessor processor = mock(BeanPostProcessor.class);
         beanFactory.addBeanPostProcessor(processor);
         beanFactory.addBeanPostProcessor(processor);
-        
+
         assertEquals(1, beanFactory.getBeanPostProcessors().size());
     }
 

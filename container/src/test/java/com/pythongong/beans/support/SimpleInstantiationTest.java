@@ -24,7 +24,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.exception.BeansException;
-import com.pythongong.test.utils.TestBean;
+import com.pythongong.test.ioc.normal.TestBean;
 
 /**
  * Unit tests for {@link SimpleInstantiation}.
@@ -49,7 +49,7 @@ class SimpleInstantiationTest {
      * 
      * @throws SecurityException
      * @throws NoSuchMethodException
-     * @throws BeansException
+     * @throws IllegalArgumentException
      */
     @Test
     @DisplayName("Should create instance using default constructor")
@@ -87,7 +87,7 @@ class SimpleInstantiationTest {
     @Test
     @DisplayName("Should throw exception when class is null")
     void shouldThrowExceptionWhenClassIsNull() {
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> instantiation.instance(null, null, null),
                 "Should throw IllegalArgumentException for null class");
     }
@@ -100,7 +100,7 @@ class SimpleInstantiationTest {
     void shouldThrowExceptionWhenInstantiationFails() {
         assertThrows(BeansException.class,
                 () -> instantiation.instance(TestBeanWithPrivateConstructor.class, null, null),
-                "Should throw BeansException when instantiation fails");
+                "Should throw IllegalArgumentException when instantiation fails");
     }
 
     /**
@@ -116,7 +116,7 @@ class SimpleInstantiationTest {
         // When/Then
         assertThrows(BeansException.class,
                 () -> instantiation.instance(TestBeanWithParam.class, constructor, args),
-                "Should throw BeansException when constructor parameters don't match");
+                "Should throw IllegalArgumentException when constructor parameters don't match");
     }
 
 }

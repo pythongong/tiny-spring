@@ -32,6 +32,7 @@ import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.config.BeanReference;
 import com.pythongong.beans.config.DisposableBean;
+import com.pythongong.beans.config.FactpryDefinition;
 import com.pythongong.beans.config.InitializingBean;
 import com.pythongong.beans.config.FieldValue;
 import com.pythongong.beans.config.FieldValueList;
@@ -242,10 +243,10 @@ public class DefaultConfigurableListableBeanFactory
 
         if (bean instanceof DisposableBean) {
             singletonBeanRegistry.registerDisposableBean(beanDefinition.beanName(), (DisposableBean) bean);
-        } else if (beanDefinition.destroyMethod() != null) {
+        } else if (!StringUtils.isEmpty(beanDefinition.destroyMethodName())) {
             singletonBeanRegistry.registerDisposableBean(beanDefinition.beanName(), () -> {
                 try {
-                    Method destroyMethod = beanDefinition.destroyMethod();
+                    Method destroyMethod = beanDefinition.beanClass().getMethod(beanDefinition.destroyMethodName());
                     destroyMethod.setAccessible(true);
                     destroyMethod.invoke(bean);
                 } catch (IllegalAccessException | InvocationTargetException e) {
@@ -259,7 +260,7 @@ public class DefaultConfigurableListableBeanFactory
      * Creates a new instance of a bean using its constructor.
      */
     private Object createBeanInstance(BeanDefinition beanDefinition) {
-        if (!StringUtils.isEmpty(beanDefinition.factoryName())) {
+        if (beanDefinition.factpryDefinition() != null) {
             return createBeanInstanceByFactory(beanDefinition);
         }
 
@@ -268,26 +269,23 @@ public class DefaultConfigurableListableBeanFactory
     }
 
     private Object createBeanInstanceByFactory(BeanDefinition beanDefinition) {
-        String factoryName = beanDefinition.factoryName();
+        FactpryDefinition factpryDefinition = beanDefinition.factpryDefinition();
+
+        String factoryName = factpryDefinition.factoryName();
         Object factory = getBean(factoryName);
-        Method factoryMethod = beanDefinition.factoryMethod();
-        if (factoryMethod == null) {
-            throw new BeansException(String.format("Bean {%s} doesn't have factory method in factory {%s}",
-                    beanDefinition.beanName(), factoryName));
-        }
+        String factoryMethodName = factpryDefinition.factoryMethodName();
 
-        Class<?>[] parameterTypes = factoryMethod.getParameterTypes();
-        Object[] arguBeans = createArguBeans(parameterTypes);
-        factoryMethod.setAccessible(true);
-
+        Class<?>[] parameterTypes = factpryDefinition.factoryMethodParamTypes();
         try {
+            Method factoryMethod = factory.getClass().getMethod(factoryMethodName, parameterTypes);
+            Object[] arguBeans = createArguBeans(parameterTypes);
+            factoryMethod.setAccessible(true);
             return arguBeans == null ? factoryMethod.invoke(factory) : factoryMethod.invoke(factory, arguBeans);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
             throw new BeansException(
                     String.format("Bean {%s} can't be created by factory method {%s} in factory {%s}",
-                            beanDefinition.beanName(), factoryMethod.getName(), factoryName));
+                            beanDefinition.beanName(), factoryMethodName, factoryName));
         }
-
     }
 
     private Object createBeanInstanceByConstructor(BeanDefinition beanDefinition) {
@@ -355,11 +353,7 @@ public class DefaultConfigurableListableBeanFactory
 
         Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
-        try {
-            invokeInitMethods(wrappedBean, beanDefinition);
-        } catch (Exception e) {
-            throw new BeansException(String.format("{%s} invokes init method failed", beanName), e);
-        }
+        invokeInitMethods(wrappedBean, beanDefinition);
 
         methodInject(beanName, wrappedBean, beanDefinition);
 
@@ -458,22 +452,29 @@ public class DefaultConfigurableListableBeanFactory
      * @param beanName       the name of the bean
      * @param wrappedBean    the bean instance
      * @param beanDefinition the bean definition
-     * @throws Exception if initialization fails
      */
-    private void invokeInitMethods(Object wrappedBean, BeanDefinition beanDefinition)
-            throws Exception {
+    private void invokeInitMethods(Object wrappedBean, BeanDefinition beanDefinition) {
         if (wrappedBean instanceof InitializingBean) {
-            ((InitializingBean) wrappedBean).afterPropertiesSet();
+            try {
+                ((InitializingBean) wrappedBean).afterPropertiesSet();
+            } catch (Exception e) {
+                throw new BeansException(String.format("{%s} inits in failure", beanDefinition.beanName()));
+            }
+        }
+
+        String initMethodName = beanDefinition.initMethodName();
+        if (StringUtils.isEmpty(initMethodName)) {
             return;
         }
 
-        Method initMethod = beanDefinition.initMethod();
-        if (initMethod == null) {
-            return;
+        try {
+            Method initMethod = beanDefinition.beanClass().getMethod(initMethodName);
+            initMethod.setAccessible(true);
+            initMethod.invoke(wrappedBean);
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
+            throw new BeansException(
+                    String.format("{%s} inits by {%s} in failure", beanDefinition.beanName(), initMethodName));
         }
 
-        initMethod.setAccessible(true);
-
-        initMethod.invoke(wrappedBean);
     }
 }

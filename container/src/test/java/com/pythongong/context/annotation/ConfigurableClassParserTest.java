@@ -28,13 +28,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pythongong.context.support.PropertyResolver;
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.ComponentScan;
 import com.pythongong.stereotype.Configuration;
-import com.pythongong.test.utils.LifecycleTestBean;
-import com.pythongong.test.utils.TestConfiguration;
-import com.pythongong.test.utils.TestConfugrableBean;
-import com.pythongong.util.StringUtils;
+import com.pythongong.test.ioc.normal.LifecycleTestBean;
+import com.pythongong.test.ioc.normal.TestConfiguration;
+import com.pythongong.test.ioc.normal.TestConfugrableBean;
 import com.pythongong.enums.ScopeEnum;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,17 +56,17 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should throw exception for null property resolver")
     void shouldThrowExceptionForNullPropertyResolver() {
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> new ConfigurableClassParser(null),
-                "Should throw BeansException for null PropertyResolver");
+                "Should throw IllegalArgumentException for null PropertyResolver");
     }
 
     @Test
     @DisplayName("Should throw exception for null class")
     void shouldThrowExceptionForNullClass() {
-        assertThrows(BeansException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> parser.parse(null),
-                "Should throw BeansException for null class");
+                "Should throw IllegalArgumentException for null class");
     }
 
     @Test
@@ -106,8 +104,8 @@ class ConfigurableClassParserTest {
                 .orElse(null);
 
         assertNotNull(lifecycleBean, "Should find lifecycle component");
-        assertNotNull(lifecycleBean.initMethod(), "Should have init method");
-        assertNotNull(lifecycleBean.destroyMethod(), "Should have destroy method");
+        assertNotNull(lifecycleBean.initMethodName(), "Should have init method");
+        assertNotNull(lifecycleBean.destroyMethodName(), "Should have destroy method");
     }
 
     @Test
@@ -136,10 +134,8 @@ class ConfigurableClassParserTest {
                 .orElse(null);
 
         assertNotNull(factoryBean);
-        assertFalse(StringUtils.isEmpty(factoryBean.factoryName()));
-        assertEquals(factoryBean.factoryName(), "testConfigurableFactory");
-        assertNotNull(factoryBean.factoryMethod());
-        assertEquals(factoryBean.factoryMethod().getName(), "createTestConfugrableBean");
+        assertNotNull(factoryBean.factpryDefinition());
+
     }
 
     // Test configurations

@@ -16,7 +16,6 @@
 
 package com.pythongong.util;
 
-import com.pythongong.exception.BeansException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,39 +27,39 @@ import static org.junit.jupiter.api.Assertions.*;
 class CheckUtilsTest {
 
     /**
-     * Tests that nullArgs throws BeansException when given null input
+     * Tests that nullArgs throws IllegalArgumentException when given null input
      */
     @Test
-    void nullArgs_WithNullObject_ThrowsBeansException() {
+    void nullArgs_WithNullObject_ThrowsIllegalArgumentException() {
         String errorMsg = "Object should not be null";
-        assertThrows(BeansException.class, () -> CheckUtils.nullArgs(null, errorMsg));
+        assertThrows(IllegalArgumentException.class, () -> CheckUtils.nullArgs(null, errorMsg));
     }
 
     /**
      * Tests that nullArgs accepts non-null input without throwing
      */
-    @Test 
+    @Test
     void nullArgs_WithNonNullObject_DoesNotThrow() {
         assertDoesNotThrow(() -> CheckUtils.nullArgs("test", "any message"));
     }
 
     /**
-     * Tests that emptyArray throws BeansException when given null array
+     * Tests that emptyArray throws IllegalArgumentException when given null array
      */
     @Test
-    void emptyArray_WithNullArray_ThrowsBeansException() {
+    void emptyArray_WithNullArray_ThrowsIllegalArgumentException() {
         String errorMsg = "Array should not be null";
-        assertThrows(BeansException.class, () -> CheckUtils.emptyArray(null, errorMsg));
+        assertThrows(IllegalArgumentException.class, () -> CheckUtils.emptyArray(null, errorMsg));
     }
 
     /**
-     * Tests that emptyArray throws BeansException when given empty array
+     * Tests that emptyArray throws IllegalArgumentException when given empty array
      */
     @Test
-    void emptyArray_WithEmptyArray_ThrowsBeansException() {
+    void emptyArray_WithEmptyArray_ThrowsIllegalArgumentException() {
         String errorMsg = "Array should not be empty";
         Object[] emptyArray = new Object[0];
-        assertThrows(BeansException.class, () -> CheckUtils.emptyArray(emptyArray, errorMsg));
+        assertThrows(IllegalArgumentException.class, () -> CheckUtils.emptyArray(emptyArray, errorMsg));
     }
 
     /**
@@ -68,35 +67,37 @@ class CheckUtilsTest {
      */
     @Test
     void emptyArray_WithNonEmptyArray_DoesNotThrow() {
-        Object[] nonEmptyArray = new Object[]{"test"};
+        Object[] nonEmptyArray = new Object[] { "test" };
         assertDoesNotThrow(() -> CheckUtils.emptyArray(nonEmptyArray, "any message"));
     }
 
     /**
-     * Tests that emptyString throws BeansException when given null string
+     * Tests that emptyString throws IllegalArgumentException when given null string
      */
     @Test
-    void emptyString_WithNullString_ThrowsBeansException() {
+    void emptyString_WithNullString_ThrowsIllegalArgumentException() {
         String errorMsg = "String should not be null";
-        assertThrows(BeansException.class, () -> CheckUtils.emptyString(null, errorMsg));
+        assertThrows(IllegalArgumentException.class, () -> CheckUtils.emptyString(null, errorMsg));
     }
 
     /**
-     * Tests that emptyString throws BeansException when given empty string
+     * Tests that emptyString throws IllegalArgumentException when given empty
+     * string
      */
     @Test
-    void emptyString_WithEmptyString_ThrowsBeansException() {
+    void emptyString_WithEmptyString_ThrowsIllegalArgumentException() {
         String errorMsg = "String should not be empty";
-        assertThrows(BeansException.class, () -> CheckUtils.emptyString("", errorMsg));
+        assertThrows(IllegalArgumentException.class, () -> CheckUtils.emptyString("", errorMsg));
     }
 
     /**
-     * Tests that emptyString throws BeansException when given blank string
+     * Tests that emptyString throws IllegalArgumentException when given blank
+     * string
      */
     @Test
-    void emptyString_WithBlankString_ThrowsBeansException() {
+    void emptyString_WithBlankString_ThrowsIllegalArgumentException() {
         String errorMsg = "String should not be blank";
-        assertThrows(BeansException.class, () -> CheckUtils.emptyString("   ", errorMsg));
+        assertThrows(IllegalArgumentException.class, () -> CheckUtils.emptyString("   ", errorMsg));
     }
 
     /**

@@ -17,8 +17,6 @@ package com.pythongong.util;
 
 import java.util.Collection;
 
-import com.pythongong.exception.BeansException;
-
 /**
  * Utility class providing validation methods for common checks.
  * This class contains static methods for validating arguments and ensuring
@@ -27,33 +25,35 @@ import com.pythongong.exception.BeansException;
  * @author Cheng Gong
  */
 public class CheckUtils {
-    
+
     /** Private constructor to prevent instantiation */
-    private CheckUtils() {}
+    private CheckUtils() {
+    }
 
     /**
-     * Checks if an object is null and throws an BeansException if it is.
+     * Checks if an object is null and throws an IllegalArgumentException if it is.
      *
      * @param obj the object to check
      * @param msg the error message to use if the object is null
-     * @throws BeansException if the object is null
+     * @throws IllegalArgumentException if the object is null
      */
     public static void nullArgs(Object obj, String msg) {
         if (obj == null) {
-            throw new BeansException(msg);
+            throw new IllegalArgumentException(msg);
         }
     }
 
     /**
-     * Checks if an array is null or empty and throws an BeansException if it is.
+     * Checks if an array is null or empty and throws an IllegalArgumentException if
+     * it is.
      *
      * @param array the array to check
-     * @param msg the error message to use if the array is null or empty
-     * @throws BeansException if the array is null or empty
+     * @param msg   the error message to use if the array is null or empty
+     * @throws IllegalArgumentException if the array is null or empty
      */
     public static void emptyArray(Object[] array, String msg) {
         if (ClassUtils.isArrayEmpty(array)) {
-            throw new BeansException(msg);
+            throw new IllegalArgumentException(msg);
         }
     }
 
@@ -62,17 +62,18 @@ public class CheckUtils {
      *
      * @param str the string to check
      * @param msg the error message to use if the string is empty
-     * @throws BeansException if the string is null, empty, or contains only whitespace
+     * @throws IllegalArgumentException if the string is null, empty, or contains
+     *                                  only whitespace
      */
     public static void emptyString(String str, String msg) {
         if (StringUtils.isEmpty(str)) {
-            throw new BeansException(msg);
+            throw new IllegalArgumentException(msg);
         }
     }
 
     public static void emptyCollection(Collection<?> collection, String msg) {
         if (ClassUtils.isCollectionEmpty(collection)) {
-            throw new BeansException(msg);
+            throw new IllegalArgumentException(msg);
         }
     }
 }

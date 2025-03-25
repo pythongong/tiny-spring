@@ -17,7 +17,6 @@
 package com.pythongong.beans.config;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.util.CheckUtils;
 
@@ -54,13 +53,13 @@ public record BeanDefinition(
          * Method to be called after bean properties are set.
          * May be null if no initialization method is specified.
          */
-        Method initMethod,
+        String initMethodName,
 
         /**
          * Method to be called when the bean is being destroyed.
          * May be null if no destruction method is specified.
          */
-        Method destroyMethod,
+        String destroyMethodName,
 
         /**
          * The scope of the bean (singleton or prototype).
@@ -73,18 +72,7 @@ public record BeanDefinition(
          * May be null, in which case the default constructor will be used.
          */
         Constructor<?> constructor,
-
-        /*
-         * The factory name to be used for creating the bean.
-         * May be null, in which case the bean class will be used.
-         */
-        String factoryName,
-
-        /*
-         * The factory method to be used for creating the bean.
-         * May be null, in which case the default constructor will be used.
-         */
-        Method factoryMethod) {
+        FactpryDefinition factpryDefinition) {
     /**
      * Canonical constructor with default value handling.
      * Ensures fieldValueList is never null and scope has a default value.
