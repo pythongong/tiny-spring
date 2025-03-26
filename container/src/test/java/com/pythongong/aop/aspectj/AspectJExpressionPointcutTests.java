@@ -10,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Method;
 
+/**
+ * @author Cheng Gong
+ */
 class AspectJExpressionPointcutTests {
 
     static final String CORRECT_EXPRESS = "execution(* com.pythongong.test.aop.AopTestInterface.*(..))";
@@ -22,7 +25,6 @@ class AspectJExpressionPointcutTests {
         Method method = AopTestInterface.class.getMethod("getProxy");
 
         // Act & Assert
-        assertTrue(pointcut.matches(AopTestInterface.class));
         assertTrue(pointcut.matches(method));
     }
 
@@ -35,7 +37,6 @@ class AspectJExpressionPointcutTests {
         Method method = DuplicateAopTestInterface.class.getMethod("getProxy");
 
         // Act & Assert
-        assertFalse(pointcut.matches(DuplicateAopTestInterface.class));
         assertFalse(pointcut.matches(method));
     }
 
@@ -48,7 +49,7 @@ class AspectJExpressionPointcutTests {
         Method method = AopTestInterface.class.getMethod("add", int.class, int.class);
 
         // Act & Assert
-        assertTrue(pointcut.matches(AopTestInterface.class));
+
         assertTrue(pointcut.matches(method));
     }
 

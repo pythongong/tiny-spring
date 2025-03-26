@@ -24,13 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.pythongong.test.ioc.normal.TestConfiguration;
 import com.pythongong.util.ClassUtils;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConfigurableClassScanner Tests")
 class ConfigurableClassScannerTest {
 
-    private static String basePackage = "com.pythongong.test.utils";
+    private static String basePackage = TestConfiguration.class.getPackageName();
 
     private ConfigurableClassScanner scanner;
 
