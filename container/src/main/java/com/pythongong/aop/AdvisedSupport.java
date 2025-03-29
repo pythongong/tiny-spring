@@ -18,6 +18,8 @@ package com.pythongong.aop;
 import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
 
+import lombok.Builder;
+
 /**
  * Configuration holder for AOP proxies. This record encapsulates all the
  * necessary
@@ -41,9 +43,9 @@ import com.pythongong.util.CheckUtils;
  * @see MethodInterceptor
  * @see MethodMatcher
  */
+@Builder
 public record AdvisedSupport(Object target,
-        MethodInterceptor methodInterceptor,
-        MethodMatcher matcher) {
+        MethodInterceptor methodInterceptor) {
 
     /**
      * Constructs an AdvisedSupport instance with validation.
@@ -53,7 +55,6 @@ public record AdvisedSupport(Object target,
     public AdvisedSupport {
         CheckUtils.nullArgs(target, "AdvisedSupport recevies null targetSource");
         CheckUtils.nullArgs(methodInterceptor, "AdvisedSupport recevies null methodInterceptor");
-        CheckUtils.nullArgs(matcher, "AdvisedSupport recevies null matcher");
     }
 
     /**

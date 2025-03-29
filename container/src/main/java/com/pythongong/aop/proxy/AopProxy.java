@@ -17,15 +17,20 @@
 package com.pythongong.aop.proxy;
 
 /**
- * Factory interface for AOP proxies. Provides a common abstraction for different
- * proxy creation strategies such as JDK dynamic proxies and ByteBuddy-based proxies.
+ * Factory interface for AOP proxies. Provides a common abstraction for
+ * different
+ * proxy creation strategies such as JDK dynamic proxies and ByteBuddy-based
+ * proxies.
  * 
- * <p>Implementations of this interface are responsible for creating proxy instances
- * that provide method interception capabilities for AOP. The actual proxy creation
+ * <p>
+ * Implementations of this interface are responsible for creating proxy
+ * instances
+ * that provide method interception capabilities for AOP. The actual proxy
+ * creation
  * mechanism may vary depending on the implementation:
  * <ul>
- *   <li>JDK dynamic proxies for interface-based proxies</li>
- *   <li>ByteBuddy for class-based proxies</li>
+ * <li>JDK dynamic proxies for interface-based proxies</li>
+ * <li>ByteBuddy for class-based proxies</li>
  * </ul>
  *
  * @author Cheng Gong
@@ -39,7 +44,7 @@ public interface AopProxy {
      * interception logic defined by the proxy creator's configuration.
      *
      * @return the proxy object
-     * @throws com.pythongong.exception.AopException if proxy creation fails
+     * @throws com.pythongong.exception.AopConfigException if proxy creation fails
      */
     Object getProxy();
 }

@@ -15,9 +15,7 @@
  */
 package com.pythongong.aop;
 
-import java.util.function.Supplier;
-
-import com.pythongong.exception.AopException;
+import com.pythongong.exception.AopConfigException;
 
 /**
  * Functional interface for implementing method interception in AOP.
@@ -44,7 +42,7 @@ import com.pythongong.exception.AopException;
  *
  * @author Cheng Gong
  * @see java.util.function.Supplier
- * @see com.pythongong.exception.AopException
+ * @see com.pythongong.exception.AopConfigException
  */
 @FunctionalInterface
 public interface MethodInterceptor {
@@ -54,7 +52,7 @@ public interface MethodInterceptor {
      *
      * @param proceed a supplier that executes the original method
      * @return the result of the method invocation
-     * @throws AopException if an error occurs during interception
+     * @throws AopConfigException if an error occurs during interception
      */
-    Object invoke(Supplier<Object> proceed) throws AopException;
+    Object invoke(MethodInvocation invocation) throws AopConfigException;
 }

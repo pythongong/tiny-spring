@@ -15,38 +15,39 @@
  */
 package com.pythongong.aop.aspectj;
 
-import java.lang.reflect.Method;
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParser;
 
-import com.pythongong.aop.MethodMatcher;
 import com.pythongong.util.CheckUtils;
 
 /**
- * AspectJ expression-based implementation of {@link MethodMatcher}.
+ * 
  * This class uses AspectJ's pointcut expression language to determine
  * which methods should be intercepted.
  * 
- * <p>Supports the full AspectJ pointcut expression syntax, including:
+ * <p>
+ * Supports the full AspectJ pointcut expression syntax, including:
  * <ul>
- *   <li>execution() expressions for method execution matching</li>
- *   <li>within() expressions for type matching</li>
- *   <li>args() expressions for argument matching</li>
- *   <li>@annotation expressions for annotation matching</li>
+ * <li>execution() expressions for method execution matching</li>
+ * <li>within() expressions for type matching</li>
+ * <li>args() expressions for argument matching</li>
+ * <li>@annotation expressions for annotation matching</li>
  * </ul>
  * 
- * <p>Example expressions:
+ * <p>
+ * Example expressions:
  * <ul>
- *   <li>"execution(* com.example.service.*.*(..))" - matches all methods in service package</li>
- *   <li>"execution(public * *(..))" - matches all public methods</li>
- *   <li>"execution(@Transactional * *(..))" - matches annotated methods</li>
+ * <li>"execution(* com.example.service.*.*(..))" - matches all methods in
+ * service package</li>
+ * <li>"execution(public * *(..))" - matches all public methods</li>
+ * <li>"execution(@Transactional * *(..))" - matches annotated methods</li>
  * </ul>
  *
  * @author Cheng Gong
  * @see MethodMatcher
  * @see org.aspectj.weaver.tools.PointcutExpression
  */
-public class AspectJExpressionPointcut implements MethodMatcher {
+public class AspectJExpressionPointcut {
 
     /**
      * The compiled AspectJ pointcut expression used for method matching.
@@ -57,7 +58,8 @@ public class AspectJExpressionPointcut implements MethodMatcher {
      * Creates a new pointcut using the specified AspectJ expression.
      *
      * @param expression the AspectJ pointcut expression
-     * @throws IllegalArgumentException if the expression is null or empty
+     * @throws IllegalArgumentException                if the expression is null or
+     *                                                 empty
      * @throws org.aspectj.weaver.tools.ParseException if the expression is invalid
      */
     public AspectJExpressionPointcut(String expression) {
@@ -73,8 +75,13 @@ public class AspectJExpressionPointcut implements MethodMatcher {
      * @param method the method to check
      * @return true if the method matches the pointcut expression
      */
-    @Override
-    public boolean matches(Method method) {
-        return pointcutExpression.matchesMethodExecution(method).alwaysMatches();
+    // @Override
+    // public boolean matches(Method method) {
+    // return pointcutExpression.matchesMethodExecution(method).alwaysMatches();
+    // }
+
+    public boolean matchesClass(Class<?> targetClass) {
+        return pointcutExpression.couldMatchJoinPointsInType(targetClass);
     }
+
 }

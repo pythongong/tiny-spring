@@ -17,7 +17,7 @@ package com.pythongong.aop.proxy;
 
 import java.lang.reflect.InvocationTargetException;
 import com.pythongong.aop.AdvisedSupport;
-import com.pythongong.exception.AopException;
+import com.pythongong.exception.AopConfigException;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
 
@@ -84,7 +84,7 @@ public class ByteBuddyAopProxy implements AopProxy {
      * </ul>
      *
      * @return the proxy instance
-     * @throws AopException if proxy creation or instantiation fails
+     * @throws AopConfigException if proxy creation or instantiation fails
      */
     @Override
     public Object getProxy() {
@@ -100,7 +100,7 @@ public class ByteBuddyAopProxy implements AopProxy {
             return proxyClass.getConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
-            throw new AopException("Fail to invoke method ");
+            throw new AopConfigException("Fail to invoke method ");
         }
     }
 }

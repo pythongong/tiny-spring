@@ -134,7 +134,7 @@ class ConfigurableClassParserTest {
                 .orElse(null);
 
         assertNotNull(factoryBean);
-        assertNotNull(factoryBean.factpryDefinition());
+        assertNotNull(factoryBean.factoryDefinition());
 
     }
 

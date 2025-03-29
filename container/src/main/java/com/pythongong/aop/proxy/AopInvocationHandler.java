@@ -17,11 +17,10 @@
 package com.pythongong.aop.proxy;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.pythongong.aop.AdvisedSupport;
-import com.pythongong.exception.AopException;
+import com.pythongong.aop.MethodInvocation;
 import com.pythongong.util.CheckUtils;
 
 /**
@@ -86,15 +85,11 @@ public class AopInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object target = advisedSupport.target();
-        if (!advisedSupport.matcher().matches(method)) {
-            return method.invoke(target, args);
-        }
-        return advisedSupport.methodInterceptor().invoke(() -> {
-            try {
-                return method.invoke(target, args);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new AopException("Fail to invoke method ");
-            }
-        });
+        return advisedSupport.methodInterceptor().invoke(MethodInvocation.builder()
+                .argus(args)
+                .method(method)
+                .target(target)
+                .build());
     }
+
 }

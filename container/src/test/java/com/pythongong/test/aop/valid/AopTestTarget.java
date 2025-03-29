@@ -1,4 +1,4 @@
-package com.pythongong.test.aop;
+package com.pythongong.test.aop.valid;
 
 public class AopTestTarget implements AopTestInterface {
 

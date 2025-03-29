@@ -21,6 +21,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import org.aspectj.lang.annotation.Aspect;
+
 import com.pythongong.beans.config.*;
 import com.pythongong.context.support.PropertyResolver;
 import com.pythongong.enums.FiledAnnoEnum;
@@ -28,6 +30,7 @@ import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.DuplicateBeanException;
 import com.pythongong.stereotype.*;
+import com.pythongong.util.AopUtils;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
 import com.pythongong.util.StringUtils;
@@ -67,6 +70,8 @@ public class ConfigurableClassParser {
 
     /** Set of bean definitions discovered during parsing */
     private Set<BeanDefinition> beanDefinitions;
+
+    private BeanDefinition aopBeanPostProcessorDefinition;
 
     /**
      * Creates a new parser with the specified property resolver.
@@ -147,6 +152,13 @@ public class ConfigurableClassParser {
         if (beanClass.isAnnotationPresent(Configuration.class)) {
             createFactoryBeanDefinitions(beanClass, beanName);
         }
+
+        if (beanClass.isAnnotationPresent(Aspect.class)) {
+            if (aopBeanPostProcessorDefinition == null) {
+                aopBeanPostProcessorDefinition = AopUtils.definiteAopBeanPostProcessor();
+            }
+            AopUtils.addAdvisors(beanDefinition, aopBeanPostProcessorDefinition);
+        }
     }
 
     /**
@@ -168,7 +180,7 @@ public class ConfigurableClassParser {
                     }
                     String beanName = beanAnno.value();
 
-                    FactpryDefinition factpryDefinition = new FactpryDefinition(factoryName, method.getName(),
+                    FactoryDefinition factpryDefinition = new FactoryDefinition(factoryName, method.getName(),
                             method.getParameterTypes());
 
                     BeanDefinition beanDefinition = BeanDefinition.builder()
@@ -177,7 +189,7 @@ public class ConfigurableClassParser {
                             .initMethodName(beanAnno.init())
                             .destroyMethodName(beanAnno.destroy())
                             .scope(extractScope(returnType))
-                            .factpryDefinition(factpryDefinition)
+                            .factoryDefinition(factpryDefinition)
                             .build();
 
                     addBeanDef(beanDefinition);

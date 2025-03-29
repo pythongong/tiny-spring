@@ -18,7 +18,7 @@ package com.pythongong.aop.proxy;
 import java.lang.reflect.Proxy;
 
 import com.pythongong.aop.AdvisedSupport;
-import com.pythongong.exception.AopException;
+import com.pythongong.exception.AopConfigException;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
 
@@ -57,7 +57,7 @@ public class JdkDynamicAopProxy implements AopProxy {
      * @param advisedSupport the AOP configuration containing target object and
      *                       interceptors
      * @throws IllegalArgumentException if advisedSupport is null
-     * @throws AopException             if the target object doesn't implement any
+     * @throws AopConfigException       if the target object doesn't implement any
      *                                  interfaces
      */
     public JdkDynamicAopProxy(AdvisedSupport advisedSupport) {
@@ -66,7 +66,7 @@ public class JdkDynamicAopProxy implements AopProxy {
         this.invocationHandler = new AopInvocationHandler(advisedSupport);
         Class<?>[] targetClasses = advisedSupport.getTargetInterfaces();
         if (ClassUtils.isArrayEmpty(targetClasses)) {
-            throw new AopException(
+            throw new AopConfigException(
                     String.format("Target type {%s} is wrong", advisedSupport.getTargetClass().getName()));
         }
     }

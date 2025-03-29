@@ -2,11 +2,9 @@ package com.pythongong.aop.proxy;
 
 import com.pythongong.aop.AdvisedSupport;
 import com.pythongong.aop.MethodInterceptor;
-import com.pythongong.aop.MethodMatcher;
-import com.pythongong.aop.aspectj.AspectJExpressionPointcut;
-import com.pythongong.exception.AopException;
-import com.pythongong.test.aop.AopTestInterface;
-import com.pythongong.test.aop.AopTestTarget;
+import com.pythongong.exception.AopConfigException;
+import com.pythongong.test.aop.valid.AopTestInterface;
+import com.pythongong.test.aop.valid.AopTestTarget;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -24,8 +22,8 @@ class JdkDynamicAopProxyTests {
         // Arrange
         AopTestInterface target = new AopTestTarget();
 
-        MethodInterceptor interceptor = proceed -> {
-            Object object = proceed.get();
+        MethodInterceptor interceptor = invocation -> {
+            Object object = invocation.proceed();
             if (object instanceof Boolean) {
                 Boolean isProxy = (Boolean) object;
                 isProxy = true;
@@ -33,8 +31,13 @@ class JdkDynamicAopProxyTests {
             }
             return object;
         };
-        MethodMatcher matcher = new AspectJExpressionPointcut(CORRECT_EXPRESS);
-        AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptor, matcher);
+
+        AdvisedSupport advisedSupport = AdvisedSupport.builder()
+                .target(target)
+                .methodInterceptor(interceptor)
+
+                .build();
+        ;
 
         // Act
         assertFalse(target.getProxy());
@@ -53,8 +56,8 @@ class JdkDynamicAopProxyTests {
         // Arrange
         Object invalidTarget = new Object();
 
-        MethodInterceptor interceptor = proceed -> {
-            Object object = proceed.get();
+        MethodInterceptor interceptor = invocation -> {
+            Object object = invocation.proceed();
             if (object instanceof Boolean) {
                 Boolean isProxy = (Boolean) object;
                 isProxy = true;
@@ -62,12 +65,15 @@ class JdkDynamicAopProxyTests {
             }
             return object;
         };
-        MethodMatcher matcher = new AspectJExpressionPointcut(CORRECT_EXPRESS);
-        AdvisedSupport advisedSupport = new AdvisedSupport(invalidTarget, interceptor,
-                matcher);
+
+        AdvisedSupport advisedSupport = AdvisedSupport.builder()
+                .target(invalidTarget)
+                .methodInterceptor(interceptor)
+
+                .build();
 
         // Act & Assert
-        assertThrows(AopException.class, () -> new JdkDynamicAopProxy(advisedSupport));
+        assertThrows(AopConfigException.class, () -> new JdkDynamicAopProxy(advisedSupport));
     }
 
     @Test
@@ -76,8 +82,8 @@ class JdkDynamicAopProxyTests {
         // Arrange
         AopTestInterface target = new AopTestTarget();
 
-        MethodInterceptor interceptor = proceed -> {
-            Object object = proceed.get();
+        MethodInterceptor interceptor = invocation -> {
+            Object object = invocation.proceed();
             if (object instanceof Boolean) {
                 Boolean isProxy = (Boolean) object;
                 isProxy = true;
@@ -85,9 +91,11 @@ class JdkDynamicAopProxyTests {
             }
             return object;
         };
-        MethodMatcher matcher = new AspectJExpressionPointcut(WRONG_EXPRESS);
-        AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptor,
-                matcher);
+        AdvisedSupport advisedSupport = AdvisedSupport.builder()
+                .target(target)
+                .methodInterceptor(interceptor)
+
+                .build();
 
         // Act
         JdkDynamicAopProxy proxy = new JdkDynamicAopProxy(advisedSupport);
@@ -104,16 +112,19 @@ class JdkDynamicAopProxyTests {
         // Arrange
         AopTestInterface target = new AopTestTarget();
 
-        MethodInterceptor interceptor = proceed -> {
-            Object object = proceed.get();
+        MethodInterceptor interceptor = invocation -> {
+            Object object = invocation.proceed();
             if (object instanceof Integer) {
                 return ((Integer) object) * 2;
             }
             return object;
         };
-        MethodMatcher matcher = new AspectJExpressionPointcut(CORRECT_EXPRESS);
-        AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptor,
-                matcher);
+
+        AdvisedSupport advisedSupport = AdvisedSupport.builder()
+                .target(target)
+                .methodInterceptor(interceptor)
+
+                .build();
 
         // Act
         JdkDynamicAopProxy proxy = new JdkDynamicAopProxy(advisedSupport);

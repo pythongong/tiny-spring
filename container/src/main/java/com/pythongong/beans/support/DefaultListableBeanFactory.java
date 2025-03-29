@@ -32,11 +32,10 @@ import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.config.BeanReference;
 import com.pythongong.beans.config.DisposableBean;
-import com.pythongong.beans.config.FactpryDefinition;
+import com.pythongong.beans.config.FactoryDefinition;
 import com.pythongong.beans.config.InitializingBean;
 import com.pythongong.beans.config.FieldValue;
 import com.pythongong.beans.config.FieldValueList;
-import com.pythongong.beans.factory.AutowireCapableBeanFactory;
 import com.pythongong.beans.factory.ConfigurableListableBeanFactory;
 import com.pythongong.beans.registry.BeanDefinitionRegistry;
 import com.pythongong.context.event.ApplicationEventMulticaster;
@@ -60,8 +59,9 @@ import com.pythongong.util.StringUtils;
  *
  * @author Cheng Gong
  */
-public class DefaultConfigurableListableBeanFactory
-        implements BeanDefinitionRegistry, ConfigurableListableBeanFactory, AutowireCapableBeanFactory {
+
+public class DefaultListableBeanFactory
+        implements BeanDefinitionRegistry, ConfigurableListableBeanFactory {
 
     /** Map of bean definitions, keyed by bean name */
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
@@ -79,7 +79,7 @@ public class DefaultConfigurableListableBeanFactory
      * Creates a new DefaultListableBeanFactory.
      * Initializes the singleton registry and general bean factory.
      */
-    public DefaultConfigurableListableBeanFactory() {
+    public DefaultListableBeanFactory() {
         singletonBeanRegistry = new DefaultSingletonBeanRegistry();
         generalBeanFactory = new GeneralBeanFactory(this::getBeanDefinition, this::createBean, singletonBeanRegistry);
     }
@@ -163,48 +163,6 @@ public class DefaultConfigurableListableBeanFactory
     }
 
     /**
-     * Applies BeanPostProcessors to the given bean instance before initialization.
-     *
-     * @param existingBean the existing bean instance
-     * @param beanName     the name of the bean
-     * @return the bean instance to use, either the original or a wrapped one
-     */
-    @Override
-    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
-            throws BeansException {
-        Object result = existingBean;
-        for (BeanPostProcessor processor : generalBeanFactory.getBeanPostProcessors()) {
-            Object current = processor.postProcessBeforeInitialization(result, beanName);
-            if (current == null) {
-                return result;
-            }
-            result = current;
-        }
-        return result;
-    }
-
-    /**
-     * Applies BeanPostProcessors to the given bean instance after initialization.
-     *
-     * @param existingBean the existing bean instance
-     * @param beanName     the name of the bean
-     * @return the bean instance to use, either the original or a wrapped one
-     */
-    @Override
-    public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
-            throws BeansException {
-        Object result = existingBean;
-        for (BeanPostProcessor processor : generalBeanFactory.getBeanPostProcessors()) {
-            Object current = processor.postProcessAfterInitialization(result, beanName);
-            if (current == null) {
-                return result;
-            }
-            result = current;
-        }
-        return result;
-    }
-
-    /**
      * Creates a new instance of a bean from its definition.
      *
      * @param beanDefinition the bean definition to create an instance from
@@ -221,6 +179,8 @@ public class DefaultConfigurableListableBeanFactory
         }
 
         fillFieldValues(beanDefinition, bean);
+
+        methodInject(bean, beanDefinition);
 
         bean = initializeBean(bean, beanDefinition);
 
@@ -260,7 +220,7 @@ public class DefaultConfigurableListableBeanFactory
      * Creates a new instance of a bean using its constructor.
      */
     private Object createBeanInstance(BeanDefinition beanDefinition) {
-        if (beanDefinition.factpryDefinition() != null) {
+        if (beanDefinition.factoryDefinition() != null) {
             return createBeanInstanceByFactory(beanDefinition);
         }
 
@@ -269,7 +229,7 @@ public class DefaultConfigurableListableBeanFactory
     }
 
     private Object createBeanInstanceByFactory(BeanDefinition beanDefinition) {
-        FactpryDefinition factpryDefinition = beanDefinition.factpryDefinition();
+        FactoryDefinition factpryDefinition = beanDefinition.factoryDefinition();
 
         String factoryName = factpryDefinition.factoryName();
         Object factory = getBean(factoryName);
@@ -351,14 +311,28 @@ public class DefaultConfigurableListableBeanFactory
         String beanName = beanDefinition.beanName();
         awareBean(beanName, bean);
 
-        Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+        bean = applyBeanPostProcessorsBeforeInit(bean, beanName);
 
-        invokeInitMethods(wrappedBean, beanDefinition);
+        invokeInitMethods(bean, beanDefinition);
 
-        methodInject(beanName, wrappedBean, beanDefinition);
+        bean = applyBeanPostProcessorsAfterInit(bean, beanName);
+        return bean;
+    }
 
-        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
-        return wrappedBean;
+    private Object applyBeanPostProcessorsBeforeInit(Object bean, String beanName) {
+        Object wrappedBean = bean;
+        for (BeanPostProcessor beanPostProcessor : generalBeanFactory.getBeanPostProcessors()) {
+            wrappedBean = beanPostProcessor.postProcessBeforeInitialization(bean, beanName);
+        }
+        return wrappedBean == null ? bean : wrappedBean;
+    }
+
+    private Object applyBeanPostProcessorsAfterInit(Object bean, String beanName) {
+        Object wrappedBean = bean;
+        for (BeanPostProcessor beanPostProcessor : generalBeanFactory.getBeanPostProcessors()) {
+            wrappedBean = beanPostProcessor.postProcessAfterInitialization(bean, beanName);
+        }
+        return wrappedBean == null ? bean : wrappedBean;
     }
 
     /**
@@ -386,12 +360,11 @@ public class DefaultConfigurableListableBeanFactory
      * This method processes methods with a single parameter that should be
      * autowired with a bean from the container.
      *
-     * @param beanName       the name of the bean being processed
      * @param wrappedBean    the bean instance being configured
      * @param beanDefinition the bean definition
      * @throws BeansException if method injection fails
      */
-    private void methodInject(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
+    private void methodInject(Object wrappedBean, BeanDefinition beanDefinition) {
         Class<?> beanClass = beanDefinition.beanClass();
         Method[] methods = beanClass.getMethods();
         for (Method method : methods) {

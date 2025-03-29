@@ -2,7 +2,7 @@ package com.pythongong.beans.config;
 
 import com.pythongong.util.CheckUtils;
 
-public record FactpryDefinition(/*
+public record FactoryDefinition(/*
                                  * The factory name to be used for creating the bean.
                                  * May be null, in which case the bean class will be used.
                                  */
@@ -15,7 +15,7 @@ public record FactpryDefinition(/*
         String factoryMethodName,
         Class<?>[] factoryMethodParamTypes) {
 
-    public FactpryDefinition {
+    public FactoryDefinition {
         CheckUtils.emptyString(factoryName, "FactpryDefinition recevies empty factory name");
         CheckUtils.emptyString(factoryMethodName, "FactpryDefinition recevies empty factory method name");
     }

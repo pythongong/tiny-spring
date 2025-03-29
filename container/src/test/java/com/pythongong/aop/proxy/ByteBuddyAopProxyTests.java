@@ -11,11 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import com.pythongong.aop.AdvisedSupport;
 import com.pythongong.aop.MethodInterceptor;
-import com.pythongong.aop.MethodMatcher;
-
-import com.pythongong.aop.aspectj.AspectJExpressionPointcut;
-import com.pythongong.test.aop.AopTestInterface;
-import com.pythongong.test.aop.AopTestTarget;
+import com.pythongong.test.aop.valid.AopTestInterface;
+import com.pythongong.test.aop.valid.AopTestTarget;
 
 public class ByteBuddyAopProxyTests {
 
@@ -29,8 +26,8 @@ public class ByteBuddyAopProxyTests {
         // Arrange
         AopTestInterface target = new AopTestTarget();
 
-        MethodInterceptor interceptor = proceed -> {
-            Object object = proceed.get();
+        MethodInterceptor interceptor = invocation -> {
+            Object object = invocation.proceed();
             if (object instanceof Boolean) {
                 Boolean isProxy = (Boolean) object;
                 isProxy = true;
@@ -38,8 +35,12 @@ public class ByteBuddyAopProxyTests {
             }
             return object;
         };
-        MethodMatcher matcher = new AspectJExpressionPointcut(CORRECT_EXPRESS);
-        AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptor, matcher);
+
+        AdvisedSupport advisedSupport = AdvisedSupport.builder()
+                .target(target)
+                .methodInterceptor(interceptor)
+
+                .build();
 
         // Act
         assertFalse(target.getProxy());
@@ -65,8 +66,8 @@ public class ByteBuddyAopProxyTests {
         // Arrange
         AopTestInterface target = new AopTestTarget();
 
-        MethodInterceptor interceptor = proceed -> {
-            Object object = proceed.get();
+        MethodInterceptor interceptor = invocation -> {
+            Object object = invocation.proceed();
             if (object instanceof Boolean) {
                 Boolean isProxy = (Boolean) object;
                 isProxy = true;
@@ -74,9 +75,11 @@ public class ByteBuddyAopProxyTests {
             }
             return object;
         };
-        MethodMatcher matcher = new AspectJExpressionPointcut(WRONG_EXPRESS);
-        AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptor,
-                matcher);
+        AdvisedSupport advisedSupport = AdvisedSupport.builder()
+                .target(target)
+                .methodInterceptor(interceptor)
+
+                .build();
 
         // Act
         assertFalse(target.getProxy());
@@ -94,16 +97,19 @@ public class ByteBuddyAopProxyTests {
         // Arrange
         AopTestInterface target = new AopTestTarget();
 
-        MethodInterceptor interceptor = proceed -> {
-            Object object = proceed.get();
+        MethodInterceptor interceptor = invocation -> {
+            Object object = invocation.proceed();
             if (object instanceof Integer) {
                 return ((Integer) object) * 2;
             }
             return object;
         };
-        MethodMatcher matcher = new AspectJExpressionPointcut(CORRECT_EXPRESS);
-        AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptor,
-                matcher);
+
+        AdvisedSupport advisedSupport = AdvisedSupport.builder()
+                .target(target)
+                .methodInterceptor(interceptor)
+
+                .build();
 
         // Act
         ByteBuddyAopProxy proxy = new ByteBuddyAopProxy(advisedSupport);

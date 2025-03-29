@@ -72,7 +72,8 @@ public record BeanDefinition(
          * May be null, in which case the default constructor will be used.
          */
         Constructor<?> constructor,
-        FactpryDefinition factpryDefinition) {
+        Object[] constructorArgus,
+        FactoryDefinition factoryDefinition) {
     /**
      * Canonical constructor with default value handling.
      * Ensures fieldValueList is never null and scope has a default value.

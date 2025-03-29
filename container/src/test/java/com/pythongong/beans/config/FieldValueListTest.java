@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-
 /**
  * Test class for verifying the functionality of field value list operations.
  * This test suite ensures that field values are properly handled and processed
@@ -33,7 +32,7 @@ import java.util.NoSuchElementException;
  * @since 2025-03-18
  */
 public class FieldValueListTest {
-    
+
     private FieldValueList fieldValueList;
 
     @BeforeEach
@@ -45,13 +44,13 @@ public class FieldValueListTest {
     void testAddAndGetFieldValue() {
         FieldValue fieldValue = new FieldValue("name", "value");
         fieldValueList.add(fieldValue);
-        
-        assertEquals(fieldValue, fieldValueList.getfieldValue("name"));
+
+        assertEquals(fieldValue, fieldValueList.getFieldValue("name"));
     }
 
     @Test
     void testGetNonExistentFieldValue() {
-        assertNull(fieldValueList.getfieldValue("nonexistent"));
+        assertNull(fieldValueList.getFieldValue("nonexistent"));
     }
 
     @Test
@@ -59,7 +58,7 @@ public class FieldValueListTest {
         FieldValue first = new FieldValue("first", "1");
         FieldValue second = new FieldValue("second", "2");
         FieldValue third = new FieldValue("third", "3");
-        
+
         fieldValueList.add(first);
         fieldValueList.add(second);
         fieldValueList.add(third);
@@ -82,10 +81,10 @@ public class FieldValueListTest {
     @Test
     void testSize() {
         assertEquals(0, fieldValueList.size());
-        
+
         fieldValueList.add(new FieldValue("test", "value"));
         assertEquals(1, fieldValueList.size());
-        
+
         fieldValueList.add(new FieldValue("test2", "value2"));
         assertEquals(2, fieldValueList.size());
     }
@@ -93,7 +92,7 @@ public class FieldValueListTest {
     @Test
     void testIsEmpty() {
         assertTrue(fieldValueList.isEmpty());
-        
+
         fieldValueList.add(new FieldValue("test", "value"));
         assertFalse(fieldValueList.isEmpty());
     }
@@ -102,14 +101,14 @@ public class FieldValueListTest {
     void testEqualsAndHashCode() {
         FieldValueList list1 = new FieldValueList();
         FieldValueList list2 = new FieldValueList();
-        
+
         assertEquals(list1, list2);
         assertEquals(list1.hashCode(), list2.hashCode());
-        
+
         FieldValue value = new FieldValue("test", "value");
         list1.add(value);
         list2.add(value);
-        
+
         assertEquals(list1, list2);
         assertEquals(list1.hashCode(), list2.hashCode());
     }

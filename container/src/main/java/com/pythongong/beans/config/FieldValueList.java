@@ -31,7 +31,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode
 public class FieldValueList implements Iterable<FieldValue> {
-    
+
     private final List<FieldValue> fieldValues;
 
     /**
@@ -56,7 +56,7 @@ public class FieldValueList implements Iterable<FieldValue> {
      * @param propertyName the name of the property to find
      * @return the fieldValue if found, null otherwise
      */
-    public FieldValue getfieldValue(String propertyName) {
+    public FieldValue getFieldValue(String propertyName) {
         for (FieldValue fieldValue : fieldValues) {
             if (fieldValue.name().equals(propertyName)) {
                 return fieldValue;
@@ -91,7 +91,7 @@ public class FieldValueList implements Iterable<FieldValue> {
     }
 
     /**
-     * Returns the number of filedValue in this list. 
+     * Returns the number of filedValue in this list.
      *
      * @return the number of filedValue in this list
      */
@@ -99,7 +99,7 @@ public class FieldValueList implements Iterable<FieldValue> {
         return fieldValues.size();
     }
 
-     /**
+    /**
      * Returns {@code true} if this list contains no filedValue.
      *
      * @return {@code true} if this list contains no filedValue
@@ -107,4 +107,14 @@ public class FieldValueList implements Iterable<FieldValue> {
     public boolean isEmpty() {
         return fieldValues.isEmpty();
     }
+
+    // public boolean contains(String fieldName) {
+    // for (FieldValue fieldValue : fieldValues) {
+    // if (fieldValue.name().equals(fieldName)) {
+    // return true;
+    // }
+    // }
+    // ;
+    // return false;
+    // }
 }

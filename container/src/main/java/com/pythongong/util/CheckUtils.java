@@ -43,6 +43,10 @@ public class CheckUtils {
         }
     }
 
+    public static void nullArgs(Object obj, String method, String argu) {
+        nullArgs(obj, String.format("{%s} recevies null {%s}", method, argu));
+    }
+
     /**
      * Checks if an array is null or empty and throws an IllegalArgumentException if
      * it is.
@@ -69,6 +73,10 @@ public class CheckUtils {
         if (StringUtils.isEmpty(str)) {
             throw new IllegalArgumentException(msg);
         }
+    }
+
+    public static void emptyString(String str, String method, String argu) {
+        emptyString(str, String.format("{%s} recevies empty {%s}", argu));
     }
 
     public static void emptyCollection(Collection<?> collection, String msg) {

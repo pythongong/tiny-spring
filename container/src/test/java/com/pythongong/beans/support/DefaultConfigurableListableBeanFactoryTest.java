@@ -16,21 +16,15 @@
 package com.pythongong.beans.support;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.config.FieldValue;
 import com.pythongong.beans.config.FieldValueList;
 import com.pythongong.context.event.ApplicationEventMulticaster;
@@ -41,12 +35,14 @@ import com.pythongong.test.ioc.normal.BeanWithMethodInjection;
 import com.pythongong.test.ioc.normal.BeanWithProperties;
 import com.pythongong.test.ioc.normal.SubTestBean;
 import com.pythongong.test.ioc.normal.TestBean;
+import com.pythongong.test.ioc.normal.TestBeanPostProcessor;
+import com.pythongong.test.ioc.normal.TestComponent;
 import com.pythongong.test.ioc.normal.TestDisposableBean;
 import com.pythongong.test.ioc.normal.TestInitializingBean;
 import com.pythongong.util.ClassUtils;
 
 /**
- * Unit tests for {@link DefaultConfigurableListableBeanFactory}.
+ * Unit tests for {@link DefaultListableBeanFactory}.
  * Tests the core functionality of the bean factory implementation including
  * bean registration, retrieval, and lifecycle management.
  *
@@ -58,20 +54,14 @@ class DefaultConfigurableListableBeanFactoryTest {
         /**
          * The bean factory instance being tested
          */
-        private DefaultConfigurableListableBeanFactory beanFactory;
-
-        /**
-         * Mock bean post processor for testing
-         */
-        @Mock
-        private BeanPostProcessor mockBeanPostProcessor;
+        private DefaultListableBeanFactory beanFactory;
 
         /**
          * Sets up the test environment before each test
          */
         @BeforeEach
         void setUp() {
-                beanFactory = new DefaultConfigurableListableBeanFactory();
+                beanFactory = new DefaultListableBeanFactory();
         }
 
         /**
@@ -135,33 +125,6 @@ class DefaultConfigurableListableBeanFactoryTest {
         }
 
         /**
-         * Tests adding and applying a bean post processor
-         */
-        @Test
-        @DisplayName("Should add and apply bean post processor")
-        void shouldAddAndApplyBeanPostProcessor() {
-                // Given
-                String beanName = "testBean";
-                Object bean = new Object();
-
-                when(mockBeanPostProcessor.postProcessBeforeInitialization(any(), anyString()))
-                                .thenReturn(bean);
-                when(mockBeanPostProcessor.postProcessAfterInitialization(any(), anyString()))
-                                .thenReturn(bean);
-
-                // When
-                beanFactory.addBeanPostProcessor(mockBeanPostProcessor);
-                Object resultBefore = beanFactory.applyBeanPostProcessorsBeforeInitialization(bean, beanName);
-                Object resultAfter = beanFactory.applyBeanPostProcessorsAfterInitialization(bean, beanName);
-
-                // Then
-                assertNotNull(resultBefore, "Result of before initialization should not be null");
-                assertNotNull(resultAfter, "Result of after initialization should not be null");
-                verify(mockBeanPostProcessor).postProcessBeforeInitialization(bean, beanName);
-                verify(mockBeanPostProcessor).postProcessAfterInitialization(bean, beanName);
-        }
-
-        /**
          * Tests the pre-instantiation of singletons
          * 
          * @throws SecurityException
@@ -186,28 +149,6 @@ class DefaultConfigurableListableBeanFactoryTest {
                 // Then
                 assertNotNull(beanFactory.getSingleton("testBean"),
                                 "Singleton bean should be instantiated");
-        }
-
-        /**
-         * Tests the behavior of processing null bean in post processors
-         */
-        @Test
-        @DisplayName("Should handle null result from post processor")
-        void shouldHandleNullResultFromPostProcessor() {
-                // Given
-                String beanName = "testBean";
-                Object bean = new Object();
-
-                when(mockBeanPostProcessor.postProcessBeforeInitialization(any(), anyString()))
-                                .thenReturn(null);
-
-                // When
-                beanFactory.addBeanPostProcessor(mockBeanPostProcessor);
-                Object result = beanFactory.applyBeanPostProcessorsBeforeInitialization(bean, beanName);
-
-                // Then
-                assertEquals(bean, result, "Should return original bean when processor returns null");
-                verify(mockBeanPostProcessor).postProcessBeforeInitialization(bean, beanName);
         }
 
         /**
@@ -280,7 +221,7 @@ class DefaultConfigurableListableBeanFactoryTest {
         public void testDestroySingletons() throws NoSuchMethodException, SecurityException {
 
                 // Create factory and register bean
-                DefaultConfigurableListableBeanFactory factory = new DefaultConfigurableListableBeanFactory();
+                DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 
                 // Register bean definition
                 BeanDefinition bd = BeanDefinition.builder()
@@ -392,7 +333,7 @@ class DefaultConfigurableListableBeanFactoryTest {
                 assertNotNull(bean);
                 assertEquals("awareBean", bean.getBeanName());
                 assertNotNull(bean.getBeanFactory());
-                assertTrue(bean.getBeanFactory() instanceof DefaultConfigurableListableBeanFactory);
+                assertTrue(bean.getBeanFactory() instanceof DefaultListableBeanFactory);
         }
 
         @Test
@@ -446,6 +387,18 @@ class DefaultConfigurableListableBeanFactoryTest {
                 assertNotNull(mainBean);
                 assertNotNull(mainBean.getTestBean());
                 assertTrue(dependency == mainBean.getTestBean());
+        }
+
+        @Test
+        void shouldBeanPostPorcessorWork() {
+                BeanDefinition beanDefinition = BeanDefinition.builder()
+                                .beanClass(TestComponent.class)
+                                .beanName("testComponent")
+                                .build();
+                beanFactory.registerBeanDefinition(beanDefinition);
+                beanFactory.addBeanPostProcessor(new TestBeanPostProcessor());
+                TestComponent testComponent = beanFactory.getBean("testComponent", TestComponent.class);
+                assertTrue(testComponent.isPostProcessed());
         }
 
 }
