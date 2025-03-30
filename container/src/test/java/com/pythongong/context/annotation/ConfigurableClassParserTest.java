@@ -17,6 +17,7 @@ package com.pythongong.context.annotation;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -27,12 +28,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pythongong.context.support.PropertyResolver;
+import com.pythongong.aop.autoproxy.AspectJAutoProxyCreator;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.stereotype.ComponentScan;
 import com.pythongong.stereotype.Configuration;
+import com.pythongong.test.aop.valid.AopConfig;
 import com.pythongong.test.ioc.normal.LifecycleTestBean;
 import com.pythongong.test.ioc.normal.TestConfiguration;
 import com.pythongong.test.ioc.normal.TestConfugrableBean;
+import com.pythongong.util.ClassUtils;
 import com.pythongong.enums.ScopeEnum;
 
 @ExtendWith(MockitoExtension.class)
@@ -136,6 +140,32 @@ class ConfigurableClassParserTest {
         assertNotNull(factoryBean);
         assertNotNull(factoryBean.factoryDefinition());
 
+    }
+
+    @Test
+    @DisplayName("Should create AspectJAutoProxyCreator")
+    void shouldCreateAspectJAutoProxyCreator() {
+        Set<BeanDefinition> beanDefinitions = parser.parse(AopConfig.class);
+        assertFalse(ClassUtils.isCollectionEmpty(beanDefinitions));
+        List<BeanDefinition> aspectJAutoProxyCreators = beanDefinitions.stream()
+                .filter(benDefinition -> {
+                    return benDefinition.beanClass() == AspectJAutoProxyCreator.class;
+                })
+                .toList();
+        assertTrue(aspectJAutoProxyCreators.size() == 1);
+    }
+
+    @Test
+    @DisplayName("Should not create AspectJAutoProxyCreator")
+    void shouldNotCreateAspectJAutoProxyCreator() {
+        Set<BeanDefinition> beanDefinitions = parser.parse(TestConfiguration.class);
+        assertFalse(ClassUtils.isCollectionEmpty(beanDefinitions));
+        List<BeanDefinition> aspectJAutoProxyCreators = beanDefinitions.stream()
+                .filter(benDefinition -> {
+                    return benDefinition.beanClass() == AspectJAutoProxyCreator.class;
+                })
+                .toList();
+        assertTrue(aspectJAutoProxyCreators.size() == 0);
     }
 
     // Test configurations

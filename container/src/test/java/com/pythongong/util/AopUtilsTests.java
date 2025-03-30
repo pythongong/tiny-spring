@@ -14,6 +14,7 @@ import com.pythongong.beans.config.FieldValue;
 import com.pythongong.exception.AopConfigException;
 import com.pythongong.test.aop.invalid.InvalidBeforeAdvice;
 import com.pythongong.test.aop.valid.TestAspect;
+import com.pythongong.test.aop.valid.TestAspectTwo;
 
 class AopUtilsTests {
 
@@ -47,6 +48,35 @@ class AopUtilsTests {
         @SuppressWarnings("unchecked")
         List<AspectJExpressionPointcutAdvisor> advisors = (List<AspectJExpressionPointcutAdvisor>) fieldValue.value();
         assertEquals(4, advisors.size()); // Should have all 4 advice methods
+    }
+
+    @Test
+    @DisplayName("Should add advisors from multiple aspect classes")
+    void shouldAddAdvisorsFromMultipleAspectClasses() {
+        // Arrange
+        BeanDefinition aspectDefinition = BeanDefinition.builder()
+                .beanClass(TestAspect.class)
+                .beanName("testAspect")
+                .build();
+
+        BeanDefinition aspectDefinition2 = BeanDefinition.builder()
+                .beanClass(TestAspectTwo.class)
+                .beanName("testAspect2")
+                .build();
+
+        BeanDefinition aopDefinition = AopUtils.definiteAopBeanPostProcessor();
+
+        // Act
+        AopUtils.addAdvisors(aspectDefinition, aopDefinition);
+        AopUtils.addAdvisors(aspectDefinition2, aopDefinition);
+
+        // Assert
+        FieldValue fieldValue = aopDefinition.fieldValueList().getFieldValue("advisors");
+        assertNotNull(fieldValue);
+
+        @SuppressWarnings("unchecked")
+        List<AspectJExpressionPointcutAdvisor> advisors = (List<AspectJExpressionPointcutAdvisor>) fieldValue.value();
+        assertEquals(8, advisors.size()); // Should have all 4 advice methods
     }
 
     @Test

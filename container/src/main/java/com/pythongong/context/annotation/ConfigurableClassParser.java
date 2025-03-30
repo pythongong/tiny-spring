@@ -156,6 +156,7 @@ public class ConfigurableClassParser {
         if (beanClass.isAnnotationPresent(Aspect.class)) {
             if (aopBeanPostProcessorDefinition == null) {
                 aopBeanPostProcessorDefinition = AopUtils.definiteAopBeanPostProcessor();
+                addBeanDef(aopBeanPostProcessorDefinition);
             }
             AopUtils.addAdvisors(beanDefinition, aopBeanPostProcessorDefinition);
         }
