@@ -22,7 +22,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -59,12 +58,14 @@ class AnnotationConfigApplicationContextTest {
 
     private static Path propertiesFile;
 
+    private static AnnotationConfigApplicationContext context;
+
     @BeforeAll
     static void setUp() throws IOException, URISyntaxException {
         testClassLoader = Thread.currentThread().getContextClassLoader();
 
         Path testClassesDir = Path.of(new URI(Objects.requireNonNull(testClassLoader.getResource(".")).toString()));
-        ;
+
         propertiesFile = testClassesDir.resolve("test.properties");
         try (FileWriter writer = new FileWriter(propertiesFile.toFile())) {
             writer.write("test.name=testValue\n");
@@ -73,6 +74,8 @@ class AnnotationConfigApplicationContextTest {
         }
         // Verify file creation
         assertTrue(Files.exists(propertiesFile));
+        context = new AnnotationConfigApplicationContext(
+                TestConfiguration.class);
     }
 
     @BeforeEach
@@ -87,17 +90,11 @@ class AnnotationConfigApplicationContextTest {
     static void tearDown() throws IOException {
         // Clean up the properties file
         Files.deleteIfExists(propertiesFile);
-        // Close the test classloader
-        if (testClassLoader instanceof URLClassLoader) {
-            ((URLClassLoader) testClassLoader).close();
-        }
     }
 
     @Test
     @DisplayName("Should create a bean")
     void shouldCreateBean() {
-        // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
 
         // When
         TestComponent component = context.getBean("testComponent", TestComponent.class);
@@ -109,8 +106,6 @@ class AnnotationConfigApplicationContextTest {
     @Test
     @DisplayName("Should create a bean")
     void shouldGetBeanByName() {
-        // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
 
         // When
         TestComponent component = (TestComponent) context.getBean("testComponent");
@@ -122,8 +117,6 @@ class AnnotationConfigApplicationContextTest {
     @Test
     @DisplayName("Should create a bean")
     void shouldGetBeansByType() {
-        // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
 
         // When
         Map<String, TestComponent> beans = context.getBeansOfType(TestComponent.class);
@@ -150,8 +143,6 @@ class AnnotationConfigApplicationContextTest {
     @Test
     @DisplayName("Should register and apply BeanPostProcessor")
     void shouldRegisterAndApplyBeanPostProcessor() {
-        // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
 
         // When
         TestComponent component = context.getBean("testComponent", TestComponent.class);
@@ -192,8 +183,6 @@ class AnnotationConfigApplicationContextTest {
     @Test
     @DisplayName("Should register and apply BeanFactoryPostProcessor")
     void shouldRegisterAndApplyBeanFactoryPostProcessor() {
-        // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
 
         // When
         FactoryPostProcessedBean bean = context.getBean("beanFactoryPostProcessedBean", FactoryPostProcessedBean.class);
@@ -206,9 +195,6 @@ class AnnotationConfigApplicationContextTest {
     @Test
     @DisplayName("Should handle prxoxy bean")
     void shouldHandlePrxoyBean() {
-        // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-                TestConfiguration.class);
 
         // When
         TestUsingProxy bean = context.getBean("testUsingProxy", TestUsingProxy.class);
@@ -224,8 +210,6 @@ class AnnotationConfigApplicationContextTest {
     @DisplayName("Should publish refresh event")
     void shouldPublishRefreshEvent() {
         // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-                TestConfiguration.class);
 
         // When
         ContextRefreshListener listener = context.getBean("contextRefreshListener", ContextRefreshListener.class);
@@ -238,9 +222,9 @@ class AnnotationConfigApplicationContextTest {
     void shouldCreateAop() {
 
         // Given
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+        AnnotationConfigApplicationContext aopContext = new AnnotationConfigApplicationContext(
                 AopConfig.class);
-        Object target = context.getBean("aopTestTarget");
+        Object target = aopContext.getBean("aopTestTarget");
         assertNotNull(target);
         assertTrue(target instanceof AopTestTarget);
         ((AopTestTarget) target).getProxy();

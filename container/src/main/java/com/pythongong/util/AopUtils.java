@@ -115,6 +115,9 @@ public class AopUtils {
                 || parameterTypes[0] != ProceedingJoinPoint.class) {
             throw new AopConfigException("");
         }
+        if (method.getReturnType() == void.class) {
+            throw new AopConfigException("");
+        }
     }
 
     private static void checkBeforeAndAfterArgus(Method method) {

@@ -19,30 +19,30 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
-import java.util.Properties;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import java.util.Objects;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 @DisplayName("PropertyResolver Tests")
 class PropertyResolverTest {
-    
-    @TempDir
-    Path tempDir;
-    
-    private Path propertiesFile;
-    private PropertyResolver resolver;
 
-    @BeforeEach
-    void setUp() throws IOException {
-        // Create test.properties file
-        propertiesFile = tempDir.resolve("application.properties");
+    private static Path propertiesFile;
+    private static PropertyResolver resolver;
+
+    @BeforeAll
+    static void setUp() throws IOException, URISyntaxException {
+        ClassLoader testClassLoader = Thread.currentThread().getContextClassLoader();
+
+        Path testClassesDir = Path.of(new URI(Objects.requireNonNull(testClassLoader.getResource(".")).toString()));
+
+        propertiesFile = testClassesDir.resolve("test.properties");
         try (FileWriter writer = new FileWriter(propertiesFile.toFile())) {
             writer.write("test.name=pythongong\n");
             writer.write("test.date=2025-03-21\n");
@@ -50,16 +50,14 @@ class PropertyResolverTest {
             writer.write("app.version=${version:1.0.0}\n");
             writer.write("app.profile=${profile:dev}\n");
         }
-        
-        // Set up classpath to include our temp directory
-        System.setProperty("java.class.path", tempDir.toString());
-        
-        // Create resolver with empty properties
-        resolver = new PropertyResolver(new Properties());
+        // Verify file creation
+        assertTrue(Files.exists(propertiesFile));
+        resolver = new PropertyResolver();
     }
 
-    @AfterEach
-    void tearDown() throws IOException {
+    @AfterAll
+    static void tearDown() throws IOException {
+        // Clean up the properties file
         Files.deleteIfExists(propertiesFile);
     }
 
@@ -70,12 +68,12 @@ class PropertyResolverTest {
         resolver.load(Files.newInputStream(propertiesFile));
 
         // Then
-        assertEquals("pythongong", resolver.getProperty("test.name"), 
-            "Should resolve simple property");
-        assertEquals("2025-03-21", resolver.getProperty("test.date"), 
-            "Should resolve date property");
-        assertEquals("02:42:18", resolver.getProperty("test.time"), 
-            "Should resolve time property");
+        assertEquals("pythongong", resolver.getProperty("test.name"),
+                "Should resolve simple property");
+        assertEquals("2025-03-21", resolver.getProperty("test.date"),
+                "Should resolve date property");
+        assertEquals("02:42:18", resolver.getProperty("test.time"),
+                "Should resolve time property");
     }
 
     @Test
@@ -85,10 +83,10 @@ class PropertyResolverTest {
         resolver.load(Files.newInputStream(propertiesFile));
 
         // Then
-        assertEquals("1.0.0", resolver.getProperty("${version:1.0.0}"), 
-            "Should use default value when property is not defined");
-        assertEquals("dev", resolver.getProperty("${profile:dev}"), 
-            "Should use default value from properties file");
+        assertEquals("1.0.0", resolver.getProperty("${version:1.0.0}"),
+                "Should use default value when property is not defined");
+        assertEquals("dev", resolver.getProperty("${profile:dev}"),
+                "Should use default value from properties file");
     }
 
     @Test
@@ -98,9 +96,9 @@ class PropertyResolverTest {
         resolver.load(Files.newInputStream(propertiesFile));
 
         // Then
-        assertThrows(NoSuchElementException.class, 
-            () -> resolver.getProperty("non.existent.property"),
-            "Should throw NoSuchElementException for missing property");
+        assertThrows(NoSuchElementException.class,
+                () -> resolver.getProperty("non.existent.property"),
+                "Should throw NoSuchElementException for missing property");
     }
 
     @Test
@@ -108,10 +106,11 @@ class PropertyResolverTest {
     void shouldUseSystemEnvironmentVariables() {
         // Given
         String javaHome = System.getenv("JAVA_HOME");
-        // assumeTrue(javaHome != null, "JAVA_HOME environment variable is required for this test");
+        // assumeTrue(javaHome != null, "JAVA_HOME environment variable is required for
+        // this test");
 
         // When/Then
         assertEquals(javaHome, resolver.getProperty("JAVA_HOME"),
-            "Should resolve system environment variable");
+                "Should resolve system environment variable");
     }
 }

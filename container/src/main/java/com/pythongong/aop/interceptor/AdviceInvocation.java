@@ -13,24 +13,24 @@ import lombok.Builder;
 
 @Builder
 public record AdviceInvocation(Object target, Method method, JoinPoint joinPoint,
-        List<MethodInterceptor> methodInterceptors, AtomicInteger interceptedNum) {
+        List<MethodMatcherInterceptor> methodMatcherInterceptors, AtomicInteger interceptedNum) {
 
     public AdviceInvocation {
         String name = AdviceInvocation.class.getSimpleName();
         CheckUtils.nullArgs(target, name, "target");
         CheckUtils.nullArgs(method, name, "method");
         CheckUtils.nullArgs(joinPoint, name, "jointPoint");
-        CheckUtils.emptyCollection(methodInterceptors, name, "methodInterceptors");
+        CheckUtils.emptyCollection(methodMatcherInterceptors, name, "methodMatcherInterceptors");
 
         interceptedNum = new AtomicInteger(0);
     }
 
     public Object proceed() {
-        if (interceptedNum.get() == (methodInterceptors.size())) {
+        if (interceptedNum.get() == (methodMatcherInterceptors.size())) {
             return invokeRealMethod();
         }
         int interceptorIndex = interceptedNum.getAndIncrement();
-        return methodInterceptors.get(interceptorIndex).invoke(this);
+        return methodMatcherInterceptors.get(interceptorIndex).methodInterceptor().invoke(this);
     }
 
     private Object invokeRealMethod() {

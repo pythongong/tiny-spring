@@ -8,17 +8,22 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.aop.AdvisedSupport;
-import com.pythongong.aop.interceptor.MethodMatchInterceptor;
+import com.pythongong.aop.aspectj.MethodMatcher;
+import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.exception.AopConfigException;
 import com.pythongong.test.aop.valid.AopTestTarget;
 
 class AopInvocationHandlerTest {
 
-    private final static AopTestTarget target = new AopTestTarget();
+    private static final AopTestTarget target = new AopTestTarget();
     private static Method method;
-    private final static Integer[] ARGS = { 2, 3 };
-    private final static String NEW_RET_VAL = "intercepted";
+    private static final Integer[] ARGS = { 2, 3 };
+    private static final String NEW_RET_VAL = "intercepted";
+
+    private static final MethodMatcher DEFAUL_METHOD_MATCHER = (method) -> {
+        return true;
+    };
 
     @BeforeAll
     static void setUp() throws NoSuchMethodException {
@@ -42,7 +47,9 @@ class AopInvocationHandlerTest {
             return invocation.proceed();
         };
 
-        List<MethodInterceptor> interceptors = List.of(interceptor1, interceptor2);
+        List<MethodMatcherInterceptor> interceptors = List.of(
+                new MethodMatcherInterceptor(interceptor1, DEFAUL_METHOD_MATCHER),
+                new MethodMatcherInterceptor(interceptor2, DEFAUL_METHOD_MATCHER));
         AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptors);
         AopInvocationHandler handler = new AopInvocationHandler(advisedSupport);
         assertEquals(5, handler.invoke(target, method, ARGS));
@@ -54,16 +61,15 @@ class AopInvocationHandlerTest {
             return NEW_RET_VAL;
         };
 
-        MethodMatchInterceptor dynamicMatchMethodInterceptor = new MethodMatchInterceptor(interceptor1,
-                (method) -> {
-                    return false;
-                });
-
         MethodInterceptor interceptor2 = (invocation) -> {
             return invocation.proceed();
         };
 
-        List<MethodInterceptor> interceptors = List.of(dynamicMatchMethodInterceptor, interceptor2);
+        List<MethodMatcherInterceptor> interceptors = List.of(
+                new MethodMatcherInterceptor(interceptor1, (method) -> {
+                    return false;
+                }),
+                new MethodMatcherInterceptor(interceptor2, DEFAUL_METHOD_MATCHER));
         AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptors);
         AopInvocationHandler handler = new AopInvocationHandler(advisedSupport);
         assertEquals(5, handler.invoke(target, method, ARGS));
@@ -75,16 +81,13 @@ class AopInvocationHandlerTest {
             return NEW_RET_VAL;
         };
 
-        MethodMatchInterceptor dynamicMatchMethodInterceptor = new MethodMatchInterceptor(interceptor1,
-                (method) -> {
-                    return true;
-                });
-
         MethodInterceptor interceptor2 = (invocation) -> {
             return invocation.proceed();
         };
 
-        List<MethodInterceptor> interceptors = List.of(dynamicMatchMethodInterceptor, interceptor2);
+        List<MethodMatcherInterceptor> interceptors = List.of(
+                new MethodMatcherInterceptor(interceptor1, DEFAUL_METHOD_MATCHER),
+                new MethodMatcherInterceptor(interceptor2, DEFAUL_METHOD_MATCHER));
         AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptors);
         AopInvocationHandler handler = new AopInvocationHandler(advisedSupport);
         assertThrows(AopConfigException.class, () -> handler.invoke(target, method, ARGS));

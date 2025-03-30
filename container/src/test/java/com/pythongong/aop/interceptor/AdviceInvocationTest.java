@@ -11,12 +11,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pythongong.aop.JoinPoint;
+import com.pythongong.aop.aspectj.MethodMatcher;
 import com.pythongong.test.aop.valid.AopTestTarget;
 
 @ExtendWith(MockitoExtension.class)
 class AdviceInvocationTest {
 
-    private final static Integer[] ARGS = { 2, 3 };
+    private static final MethodMatcher DEFAUL_METHOD_MATCHER = (method) -> {
+        return true;
+    };
+
+    private static final Integer[] ARGS = { 2, 3 };
 
     private static AopTestTarget testTarget;
     private static Method method;
@@ -56,7 +61,7 @@ class AdviceInvocationTest {
                     .target(testTarget)
                     .method(method)
                     .joinPoint(joinPoint)
-                    .methodInterceptors(Collections.emptyList())
+                    .methodMatcherInterceptors(Collections.emptyList())
                     .build();
         });
 
@@ -72,12 +77,14 @@ class AdviceInvocationTest {
         MethodInterceptor interceptor2 = (invocation) -> {
             return invocation.proceed();
         };
-        List<MethodInterceptor> interceptors = List.of(interceptor1, interceptor2);
+        List<MethodMatcherInterceptor> interceptors = List.of(
+                new MethodMatcherInterceptor(interceptor1, DEFAUL_METHOD_MATCHER),
+                new MethodMatcherInterceptor(interceptor2, DEFAUL_METHOD_MATCHER));
         AdviceInvocation invocation = AdviceInvocation.builder()
                 .target(new AopTestTarget())
                 .method(method)
                 .joinPoint(joinPoint)
-                .methodInterceptors(interceptors)
+                .methodMatcherInterceptors(interceptors)
                 .build();
 
         assertEquals(retVal, invocation.proceed());
@@ -94,12 +101,14 @@ class AdviceInvocationTest {
             return invocation.proceed();
         };
 
-        List<MethodInterceptor> interceptors = List.of(interceptor1, interceptor2);
+        List<MethodMatcherInterceptor> interceptors = List.of(
+                new MethodMatcherInterceptor(interceptor1, DEFAUL_METHOD_MATCHER),
+                new MethodMatcherInterceptor(interceptor2, DEFAUL_METHOD_MATCHER));
         AdviceInvocation invocation = AdviceInvocation.builder()
                 .target(new AopTestTarget())
                 .method(method)
                 .joinPoint(joinPoint)
-                .methodInterceptors(interceptors)
+                .methodMatcherInterceptors(interceptors)
                 .build();
 
         assertEquals(5, invocation.proceed());

@@ -6,10 +6,16 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.aop.AdvisedSupport;
+import com.pythongong.aop.aspectj.MethodMatcher;
 import com.pythongong.aop.interceptor.MethodInterceptor;
+import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.test.aop.valid.AopTestTarget;
 
 class ByteBuddyAopProxyTest {
+
+    private final static MethodMatcher DEFAUL_METHOD_MATCHER = (method) -> {
+        return true;
+    };
 
     @Test
     void shouldThrowExceptionWhenAdvisedSupportIsNull() {
@@ -30,7 +36,9 @@ class ByteBuddyAopProxyTest {
             return true;
         };
 
-        List<MethodInterceptor> interceptors = List.of(interceptor1, interceptor2);
+        List<MethodMatcherInterceptor> interceptors = List.of(
+                new MethodMatcherInterceptor(interceptor1, DEFAUL_METHOD_MATCHER),
+                new MethodMatcherInterceptor(interceptor2, DEFAUL_METHOD_MATCHER));
         AdvisedSupport advisedSupport = new AdvisedSupport(target, interceptors);
         ByteBuddyAopProxy proxy = new ByteBuddyAopProxy(advisedSupport);
         Object proxyTarget = proxy.getProxy();
@@ -47,7 +55,8 @@ class ByteBuddyAopProxyTest {
             return invocation.proceed();
         };
 
-        List<MethodInterceptor> interceptors = List.of(interceptor1);
+        List<MethodMatcherInterceptor> interceptors = List.of(
+                new MethodMatcherInterceptor(interceptor1, DEFAUL_METHOD_MATCHER));
         AdvisedSupport advisedSupport = new AdvisedSupport(service, interceptors);
         ByteBuddyAopProxy proxy = new ByteBuddyAopProxy(advisedSupport);
 

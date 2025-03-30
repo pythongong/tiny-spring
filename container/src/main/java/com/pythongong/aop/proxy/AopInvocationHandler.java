@@ -23,8 +23,7 @@ import java.util.List;
 import com.pythongong.aop.AdvisedSupport;
 import com.pythongong.aop.JoinPoint;
 import com.pythongong.aop.interceptor.AdviceInvocation;
-import com.pythongong.aop.interceptor.MethodMatchInterceptor;
-import com.pythongong.aop.interceptor.MethodInterceptor;
+import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.exception.AopConfigException;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
@@ -90,27 +89,25 @@ public class AopInvocationHandler implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        List<MethodInterceptor> methodInterceptors = advisedSupport.methodInterceptors();
-        if (ClassUtils.isCollectionEmpty(methodInterceptors)) {
+        List<MethodMatcherInterceptor> methodMatcherInterceptors = advisedSupport.methodMatcherInterceptors().stream()
+                .filter(methodMatcherInterceptor -> {
+                    return methodMatcherInterceptor.methodMatcher().matches(method);
+                }).toList();
+        ;
+        if (ClassUtils.isCollectionEmpty(methodMatcherInterceptors)) {
             return method.invoke(advisedSupport.target(), args);
         }
-        methodInterceptors = methodInterceptors.stream().filter(methodInterceptor -> {
-            if (methodInterceptor instanceof MethodMatchInterceptor) {
-                return ((MethodMatchInterceptor) methodInterceptor).methodMatcher().matches(method);
-            }
-            return true;
-        }).toList();
 
         JoinPoint joinPoint = new JoinPoint(method.getName(), method.getParameterTypes(), args);
         AdviceInvocation invocation = AdviceInvocation.builder()
                 .method(method)
-                .methodInterceptors(methodInterceptors)
+                .methodMatcherInterceptors(methodMatcherInterceptors)
                 .target(advisedSupport.target())
                 .joinPoint(joinPoint)
                 .build();
         Object result = invocation.proceed();
-        if (invocation.interceptedNum().get() != methodInterceptors.size()) {
-            throw new AopConfigException(String.format("Not all interceptors in method {%s} og {%s}",
+        if (invocation.interceptedNum().get() != methodMatcherInterceptors.size()) {
+            throw new AopConfigException(String.format("Not all interceptors are invoked in method {%s} of {%s}",
                     advisedSupport.target().getClass().getName(), method.getName()));
         }
         return result;

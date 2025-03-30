@@ -16,9 +16,6 @@
 package com.pythongong.util;
 
 import java.util.Collection;
-import java.util.List;
-
-import com.pythongong.aop.interceptor.MethodInterceptor;
 
 /**
  * Utility class providing validation methods for common checks.
@@ -88,7 +85,7 @@ public class CheckUtils {
         }
     }
 
-    public static void emptyCollection(List<MethodInterceptor> methodInterceptors, String method, String argu) {
-        emptyCollection(methodInterceptors, String.format("{%s} recevies empty {%s}", method, argu));
+    public static void emptyCollection(Collection<?> collection, String method, String argu) {
+        emptyCollection(collection, String.format("{%s} recevies empty {%s}", method, argu));
     }
 }

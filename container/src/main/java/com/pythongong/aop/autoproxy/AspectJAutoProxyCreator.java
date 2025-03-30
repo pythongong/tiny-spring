@@ -12,7 +12,7 @@ import com.pythongong.aop.interceptor.AfterMethodInterceptor;
 import com.pythongong.aop.interceptor.AfterReturningMethodInterceptor;
 import com.pythongong.aop.interceptor.AroundMethodInterceptor;
 import com.pythongong.aop.interceptor.BeforeMethodInterceptor;
-import com.pythongong.aop.interceptor.MethodMatchInterceptor;
+import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.aop.proxy.ProxyFactory;
 import com.pythongong.beans.aware.BeanFactoryAware;
@@ -55,10 +55,10 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
         if (relatedAdvisors.isEmpty()) {
             return bean;
         }
-        List<MethodInterceptor> methodInterceptors = createInterceptors(relatedAdvisors);
+        List<MethodMatcherInterceptor> methodMatcherInterceptors = createInterceptors(relatedAdvisors);
         return ProxyFactory.createProxy(AdvisedSupport
                 .builder()
-                .methodInterceptors(methodInterceptors)
+                .methodMatcherInterceptors(methodMatcherInterceptors)
                 .target(bean)
                 .build());
     }
@@ -68,8 +68,8 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
         this.beanFactory = (DefaultListableBeanFactory) beanFactory;
     }
 
-    private List<MethodInterceptor> createInterceptors(List<AspectJExpressionPointcutAdvisor> relatedAdvisors) {
-        List<MethodInterceptor> beforeInterceptors = new ArrayList<>();
+    private List<MethodMatcherInterceptor> createInterceptors(List<AspectJExpressionPointcutAdvisor> relatedAdvisors) {
+        List<MethodMatcherInterceptor> beforeInterceptors = new ArrayList<>();
         relatedAdvisors.forEach(advisor -> {
             Object aspect = beanFactory.getBean(advisor.aspectName());
             AspectJExpressionPointcut pointcut = advisor.pointcut();
@@ -95,7 +95,7 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
                 throw new AopConfigException("");
             }
 
-            beforeInterceptors.add(new MethodMatchInterceptor(
+            beforeInterceptors.add(new MethodMatcherInterceptor(
                     methodInterceptor, pointcut.methodMatcher()));
         });
         return beforeInterceptors;
