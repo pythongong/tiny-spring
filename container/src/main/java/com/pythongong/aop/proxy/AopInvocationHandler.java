@@ -18,10 +18,16 @@ package com.pythongong.aop.proxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import com.pythongong.aop.AdvisedSupport;
-import com.pythongong.aop.MethodInvocation;
+import com.pythongong.aop.advice.JoinPoint;
+import com.pythongong.aop.interceptor.AdviceInvocation;
+import com.pythongong.aop.interceptor.DynamicMatchMethodInterceptor;
+import com.pythongong.aop.interceptor.MethodInterceptor;
+import com.pythongong.exception.AopConfigException;
 import com.pythongong.util.CheckUtils;
+import com.pythongong.util.ClassUtils;
 
 /**
  * The invocation handler for AOP proxy. This class implements the core
@@ -84,12 +90,29 @@ public class AopInvocationHandler implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Object target = advisedSupport.target();
-        return advisedSupport.methodInterceptor().invoke(MethodInvocation.builder()
-                .argus(args)
+        List<MethodInterceptor> methodInterceptors = advisedSupport.methodInterceptors();
+        if (ClassUtils.isCollectionEmpty(methodInterceptors)) {
+            return method.invoke(advisedSupport.target(), args);
+        }
+        methodInterceptors = methodInterceptors.stream().filter(methodInterceptor -> {
+            if (methodInterceptor instanceof DynamicMatchMethodInterceptor) {
+                return ((DynamicMatchMethodInterceptor) methodInterceptor).methodMatcher().matches(method);
+            }
+            return true;
+        }).toList();
+
+        JoinPoint joinPoint = new JoinPoint(method.getName(), method.getParameterTypes(), args);
+        AdviceInvocation invocation = AdviceInvocation.builder()
                 .method(method)
-                .target(target)
-                .build());
+                .methodInterceptors(methodInterceptors)
+                .target(advisedSupport.target())
+                .joinPoint(joinPoint)
+                .build();
+        Object result = invocation.proceed();
+        if (invocation.interceptedNum().get() != methodInterceptors.size()) {
+            throw new AopConfigException("");
+        }
+        return result;
     }
 
 }

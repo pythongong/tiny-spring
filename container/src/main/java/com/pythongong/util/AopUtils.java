@@ -1,6 +1,7 @@
 package com.pythongong.util;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,6 +124,31 @@ public class AopUtils {
         }
 
         if (parameterTypes.length != 1 || parameterTypes[0] != JoinPoint.class) {
+            throw new AopConfigException("");
+        }
+    }
+
+    public static Object invokeAdvice(AdviceMethodParam param) {
+        Method advicMethod = param.advicMethod();
+        Class<?>[] parameterTypes = advicMethod.getParameterTypes();
+        Object[] argus = new Object[parameterTypes.length];
+        if (argus.length > 0) {
+            if (parameterTypes[0] == JoinPoint.class) {
+                argus[0] = param.joinPoint();
+            }
+
+            if (parameterTypes[0] == ProceedingJoinPoint.class) {
+                argus[0] = param.proceedingJoinPoint();
+            }
+
+        }
+        if (argus.length > 1) {
+            argus[1] = param.retVal();
+        }
+
+        try {
+            return advicMethod.invoke(param.aspect(), argus);
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new AopConfigException("");
         }
     }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pythongong.aop;
+package com.pythongong.aop.interceptor;
 
 import com.pythongong.exception.AopConfigException;
 
@@ -50,9 +50,9 @@ public interface MethodInterceptor {
     /**
      * Intercepts a method invocation and handles its execution.
      *
-     * @param proceed a supplier that executes the original method
+     * 
      * @return the result of the method invocation
      * @throws AopConfigException if an error occurs during interception
      */
-    Object invoke(MethodInvocation invocation) throws AopConfigException;
+    Object invoke(AdviceInvocation invocation) throws AopConfigException;
 }

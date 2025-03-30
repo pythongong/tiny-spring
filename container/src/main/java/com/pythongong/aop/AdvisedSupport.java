@@ -15,6 +15,9 @@
  */
 package com.pythongong.aop;
 
+import java.util.List;
+
+import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
 
@@ -45,7 +48,7 @@ import lombok.Builder;
  */
 @Builder
 public record AdvisedSupport(Object target,
-        MethodInterceptor methodInterceptor) {
+        List<MethodInterceptor> methodInterceptors) {
 
     /**
      * Constructs an AdvisedSupport instance with validation.
@@ -54,7 +57,7 @@ public record AdvisedSupport(Object target,
      */
     public AdvisedSupport {
         CheckUtils.nullArgs(target, "AdvisedSupport recevies null targetSource");
-        CheckUtils.nullArgs(methodInterceptor, "AdvisedSupport recevies null methodInterceptor");
+        CheckUtils.nullArgs(methodInterceptors, "AdvisedSupport recevies null methodInterceptor");
     }
 
     /**

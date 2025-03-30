@@ -15,6 +15,8 @@
  */
 package com.pythongong.aop.aspectj;
 
+import java.lang.reflect.Method;
+
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParser;
 
@@ -47,7 +49,7 @@ import com.pythongong.util.CheckUtils;
  * @see MethodMatcher
  * @see org.aspectj.weaver.tools.PointcutExpression
  */
-public class AspectJExpressionPointcut {
+public class AspectJExpressionPointcut implements MethodMatcher {
 
     /**
      * The compiled AspectJ pointcut expression used for method matching.
@@ -75,13 +77,21 @@ public class AspectJExpressionPointcut {
      * @param method the method to check
      * @return true if the method matches the pointcut expression
      */
-    // @Override
-    // public boolean matches(Method method) {
-    // return pointcutExpression.matchesMethodExecution(method).alwaysMatches();
-    // }
+    @Override
+    public boolean matches(Method method) {
+        return pointcutExpression.matchesMethodExecution(method).alwaysMatches();
+    }
 
     public boolean matchesClass(Class<?> targetClass) {
         return pointcutExpression.couldMatchJoinPointsInType(targetClass);
+    }
+
+    public boolean isDynamic() {
+        return pointcutExpression.mayNeedDynamicTest();
+    }
+
+    public MethodMatcher methodMatcher() {
+        return this;
     }
 
 }

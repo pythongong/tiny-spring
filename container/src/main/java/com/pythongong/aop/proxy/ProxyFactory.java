@@ -7,9 +7,11 @@ public class ProxyFactory {
 
     public static Object createProxy(AdvisedSupport advisedSupport) {
         CheckUtils.nullArgs(advisedSupport, "ProxyFactory recevies null advise");
-        // if (advisedSupport.isProxyTargetClass()) {
-        // return new ByteBuddyAopProxy(advisedSupport).getProxy();
-        // }
-        return new JdkDynamicAopProxy(advisedSupport).getProxy();
+        Object target = advisedSupport.target();
+        Class<?> targetClass = target.getClass();
+        if (targetClass.isInterface()) {
+            return new JdkDynamicAopProxy(advisedSupport).getProxy();
+        }
+        return new ByteBuddyAopProxy(advisedSupport);
     }
 }
