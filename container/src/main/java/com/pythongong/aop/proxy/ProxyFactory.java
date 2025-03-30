@@ -12,6 +12,6 @@ public class ProxyFactory {
         if (targetClass.isInterface()) {
             return new JdkDynamicAopProxy(advisedSupport).getProxy();
         }
-        return new ByteBuddyAopProxy(advisedSupport);
+        return new ByteBuddyAopProxy(advisedSupport).getProxy();
     }
 }

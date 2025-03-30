@@ -3,6 +3,8 @@ package com.pythongong.aop.autoproxy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.aspectj.lang.annotation.Aspect;
+
 import com.pythongong.aop.AdvisedSupport;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcut;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcutAdvisor;
@@ -10,7 +12,7 @@ import com.pythongong.aop.interceptor.AfterMethodInterceptor;
 import com.pythongong.aop.interceptor.AfterReturningMethodInterceptor;
 import com.pythongong.aop.interceptor.AroundMethodInterceptor;
 import com.pythongong.aop.interceptor.BeforeMethodInterceptor;
-import com.pythongong.aop.interceptor.DynamicMatchMethodInterceptor;
+import com.pythongong.aop.interceptor.MethodMatchInterceptor;
 import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.aop.proxy.ProxyFactory;
 import com.pythongong.beans.aware.BeanFactoryAware;
@@ -41,9 +43,14 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
         }
 
         Class<?> beanClass = bean.getClass();
+        if (beanClass == AspectJAutoProxyCreator.class || beanClass.isAnnotationPresent(Aspect.class)) {
+            return bean;
+        }
         List<AspectJExpressionPointcutAdvisor> relatedAdvisors = advisors.stream()
                 .filter(advisor -> {
                     return advisor.pointcut().matchesClass(beanClass);
+                }).sorted((advisor1, advisor2) -> {
+                    return AdviceEnum.compare(advisor1.adviceEnum(), advisor2.adviceEnum());
                 }).toList();
         if (relatedAdvisors.isEmpty()) {
             return bean;
@@ -62,11 +69,6 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
     }
 
     private List<MethodInterceptor> createInterceptors(List<AspectJExpressionPointcutAdvisor> relatedAdvisors) {
-
-        relatedAdvisors.sort((advisor1, advisor2) -> {
-            return AdviceEnum.compare(advisor1.adviceEnum(), advisor2.adviceEnum());
-        });
-
         List<MethodInterceptor> beforeInterceptors = new ArrayList<>();
         relatedAdvisors.forEach(advisor -> {
             Object aspect = beanFactory.getBean(advisor.aspectName());
@@ -93,12 +95,8 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
                 throw new AopConfigException("");
             }
 
-            if (!pointcut.isDynamic()) {
-                beforeInterceptors.add(methodInterceptor);
-            } else {
-                beforeInterceptors.add(new DynamicMatchMethodInterceptor(
-                        methodInterceptor, pointcut.methodMatcher()));
-            }
+            beforeInterceptors.add(new MethodMatchInterceptor(
+                    methodInterceptor, pointcut.methodMatcher()));
         });
         return beforeInterceptors;
     }

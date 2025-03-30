@@ -2,7 +2,7 @@ package com.pythongong.test.aop.valid;
 
 import com.pythongong.stereotype.Component;
 
-@Component
+@Component("aopTestTarget")
 public class AopTestTarget implements AopTestInterface {
 
     private boolean isProxy = false;

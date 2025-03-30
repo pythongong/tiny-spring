@@ -2,7 +2,7 @@ package com.pythongong.aop.interceptor;
 
 import java.lang.reflect.Method;
 
-import com.pythongong.aop.advice.ProceedingJoinPoint;
+import com.pythongong.aop.ProceedingJoinPoint;
 import com.pythongong.exception.AopConfigException;
 import com.pythongong.util.AdviceMethodParam;
 import com.pythongong.util.AopUtils;

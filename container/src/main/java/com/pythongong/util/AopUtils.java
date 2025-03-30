@@ -11,8 +11,8 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Before;
 
-import com.pythongong.aop.advice.JoinPoint;
-import com.pythongong.aop.advice.ProceedingJoinPoint;
+import com.pythongong.aop.JoinPoint;
+import com.pythongong.aop.ProceedingJoinPoint;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcut;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import com.pythongong.aop.autoproxy.AspectJAutoProxyCreator;
@@ -147,9 +147,10 @@ public class AopUtils {
         }
 
         try {
+            advicMethod.setAccessible(true);
             return advicMethod.invoke(param.aspect(), argus);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new AopConfigException("");
+            throw new AopConfigException(String.format("{%s} advice failed", advicMethod.getName()));
         }
     }
 

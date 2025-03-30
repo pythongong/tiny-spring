@@ -86,10 +86,6 @@ public class AspectJExpressionPointcut implements MethodMatcher {
         return pointcutExpression.couldMatchJoinPointsInType(targetClass);
     }
 
-    public boolean isDynamic() {
-        return pointcutExpression.mayNeedDynamicTest();
-    }
-
     public MethodMatcher methodMatcher() {
         return this;
     }

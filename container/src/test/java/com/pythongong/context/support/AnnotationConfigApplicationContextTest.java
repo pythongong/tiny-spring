@@ -38,6 +38,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.pythongong.test.aop.valid.AdviceOrder;
+import com.pythongong.test.aop.valid.AopConfig;
+import com.pythongong.test.aop.valid.AopTestTarget;
 import com.pythongong.test.ioc.normal.ContextRefreshListener;
 import com.pythongong.test.ioc.normal.FactoryPostProcessedBean;
 import com.pythongong.test.ioc.normal.LifecycleTestBean;
@@ -229,6 +232,19 @@ class AnnotationConfigApplicationContextTest {
 
         // Then
         assertTrue(listener.isRefreshed(), "Context should be refreshed");
+    }
+
+    @Test
+    void shouldCreateAop() {
+
+        // Given
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+                AopConfig.class);
+        Object target = context.getBean("aopTestTarget");
+        assertNotNull(target);
+        assertTrue(target instanceof AopTestTarget);
+        ((AopTestTarget) target).getProxy();
+        assertFalse(AdviceOrder.ORDER.isEmpty());
     }
 
 }

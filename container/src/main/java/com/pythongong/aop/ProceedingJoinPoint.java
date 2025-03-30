@@ -1,4 +1,4 @@
-package com.pythongong.aop.advice;
+package com.pythongong.aop;
 
 import com.pythongong.aop.interceptor.AdviceInvocation;
 

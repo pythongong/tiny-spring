@@ -19,10 +19,13 @@ public class AfterReturningMethodInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(AdviceInvocation invocation) throws AopConfigException {
         Object retVal = invocation.proceed();
-        return AopUtils.invokeAdvice(AdviceMethodParam.builder()
+        Object newRetVal = AopUtils.invokeAdvice(AdviceMethodParam.builder()
                 .aspect(aspect)
+                .joinPoint(invocation.joinPoint())
                 .advicMethod(afterReturing)
                 .retVal(retVal)
                 .build());
+
+        return newRetVal != null ? newRetVal : retVal;
     }
 }

@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
  */
 class AspectJExpressionPointcutTests {
 
-    static final String CORRECT_EXPRESS = "execution(* com.pythongong.test.aop.AopTestInterface.*(..))";
+    private static final String CORRECT_EXPRESS = "execution(* com.pythongong.test.aop.valid.AopTestInterface.*(..))";
 
     @Test
     @DisplayName("Should match execution of public methods")

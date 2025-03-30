@@ -6,28 +6,34 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 
-import com.pythongong.aop.advice.JoinPoint;
-import com.pythongong.aop.advice.ProceedingJoinPoint;
+import com.pythongong.aop.JoinPoint;
+import com.pythongong.aop.ProceedingJoinPoint;
 import com.pythongong.stereotype.Component;
 
 @Aspect
 @Component("testAspect")
 public class TestAspect {
 
-    @Before("execution(* com.pythongong.test.aop.valid.*.*(..))")
-    public void beforeAdvice(JoinPoint joinPoint) {
+    private static final String EXPRESS = "execution(* com.pythongong.test.aop.valid.AopTestInterface.*(..))";
+
+    @AfterReturning(EXPRESS)
+    public void afterReturningAdvice(JoinPoint joinPoint, Object result) {
+        AdviceOrder.execute("afterReturning1: " + joinPoint.methodName());
     }
 
-    @After("execution(* com.pythongong.test.aop.valid.*.*(..))")
-    public void afterAdvice(JoinPoint joinPoint) {
+    @Before("execution(* com.pythongong.test.aop.valid.*.*(..))")
+    public void beforeAdvice(JoinPoint joinPoint) {
+        AdviceOrder.execute("before1: " + joinPoint.methodName());
     }
 
     @Around("execution(* com.pythongong.test.aop.valid.*.*(..))")
     public Object aroundAdvice(ProceedingJoinPoint joinPoint) throws Throwable {
+        AdviceOrder.execute("around1: " + joinPoint.getJoinPoint().methodName());
         return joinPoint.proceed();
     }
 
-    @AfterReturning("execution(* com.pythongong.test.aop.valid.*.*(..))")
-    public void afterReturningAdvice(JoinPoint joinPoint, Object result) {
+    @After("execution(* com.pythongong.test.aop.valid.*.*(..))")
+    public void afterAdvice(JoinPoint joinPoint) {
+        AdviceOrder.execute("after1: " + joinPoint.methodName());
     }
 }

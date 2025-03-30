@@ -21,9 +21,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import com.pythongong.aop.AdvisedSupport;
-import com.pythongong.aop.advice.JoinPoint;
+import com.pythongong.aop.JoinPoint;
 import com.pythongong.aop.interceptor.AdviceInvocation;
-import com.pythongong.aop.interceptor.DynamicMatchMethodInterceptor;
+import com.pythongong.aop.interceptor.MethodMatchInterceptor;
 import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.exception.AopConfigException;
 import com.pythongong.util.CheckUtils;
@@ -95,8 +95,8 @@ public class AopInvocationHandler implements InvocationHandler {
             return method.invoke(advisedSupport.target(), args);
         }
         methodInterceptors = methodInterceptors.stream().filter(methodInterceptor -> {
-            if (methodInterceptor instanceof DynamicMatchMethodInterceptor) {
-                return ((DynamicMatchMethodInterceptor) methodInterceptor).methodMatcher().matches(method);
+            if (methodInterceptor instanceof MethodMatchInterceptor) {
+                return ((MethodMatchInterceptor) methodInterceptor).methodMatcher().matches(method);
             }
             return true;
         }).toList();
@@ -110,7 +110,8 @@ public class AopInvocationHandler implements InvocationHandler {
                 .build();
         Object result = invocation.proceed();
         if (invocation.interceptedNum().get() != methodInterceptors.size()) {
-            throw new AopConfigException("");
+            throw new AopConfigException(String.format("Not all interceptors in method {%s} og {%s}",
+                    advisedSupport.target().getClass().getName(), method.getName()));
         }
         return result;
     }
