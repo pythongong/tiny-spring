@@ -24,7 +24,7 @@ import com.pythongong.stereotype.Component;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassPathSerchParam;
 import com.pythongong.util.ClassUtils;
-import com.pythongong.util.PathUtils;
+import com.pythongong.util.FileUtils;
 import com.pythongong.util.StringUtils;
 
 /**
@@ -80,25 +80,25 @@ public class ConfigurableClassScanner {
      */
     private Set<Class<?>> scanCandidateComponents(String basePackage) {
         Set<String> classNames = new HashSet<>();
-        String packagePath = PathUtils.convertPackageToPath(basePackage);
+        String packagePath = FileUtils.convertPackageToPath(basePackage);
 
-        PathUtils.findClassPathFileNames(ClassPathSerchParam.builder()
+        FileUtils.findClassPathFileNames(ClassPathSerchParam.builder()
                 .packagePath(packagePath)
                 .serachJar(true)
                 .serachFile(true)
                 .searchSudDirect(true)
                 .pathMapper((basePath, filePath) -> {
                     String filePathStr = filePath.toString();
-                    if (!filePathStr.endsWith(PathUtils.CLASS_FILE_SUFFIX)) {
+                    if (!filePathStr.endsWith(FileUtils.CLASS_FILE_SUFFIX)) {
                         return;
                     }
                     String basePathStr = basePath.toString();
                     // For Jar file system, it's 0
                     int startIndex = basePathStr.length() - packagePath.length();
-                    int endIndex = filePathStr.length() - PathUtils.CLASS_FILE_SUFFIX.length();
+                    int endIndex = filePathStr.length() - FileUtils.CLASS_FILE_SUFFIX.length();
                     String className = filePathStr.substring(startIndex, endIndex);
-                    className = className.replace(PathUtils.PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR)
-                            .replace(PathUtils.SYSTEM_PATH_SEPARATOR, PathUtils.PACKAGE_SEPARATOR);
+                    className = className.replace(FileUtils.PATH_SEPARATOR, FileUtils.PACKAGE_SEPARATOR)
+                            .replace(FileUtils.SYSTEM_PATH_SEPARATOR, FileUtils.PACKAGE_SEPARATOR);
                     if (!StringUtils.isEmpty(className)) {
                         classNames.add(className);
                     }

@@ -16,6 +16,7 @@
 package com.pythongong.util;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Utility class providing validation methods for common checks.
@@ -87,5 +88,11 @@ public class CheckUtils {
 
     public static void emptyCollection(Collection<?> collection, String method, String argu) {
         emptyCollection(collection, String.format("{%s} recevies empty {%s}", method, argu));
+    }
+
+    public static void emptyMap(Map<?, ?> map, String method, String argu) {
+        if (map == null || map.isEmpty()) {
+            throw new IllegalArgumentException(String.format("{%s} recevies empty {%s}", method, argu));
+        }
     }
 }

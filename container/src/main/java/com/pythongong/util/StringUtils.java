@@ -33,8 +33,14 @@ import java.util.Map;
  */
 public class StringUtils {
 
+    /** A map to store converters */
     private static final Map<Class<?>, StringConverter> stringConverters = new HashMap<>();
 
+    /**
+     * A static block to initialize the string converters.
+     * It registers converters for various primitive types and their corresponding
+     * wrapper classes.
+     */
     static {
         stringConverters.put(String.class, s -> s);
         stringConverters.put(boolean.class, s -> Boolean.parseBoolean(s));
@@ -66,6 +72,13 @@ public class StringUtils {
         stringConverters.put(ZoneId.class, s -> ZoneId.of(s));
     }
 
+    /**
+     * Converts a string to the specified target class.
+     * 
+     * @param source      the string to convert
+     * @param targetClass the target class to convert to
+     * @return the converted object
+     */
     public static Object convertString(String source, Class<?> targetClass) {
         StringConverter stringConverter = stringConverters.get(targetClass);
         if (stringConverter == null) {

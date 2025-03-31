@@ -16,7 +16,8 @@
 package com.pythongong.context.support;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ import com.pythongong.core.io.ResourceLoader;
 import com.pythongong.exception.BeansException;
 import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassPathSerchParam;
-import com.pythongong.util.PathUtils;
+import com.pythongong.util.FileUtils;
 
 /**
  * Central class for handling annotation-based configuration and bootstrapping
@@ -178,16 +179,20 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      * @return configured PropertyResolver instance
      */
     private PropertyResolver createPropertyResolver() {
-        Set<String> propertiesFiles = new HashSet<>();
-        PathUtils.findClassPathFileNames(ClassPathSerchParam.builder()
-                .packagePath(PathUtils.ROOT_CLASS_PATH)
+        List<String> propertiesFiles = new ArrayList<>();
+        List<String> yamlFiles = new ArrayList<>();
+        FileUtils.findClassPathFileNames(ClassPathSerchParam.builder()
+                .packagePath(FileUtils.ROOT_CLASS_PATH)
                 .searchSudDirect(false)
                 .serachJar(false)
                 .serachFile(true)
                 .pathMapper((basePath, filePath) -> {
-                    String fileName = filePath.getFileName().toString();
-                    if (fileName.endsWith(PathUtils.PROPERTY_SUFFIX)) {
+                    String fileName = FileUtils.CLASSPATH_URL_PREFIX + filePath.getFileName().toString();
+                    if (fileName.endsWith(FileUtils.PROPERTY_SUFFIX)) {
                         propertiesFiles.add(fileName);
+                    }
+                    if (fileName.endsWith(FileUtils.YAML_SUFFIX)) {
+                        yamlFiles.add(fileName);
                     }
                 })
                 .build());
@@ -195,12 +200,16 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
         ResourceLoader resourceLoader = new DefaultResourceLoader();
         PropertyResolver propertyResolver = new PropertyResolver();
         propertiesFiles.forEach(propertiesFile -> {
-            Resource resource = resourceLoader.getResource(PathUtils.CLASSPATH_URL_PREFIX + propertiesFile);
+            Resource resource = resourceLoader.getResource(propertiesFile);
             try {
                 propertyResolver.load(resource.getInputStream());
             } catch (IOException e) {
                 throw new BeansException(String.format("Load propeties file {%s} failed", propertiesFile), e);
             }
+        });
+        yamlFiles.forEach(yamlFile -> {
+            Map<String, Object> yamlData = FileUtils.loadYaml(yamlFile);
+            propertyResolver.addAll(yamlData);
         });
         return propertyResolver;
     }

@@ -141,6 +141,17 @@ class AnnotationConfigApplicationContextTest {
     }
 
     @Test
+    void shouldLoadYamlFromClasspath() throws IOException {
+        // When
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfiguration.class);
+
+        // Then
+        TestPropertyComponent bean = context.getBean("testPropertyComponent", TestPropertyComponent.class);
+        assertTrue(bean.isAutoCommit());
+
+    }
+
+    @Test
     @DisplayName("Should register and apply BeanPostProcessor")
     void shouldRegisterAndApplyBeanPostProcessor() {
 

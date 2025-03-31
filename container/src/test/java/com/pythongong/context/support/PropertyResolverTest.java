@@ -23,12 +23,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.pythongong.util.FileUtils;
 
 @DisplayName("PropertyResolver Tests")
 class PropertyResolverTest {
@@ -112,5 +115,14 @@ class PropertyResolverTest {
         // When/Then
         assertEquals(javaHome, resolver.getProperty("JAVA_HOME"),
                 "Should resolve system environment variable");
+    }
+
+    @Test
+    void shouldLoadYamlProperties() {
+        String yamlDir = FileUtils.CLASSPATH_URL_PREFIX + "application.yml";
+
+        Map<String, Object> yaml = FileUtils.loadYaml(yamlDir);
+        resolver.addAll(yaml);
+        assertNotNull(resolver.getProperty("${spring.datasource.auto-commit}", boolean.class));
     }
 }

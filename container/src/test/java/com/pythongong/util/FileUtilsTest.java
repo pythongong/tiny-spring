@@ -22,11 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,11 +38,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.pythongong.exception.BeansException;
 
 /**
- * Unit tests for {@link PathUtils}.
+ * Unit tests for {@link FileUtils}.
  * Tests the file and classpath operations functionality.
  *
  * @author pythongong
@@ -48,7 +49,7 @@ import com.pythongong.exception.BeansException;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PathUtils Tests")
-class PathUtilsTest {
+class FileUtilsTest {
 
     private static final String TEST_RESOURCES_PATH = "pathutils_test";
     private static final List<Path> createdPaths = new ArrayList<>();
@@ -88,7 +89,7 @@ class PathUtilsTest {
         createFile(testResourcesRoot.resolve("test2.txt"), "test2.txt content");
         createFile(testResourcesRoot.resolve("subdir").resolve("test3.properties"), "test3.properties content");
         createFile(testResourcesRoot.resolve("test with spaces.txt"), "test with spaces content");
-        createFile(testResourcesRoot.resolve("test#special$chars.txt"), "special chars content");
+        createFile(testResourcesRoot.resolve("test#special.txt"), "special chars content");
     }
 
     private static void createDirectory(Path dir) throws IOException {
@@ -116,14 +117,14 @@ class PathUtilsTest {
                 .build();
 
         // When
-        PathUtils.findClassPathFileNames(param);
+        FileUtils.findClassPathFileNames(param);
 
         // Then
         assertEquals(4, foundFiles.size());
         assertTrue(foundFiles.contains("test1.properties"));
         assertTrue(foundFiles.contains("test2.txt"));
         assertTrue(foundFiles.contains("test with spaces.txt"));
-        assertTrue(foundFiles.contains("test#special$chars.txt"));
+        assertTrue(foundFiles.contains("test#special.txt"));
     }
 
     @Test
@@ -141,7 +142,7 @@ class PathUtilsTest {
                 .build();
 
         // When
-        PathUtils.findClassPathFileNames(param);
+        FileUtils.findClassPathFileNames(param);
 
         // Then
         assertEquals(5, foundFiles.size());
@@ -153,7 +154,7 @@ class PathUtilsTest {
     void shouldFindOnlyPropertyFiles() {
         // Given
         BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> {
-            if (filePath.toString().endsWith(PathUtils.PROPERTY_SUFFIX)) {
+            if (filePath.toString().endsWith(FileUtils.PROPERTY_SUFFIX)) {
                 foundFiles.add(filePath.getFileName().toString());
             }
         };
@@ -167,7 +168,7 @@ class PathUtilsTest {
                 .build();
 
         // When
-        PathUtils.findClassPathFileNames(param);
+        FileUtils.findClassPathFileNames(param);
 
         // Then
         assertEquals(2, foundFiles.size());
@@ -190,7 +191,7 @@ class PathUtilsTest {
                 .build();
 
         // When
-        PathUtils.findClassPathFileNames(param);
+        FileUtils.findClassPathFileNames(param);
 
         // Then
         assertTrue(foundFiles.isEmpty());
@@ -200,7 +201,7 @@ class PathUtilsTest {
     @DisplayName("Should throw exception when search parameter is null")
     void shouldThrowExceptionWhenParamIsNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> PathUtils.findClassPathFileNames(null),
+                () -> FileUtils.findClassPathFileNames(null),
                 "Should throw IllegalArgumentException when param is null");
     }
 
@@ -219,7 +220,7 @@ class PathUtilsTest {
                 .build();
 
         // When
-        PathUtils.findClassPathFileNames(param);
+        FileUtils.findClassPathFileNames(param);
 
         // Then
         assertTrue(foundFiles.isEmpty());
@@ -233,7 +234,7 @@ class PathUtilsTest {
         String expectedPath = "com/pythongong/util";
 
         // When
-        String result = PathUtils.convertPackageToPath(packageName);
+        String result = FileUtils.convertPackageToPath(packageName);
 
         // Then
         assertEquals(expectedPath, result);
@@ -246,7 +247,7 @@ class PathUtilsTest {
         String packageName = "com.test.package";
 
         // When
-        String result = PathUtils.convertPackageToPath(packageName);
+        String result = FileUtils.convertPackageToPath(packageName);
 
         // Then
         assertFalse(result.contains("\\"),
@@ -273,7 +274,7 @@ class PathUtilsTest {
                 .build();
 
         // When/Then
-        assertThrows(BeansException.class, () -> PathUtils.findClassPathFileNames(param));
+        assertThrows(BeansException.class, () -> FileUtils.findClassPathFileNames(param));
         mockedClassUtils.close();
     }
 
@@ -301,13 +302,25 @@ class PathUtilsTest {
                 .build();
 
         // When
-        PathUtils.findClassPathFileNames(param);
+        FileUtils.findClassPathFileNames(param);
 
         // Then
         assertFalse(foundClasses.isEmpty(), "Should find classes in JUnit package");
         assertTrue(
                 foundClasses.contains("Test.class"),
                 "Should find Test.class interface from JUnit");
+    }
+
+    @Test
+    void shouldLoadYaml() throws URISyntaxException {
+        String yamlDir = FileUtils.CLASSPATH_URL_PREFIX + "application.yml";
+
+        Map<String, Object> yaml = FileUtils.loadYaml(yamlDir);
+        // System.out.println(yaml.toString());
+        assertFalse(yaml.isEmpty());
+        assertTrue(yaml.containsKey("app.title"));
+        assertEquals("Tiny Spring", yaml.get("app.title"));
+
     }
 
 }

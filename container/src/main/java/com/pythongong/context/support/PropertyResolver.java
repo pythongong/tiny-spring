@@ -17,6 +17,7 @@ package com.pythongong.context.support;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
@@ -70,6 +71,11 @@ public class PropertyResolver {
         this.properties.putAll(System.getenv());
     }
 
+    public void addAll(Map<String, Object> propertyMap) {
+        CheckUtils.emptyMap(propertyMap, "PropertyResolver.addAll", "propertyMap");
+        properties.putAll(propertyMap);
+    }
+
     /**
      * Loads properties from an input stream into this resolver
      *
@@ -109,7 +115,7 @@ public class PropertyResolver {
         }
 
         if (value == null) {
-            throw new NoSuchElementException(key + " doesn't exist: ");
+            throw new NoSuchElementException(key + " doesn't exist");
         }
 
         return value;

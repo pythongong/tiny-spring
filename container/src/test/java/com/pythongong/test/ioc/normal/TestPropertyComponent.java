@@ -3,6 +3,9 @@ package com.pythongong.test.ioc.normal;
 import com.pythongong.stereotype.Component;
 import com.pythongong.stereotype.Value;
 
+import lombok.Getter;
+
+@Getter
 @Component("testPropertyComponent")
 public class TestPropertyComponent {
     @Value("${test.name}")
@@ -14,15 +17,7 @@ public class TestPropertyComponent {
     @Value("${app.description}")
     private String description;
 
-    public String getName() {
-        return name;
-    }
+    @Value("${spring.datasource.auto-commit}")
+    private boolean autoCommit;
 
-    public String getVersion() {
-        return version;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }
