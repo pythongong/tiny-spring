@@ -323,28 +323,14 @@ public class DefaultListableBeanFactory
         String beanName = beanDefinition.beanName();
         awareBean(beanName, bean);
 
-        bean = applyBeanPostProcessorsBeforeInit(bean, beanName);
-
+        List<BeanPostProcessor> beanPostProcessors = generalBeanFactory.getBeanPostProcessors();
+        beanPostProcessors
+                .forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(bean, beanName));
         invokeInitMethods(bean, beanDefinition);
 
-        bean = applyBeanPostProcessorsAfterInit(bean, beanName);
+        beanPostProcessors
+                .forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(bean, beanName));
         return bean;
-    }
-
-    private Object applyBeanPostProcessorsBeforeInit(Object bean, String beanName) {
-        Object wrappedBean = bean;
-        for (BeanPostProcessor beanPostProcessor : generalBeanFactory.getBeanPostProcessors()) {
-            wrappedBean = beanPostProcessor.postProcessBeforeInitialization(bean, beanName);
-        }
-        return wrappedBean == null ? bean : wrappedBean;
-    }
-
-    private Object applyBeanPostProcessorsAfterInit(Object bean, String beanName) {
-        Object wrappedBean = bean;
-        for (BeanPostProcessor beanPostProcessor : generalBeanFactory.getBeanPostProcessors()) {
-            wrappedBean = beanPostProcessor.postProcessAfterInitialization(bean, beanName);
-        }
-        return wrappedBean == null ? bean : wrappedBean;
     }
 
     /**

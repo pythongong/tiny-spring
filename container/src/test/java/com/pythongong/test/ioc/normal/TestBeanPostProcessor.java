@@ -10,15 +10,15 @@ import lombok.Data;
 public class TestBeanPostProcessor implements BeanPostProcessor {
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) {
+    public void postProcessBeforeInitialization(Object bean, String beanName) {
         if (bean instanceof TestComponent) {
             ((TestComponent) bean).setPostProcessed(true);
         }
-        return bean;
+
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) {
-        return bean;
+    public void postProcessAfterInitialization(Object bean, String beanName) {
+
     }
 }

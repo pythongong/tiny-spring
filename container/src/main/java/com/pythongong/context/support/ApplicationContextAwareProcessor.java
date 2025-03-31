@@ -36,41 +36,42 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
     private final ApplicationContext applicationContext;
 
     /**
-     * Creates a new ApplicationContextAwareProcessor with the specified ApplicationContext
+     * Creates a new ApplicationContextAwareProcessor with the specified
+     * ApplicationContext
      *
-     * @param applicationContext the ApplicationContext to be injected into aware beans
+     * @param applicationContext the ApplicationContext to be injected into aware
+     *                           beans
      */
     public ApplicationContextAwareProcessor(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 
     /**
-     * Injects the ApplicationContext into beans that implement ApplicationContextAware
+     * Injects the ApplicationContext into beans that implement
+     * ApplicationContextAware
      * before their initialization.
      *
-     * @param bean the bean instance being processed
+     * @param bean     the bean instance being processed
      * @param beanName the name of the bean
-     * @return the bean instance
      * @throws BeansException if any error occurs during processing
      */
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public void postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof ApplicationContextAware) {
             ((ApplicationContextAware) bean).setApplicationContext(applicationContext);
         }
-        return bean;
     }
 
     /**
      * No post-processing is performed after initialization
      *
-     * @param bean the bean instance being processed
+     * @param bean     the bean instance being processed
      * @param beanName the name of the bean
-     * @return the bean instance
+     * 
      * @throws BeansException if any error occurs during processing
      */
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
+    public void postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+
     }
 }

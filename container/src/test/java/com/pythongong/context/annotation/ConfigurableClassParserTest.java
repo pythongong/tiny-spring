@@ -54,6 +54,7 @@ class ConfigurableClassParserTest {
         props.setProperty("test.name", "testValue\n");
         props.setProperty("test.version", "1.0.0\n");
         props.setProperty("app.description", "Test Application\n");
+        props.setProperty("spring.datasource.auto-commit", "true");
         propertyResolver = new PropertyResolver(props);
         parser = new ConfigurableClassParser(propertyResolver);
         definitions = parser.parse(TestConfiguration.class);

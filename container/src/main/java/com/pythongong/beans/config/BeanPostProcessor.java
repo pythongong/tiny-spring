@@ -28,20 +28,20 @@ public interface BeanPostProcessor {
     /**
      * Apply this post processor before initialization of the given bean instance.
      *
-     * @param bean the new bean instance
+     * @param bean     the new bean instance
      * @param beanName the name of the bean
      * @return the bean instance to use, either the original or a wrapped one
      * @throws BeansException in case of errors
      */
-    Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException;
+    void postProcessBeforeInitialization(Object bean, String beanName) throws BeansException;
 
     /**
      * Apply this post processor after initialization of the given bean instance.
      *
-     * @param bean the new bean instance
+     * @param bean     the new bean instance
      * @param beanName the name of the bean
      * @return the bean instance to use, either the original or a wrapped one
      * @throws BeansException in case of errors
      */
-    Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
+    void postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
 }
