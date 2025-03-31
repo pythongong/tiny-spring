@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,11 +43,12 @@ import com.pythongong.enums.ScopeEnum;
 @DisplayName("ConfigurableClassParser Tests")
 class ConfigurableClassParserTest {
 
-    private PropertyResolver propertyResolver;
-    private ConfigurableClassParser parser;
+    private static PropertyResolver propertyResolver;
+    private static ConfigurableClassParser parser;
+    private static Set<BeanDefinition> definitions;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
         Properties props = new Properties();
         props.setProperty("test.property", "testValue");
         props.setProperty("test.name", "testValue\n");
@@ -55,6 +56,7 @@ class ConfigurableClassParserTest {
         props.setProperty("app.description", "Test Application\n");
         propertyResolver = new PropertyResolver(props);
         parser = new ConfigurableClassParser(propertyResolver);
+        definitions = parser.parse(TestConfiguration.class);
     }
 
     @Test
@@ -84,7 +86,7 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should parse ComponentScan with empty basePackages")
     void shouldParseComponentScanWithEmptyBasePackages() {
-        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
+
         assertFalse(definitions.isEmpty(),
                 "Should find components in the declaring class package");
     }
@@ -92,7 +94,7 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should parse ComponentScan with explicit basePackages")
     void shouldParseComponentScanWithExplicitBasePackages() {
-        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
+
         assertFalse(definitions.isEmpty(),
                 "Should find components in specified packages");
     }
@@ -100,7 +102,6 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should parse bean with lifecycle methods")
     void shouldParseBeanWithLifecycleMethods() {
-        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
 
         BeanDefinition lifecycleBean = definitions.stream()
                 .filter(def -> def.beanClass().equals(LifecycleTestBean.class))
@@ -115,7 +116,6 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should parse bean with custom scope")
     void shouldParseBeanWithCustomScope() {
-        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
 
         BeanDefinition prototypeBean = definitions.stream()
                 .filter(def -> def.scope().equals(ScopeEnum.PROTOTYPE))
@@ -130,7 +130,6 @@ class ConfigurableClassParserTest {
     @Test
     @DisplayName("Should parse configurable factory component")
     void shouldParseConfigurableFactoryComponent() {
-        Set<BeanDefinition> definitions = parser.parse(TestConfiguration.class);
 
         BeanDefinition factoryBean = definitions.stream()
                 .filter(def -> def.beanClass().equals(TestConfugrableBean.class))

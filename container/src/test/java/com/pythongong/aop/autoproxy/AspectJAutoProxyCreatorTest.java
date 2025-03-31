@@ -1,8 +1,6 @@
 package com.pythongong.aop.autoproxy;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -12,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import com.pythongong.aop.JoinPoint;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcut;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcutAdvisor;
+import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.enums.AdviceEnum;
 import com.pythongong.test.aop.valid.AopTestTarget;
@@ -25,7 +24,7 @@ class AspectJAutoProxyCreatorTest {
     @BeforeEach
     void setUp() {
         proxyCreator = new AspectJAutoProxyCreator();
-        beanFactory = mock(DefaultListableBeanFactory.class);
+        beanFactory = new DefaultListableBeanFactory();
         proxyCreator.setBeanFactory(beanFactory);
     }
 
@@ -47,7 +46,10 @@ class AspectJAutoProxyCreatorTest {
     void shouldCreateProxyWhenMatchingAdvisorExists() throws NoSuchMethodException {
         // Setup test objects
         AopTestTarget testService = new AopTestTarget();
-        TestAspect testAspect = new TestAspect();
+        beanFactory.registerBeanDefinition(BeanDefinition.builder()
+                .beanClass(TestAspect.class)
+                .beanName("testAspect")
+                .build());
         Method adviceMethod = TestAspect.class.getMethod("beforeAdvice", JoinPoint.class);
 
         // Setup pointcut and advisor
@@ -59,9 +61,6 @@ class AspectJAutoProxyCreatorTest {
                 .method(adviceMethod)
                 .pointcut(pointcut)
                 .build();
-
-        // Mock behavior
-        when(beanFactory.getBean("testAspect")).thenReturn(testAspect);
 
         // Set advisors through reflection
         try {

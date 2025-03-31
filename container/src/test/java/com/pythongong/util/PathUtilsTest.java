@@ -22,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,8 +55,6 @@ class PathUtilsTest {
     private final List<String> foundFiles = new ArrayList<>();
 
     private static Path testResourcesRoot;
-    private static ClassLoader testClassLoader;
-    private MockedStatic<ClassUtils> mockedClassUtils;
 
     @BeforeAll
     static void setUp() throws IOException {
@@ -67,26 +62,11 @@ class PathUtilsTest {
         testResourcesRoot = Paths.get("target", "test-classes", TEST_RESOURCES_PATH);
         createTestDirectories();
         createTestFiles();
-
-        // Create URLClassLoader with test resources
-        URL testResourcesUrl = testResourcesRoot.toUri().toURL();
-        testClassLoader = new URLClassLoader(new URL[] { testResourcesUrl }, null);
     }
 
     @BeforeEach
     void setUpEach() {
         foundFiles.clear();
-        // Create fresh mock for each test
-        mockedClassUtils = mockStatic(ClassUtils.class);
-        mockedClassUtils.when(ClassUtils::getDefaultClassLoader).thenReturn(testClassLoader);
-    }
-
-    @AfterEach
-    void tearDownEach() {
-        // Close the mock after each test
-        if (mockedClassUtils != null) {
-            mockedClassUtils.close();
-        }
     }
 
     @AfterAll
@@ -94,11 +74,6 @@ class PathUtilsTest {
         // Clean up created files and directories in reverse order
         for (int i = createdPaths.size() - 1; i >= 0; i--) {
             Files.deleteIfExists(createdPaths.get(i));
-        }
-
-        // Close the test classloader
-        if (testClassLoader instanceof URLClassLoader) {
-            ((URLClassLoader) testClassLoader).close();
         }
     }
 
@@ -133,7 +108,7 @@ class PathUtilsTest {
         BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
-                .packagePath(PathUtils.ROOT_CLASS_PATH)
+                .packagePath(TEST_RESOURCES_PATH)
                 .pathMapper(pathMapper)
                 .searchSudDirect(false)
                 .serachFile(true)
@@ -158,7 +133,7 @@ class PathUtilsTest {
         BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
-                .packagePath(PathUtils.ROOT_CLASS_PATH)
+                .packagePath(TEST_RESOURCES_PATH)
                 .pathMapper(pathMapper)
                 .searchSudDirect(true)
                 .serachFile(true)
@@ -184,7 +159,7 @@ class PathUtilsTest {
         };
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
-                .packagePath(PathUtils.ROOT_CLASS_PATH)
+                .packagePath(TEST_RESOURCES_PATH)
                 .pathMapper(pathMapper)
                 .searchSudDirect(true)
                 .serachFile(true)
@@ -236,7 +211,7 @@ class PathUtilsTest {
         BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
-                .packagePath(PathUtils.ROOT_CLASS_PATH)
+                .packagePath(TEST_RESOURCES_PATH)
                 .pathMapper(pathMapper)
                 .searchSudDirect(true)
                 .serachFile(false)
@@ -284,12 +259,13 @@ class PathUtilsTest {
     @DisplayName("Should handle null classloader gracefully")
     void shouldHandleNullClassloader() {
         // Given
+        MockedStatic<ClassUtils> mockedClassUtils = mockStatic(ClassUtils.class);
         mockedClassUtils.when(ClassUtils::getDefaultClassLoader).thenReturn(null);
 
         BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> foundFiles.add(filePath.getFileName().toString());
 
         ClassPathSerchParam param = ClassPathSerchParam.builder()
-                .packagePath(PathUtils.ROOT_CLASS_PATH)
+                .packagePath(TEST_RESOURCES_PATH)
                 .pathMapper(pathMapper)
                 .searchSudDirect(true)
                 .serachFile(true)
@@ -298,6 +274,40 @@ class PathUtilsTest {
 
         // When/Then
         assertThrows(BeansException.class, () -> PathUtils.findClassPathFileNames(param));
+        mockedClassUtils.close();
+    }
+
+    @Test
+    @DisplayName("Should find JUnit Test interface in classpath from JAR")
+    void shouldFindJUnitTestInterfaceInClasspath() {
+        // Given
+        List<String> foundClasses = new ArrayList<>();
+        BiConsumer<Path, Path> pathMapper = (basePath, filePath) -> {
+            String fileName = filePath.getFileName().toString();
+            if (fileName.endsWith(".class")) {
+                foundClasses.add(fileName);
+            }
+        };
+
+        // Get package path for org.junit.jupiter.api.Test
+        String packagePath = Test.class.getPackage().getName().replace('.', '/');
+
+        ClassPathSerchParam param = ClassPathSerchParam.builder()
+                .packagePath(packagePath)
+                .pathMapper(pathMapper)
+                .searchSudDirect(false)
+                .serachFile(false)
+                .serachJar(true)
+                .build();
+
+        // When
+        PathUtils.findClassPathFileNames(param);
+
+        // Then
+        assertFalse(foundClasses.isEmpty(), "Should find classes in JUnit package");
+        assertTrue(
+                foundClasses.contains("Test.class"),
+                "Should find Test.class interface from JUnit");
     }
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2025 Cheng Gong
+ * Copyright 2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.pythongong.aop;
 
 import java.util.List;
@@ -25,36 +26,26 @@ import com.pythongong.util.CheckUtils;
 import lombok.Builder;
 
 /**
- * Configuration holder for AOP proxies. This record encapsulates all the
- * necessary
- * components for creating and managing AOP proxies:
- * <ul>
- * <li>The target object to proxy</li>
- * <li>The interceptor that handles method invocations</li>
- * <li>The matcher that determines which methods to intercept</li>
- * </ul>
+ * Configuration holder for AOP proxy creation.
  * 
- * <p>
- * This class is immutable and thread-safe, implemented as a record to provide
- * a concise way to hold and access AOP configuration data.
+ * <p>Holds the target object and its associated interceptors required
+ * for creating AOP proxies.
  *
- * @param target            the target object to proxy
- * @param methodInterceptor the interceptor that handles method invocations
- * @param matcher           the matcher that determines which methods to
- *                          intercept
- * 
- * @author Cheng Gong
- * @see MethodInterceptor
- * @see MethodMatcher
+ * @author pythongong
+ * @since 1.0
+ * @param target the target object to be proxied
+ * @param methodMatcherInterceptors list of method matchers and their interceptors
  */
 @Builder
-public record AdvisedSupport(Object target,
+public record AdvisedSupport(
+        /** The target object to be proxied */
+        Object target,
+        /** List of method matchers and their interceptors */
         List<MethodMatcherInterceptor> methodMatcherInterceptors) {
 
     /**
-     * Constructs an AdvisedSupport instance with validation.
-     * 
-     * @throws IllegalArgumentException if any parameter is null
+     * Compact constructor for parameter validation.
+     * @throws IllegalArgumentException if target or methodMatcherInterceptors is null
      */
     public AdvisedSupport {
         CheckUtils.nullArgs(target, "AdvisedSupport recevies null targetSource");
@@ -62,25 +53,17 @@ public record AdvisedSupport(Object target,
     }
 
     /**
-     * Return the type of targets returned by this {@link TargetSource}.
-     * <p>
-     * Can return <code>null</code>, although certain usages of a
-     * <code>TargetSource</code> might just work with a predetermined
-     * target class.
-     * 
-     * @return the type of targets returned by this {@link TargetSource}
+     * Gets the interfaces implemented by the target object.
+     * @return array of interfaces, or null if none exist
      */
     @Nullable
     public Class<?>[] getTargetInterfaces() {
-        return this.target.getClass().getInterfaces();
+        return this.getTargetClass().getInterfaces();
     }
 
     /**
-     * Returns the actual class of the target object.
-     * This is useful for proxy creation mechanisms that need to
-     * know the concrete class of the target.
-     *
-     * @return the Class object representing the target's type
+     * Gets the actual class of the target object.
+     * @return the target object's class
      */
     public Class<?> getTargetClass() {
         return this.target.getClass();

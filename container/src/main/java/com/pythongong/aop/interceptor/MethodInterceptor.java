@@ -1,11 +1,11 @@
 /*
- * Copyright 2025 Cheng Gong
+ * Copyright 2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,44 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.pythongong.aop.interceptor;
 
 import com.pythongong.exception.AopConfigException;
 
 /**
- * Functional interface for implementing method interception in AOP.
- * Interceptors can perform custom logic before and after method execution,
- * or even completely replace the original method's behavior.
+ * Interface for method interception in AOP.
  * 
- * <p>
- * This interface is designed to work with Java's Supplier interface,
- * allowing for a clean and functional approach to method interception.
- * The proceed parameter represents the original method execution,
- * which can be invoked or skipped as needed.
- * 
- * <p>
- * Example usage:
- * 
- * <pre>
- * MethodInterceptor interceptor = proceed -> {
- *     // Before method execution
- *     Object result = proceed.get();
- *     // After method execution
- *     return result;
- * };
- * </pre>
+ * <p>Provides the core interception mechanism for AOP advice, allowing custom
+ * behavior to be inserted before, after, or around method invocations.
  *
- * @author Cheng Gong
- * @see java.util.function.Supplier
- * @see com.pythongong.exception.AopConfigException
+ * @author pythongong
+ * @since 1.0
  */
 @FunctionalInterface
 public interface MethodInterceptor {
 
     /**
-     * Intercepts a method invocation and handles its execution.
-     *
+     * Intercepts a method invocation.
      * 
+     * @param invocation the context of the method invocation
      * @return the result of the method invocation
      * @throws AopConfigException if an error occurs during interception
      */
