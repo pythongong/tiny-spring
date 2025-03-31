@@ -30,7 +30,7 @@ public class AopUtils {
         Class<AspectJAutoProxyCreator> beanClass = AspectJAutoProxyCreator.class;
         return BeanDefinition.builder()
                 .beanClass(beanClass)
-                .beanName(beanClass.getName())
+                .beanName(AspectJAutoProxyCreator.BEAN_NAME)
                 .build();
     }
 

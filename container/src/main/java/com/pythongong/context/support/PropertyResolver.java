@@ -21,11 +21,14 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import com.pythongong.exception.NoSuchBeanException;
+import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
+import com.pythongong.util.StringUtils;
 
 /**
  * A property resolver that handles property placeholder resolution and provides
- * access to configuration properties. This resolver supports both system environment
+ * access to configuration properties. This resolver supports both system
+ * environment
  * variables and custom properties loaded from property files. It also supports
  * default values in property placeholders using the syntax ${key:defaultValue}.
  *
@@ -44,7 +47,8 @@ public class PropertyResolver {
     private final static String END = "}";
 
     /**
-     * The properties container holding all resolved properties and system environment variables
+     * The properties container holding all resolved properties and system
+     * environment variables
      */
     private Properties properties;
 
@@ -54,7 +58,7 @@ public class PropertyResolver {
     public PropertyResolver() {
         this(null);
     }
-    
+
     /**
      * Creates a new PropertyResolver with the specified properties
      * System environment variables are automatically added to the properties
@@ -74,20 +78,22 @@ public class PropertyResolver {
      */
     public void load(InputStream inputStream) throws IOException {
         CheckUtils.nullArgs(inputStream, "PropertyResolver.load recevies null InputStream");
-        try(inputStream) {
+        try (inputStream) {
             properties.load(inputStream);
         } catch (IOException e) {
             throw new IOException("Error loading properties", e);
-        } 
+        }
     }
 
     /**
-     * Resolves a property value by its key. If the key is in the format ${key:defaultValue},
+     * Resolves a property value by its key. If the key is in the format
+     * ${key:defaultValue},
      * returns the default value if the key doesn't exist.
      *
      * @param key the property key to resolve
      * @return the resolved property value
-     * @throws NoSuchBeanException the property doesn't exist and no default value is specified
+     * @throws NoSuchBeanException the property doesn't exist and no default value
+     *                             is specified
      */
     public String getProperty(String key) {
         CheckUtils.emptyString(key, "PropertyResolver.getProperty receives empty key");
@@ -97,11 +103,11 @@ public class PropertyResolver {
             value = properties.getProperty(key, propertyExpr.defaultValue());
         } else if (propertyExpr != null) {
             value = properties.getProperty(propertyExpr.key());
-            
+
         } else {
             value = properties.getProperty(key);
         }
-        
+
         if (value == null) {
             throw new NoSuchElementException(key + " doesn't exist: ");
         }
@@ -109,12 +115,25 @@ public class PropertyResolver {
         return value;
     }
 
+    @Nullable
+    public Object getProperty(String key, Class<?> targetType) {
+        String value = getProperty(key);
+        if (value == null) {
+            return null;
+        }
+        if (targetType == String.class) {
+            return value;
+        }
+        return StringUtils.convertString(value, targetType);
+    }
+
     /**
      * Parses a property expression in the format ${key:defaultValue} or ${key}
      * into its components
      *
      * @param key the property expression to parse
-     * @return a PropertyExpr object containing the parsed key and default value, or null if not a valid expression
+     * @return a PropertyExpr object containing the parsed key and default value, or
+     *         null if not a valid expression
      */
     private PropertyExpr parsePropertyExpr(String key) {
         if (!key.startsWith(START) || !key.endsWith(END)) {
@@ -124,7 +143,7 @@ public class PropertyResolver {
         if (defaultValueIndex == -1) {
             key = key.substring(START.length(), key.length() - END.length());
             return new PropertyExpr(key, null);
-        } 
+        }
 
         String defaultValue = key.substring(defaultValueIndex + 1, key.length() - END.length());
         key = key.substring(START.length(), defaultValueIndex);
@@ -137,15 +156,14 @@ public class PropertyResolver {
  * and an optional default value.
  */
 record PropertyExpr(
-    /**
-     * The property key without the ${} delimiters
-     */
-    String key, 
+        /**
+         * The property key without the ${} delimiters
+         */
+        String key,
 
-    /**
-     * The default value to use if the property is not found,
-     * or null if no default value was specified
-     */
-    String defaultValue
-) {
+        /**
+         * The default value to use if the property is not found,
+         * or null if no default value was specified
+         */
+        String defaultValue) {
 }

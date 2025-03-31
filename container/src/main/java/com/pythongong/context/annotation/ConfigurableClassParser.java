@@ -346,7 +346,7 @@ public class ConfigurableClassParser {
      * @return the property value
      */
     private FieldValue getValuedField(Value value, Field field) {
-        String property = propertyResolver.getProperty(value.value());
+        Object property = propertyResolver.getProperty(value.value(), field.getType());
         return new FieldValue(field.getName(), property);
     }
 

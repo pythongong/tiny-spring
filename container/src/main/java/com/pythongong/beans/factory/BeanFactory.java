@@ -16,13 +16,15 @@
 package com.pythongong.beans.factory;
 
 import com.pythongong.exception.BeansException;
+import com.pythongong.stereotype.Nullable;
 
 /**
  * The root interface for accessing a Spring bean container.
  * This is the most fundamental interface of the Spring bean container,
  * providing basic bean retrieval functionality.
  * 
- * <p>The basic client view of a bean container, allowing for
+ * <p>
+ * The basic client view of a bean container, allowing for
  * programmatic retrieval of bean instances. Implementations should
  * support the Singleton and Prototype design patterns.
  *
@@ -42,17 +44,21 @@ public interface BeanFactory {
      * @return an instance of the bean
      * @throws BeansException if the bean could not be obtained
      */
+    @Nullable
     Object getBean(String beanName) throws BeansException;
 
     /**
      * Returns an instance of the bean registered with the given name and ensures
      * it matches the required type.
      *
-     * @param <T> the required type of the bean
-     * @param beanName name of the bean to retrieve
-     * @param requiredType type the bean must match; can be an interface or superclass
+     * @param <T>          the required type of the bean
+     * @param beanName     name of the bean to retrieve
+     * @param requiredType type the bean must match; can be an interface or
+     *                     superclass
      * @return an instance of the bean cast to the required type
-     * @throws BeansException if the bean could not be obtained or is not of the required type
+     * @throws BeansException if the bean could not be obtained or is not of the
+     *                        required type
      */
+    @Nullable
     <T> T getBean(String beanName, Class<T> requiredType) throws BeansException;
 }

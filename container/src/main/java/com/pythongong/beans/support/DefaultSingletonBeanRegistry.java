@@ -92,7 +92,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
      * @param bean     the bean instance
      * @throws IllegalArgumentException if beanName is empty or bean is null
      */
-    protected void registerSingleton(String beanName, Object bean) {
+    void registerSingleton(String beanName, Object bean) {
         CheckUtils.emptyString(beanName, "DefaultSingletonBeanRegistry.registerSingleton receives empty bean name");
         CheckUtils.nullArgs(bean, "DefaultSingletonBeanRegistry.registerSingleton receives null bean");
         singletonObjects.put(beanName, bean);

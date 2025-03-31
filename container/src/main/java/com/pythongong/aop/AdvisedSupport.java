@@ -18,7 +18,6 @@ package com.pythongong.aop;
 
 import java.util.List;
 
-import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
@@ -28,13 +27,15 @@ import lombok.Builder;
 /**
  * Configuration holder for AOP proxy creation.
  * 
- * <p>Holds the target object and its associated interceptors required
+ * <p>
+ * Holds the target object and its associated interceptors required
  * for creating AOP proxies.
  *
  * @author pythongong
  * @since 1.0
- * @param target the target object to be proxied
- * @param methodMatcherInterceptors list of method matchers and their interceptors
+ * @param target                    the target object to be proxied
+ * @param methodMatcherInterceptors list of method matchers and their
+ *                                  interceptors
  */
 @Builder
 public record AdvisedSupport(
@@ -45,7 +46,9 @@ public record AdvisedSupport(
 
     /**
      * Compact constructor for parameter validation.
-     * @throws IllegalArgumentException if target or methodMatcherInterceptors is null
+     * 
+     * @throws IllegalArgumentException if target or methodMatcherInterceptors is
+     *                                  null
      */
     public AdvisedSupport {
         CheckUtils.nullArgs(target, "AdvisedSupport recevies null targetSource");
@@ -54,6 +57,7 @@ public record AdvisedSupport(
 
     /**
      * Gets the interfaces implemented by the target object.
+     * 
      * @return array of interfaces, or null if none exist
      */
     @Nullable
@@ -63,6 +67,7 @@ public record AdvisedSupport(
 
     /**
      * Gets the actual class of the target object.
+     * 
      * @return the target object's class
      */
     public Class<?> getTargetClass() {

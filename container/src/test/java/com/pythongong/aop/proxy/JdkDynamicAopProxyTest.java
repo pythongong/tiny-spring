@@ -50,6 +50,7 @@ class JdkDynamicAopProxyTest {
         assertNotNull(proxyTarget);
         assertTrue(proxyTarget instanceof AopTestInterface);
         assertTrue(((AopTestInterface) proxyTarget).getProxy());
+        assertFalse(proxyTarget == target);
     }
 
     @Test

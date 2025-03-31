@@ -31,14 +31,14 @@ class AspectJAutoProxyCreatorTest {
     @Test
     void shouldReturnOriginalBeanWhenNoAdvisors() {
         AopTestTarget target = new AopTestTarget();
-        Object result = proxyCreator.postProcessAfterInitialization(target, "testService");
+        Object result = proxyCreator.create(target, "testService");
         assertSame(target, result);
     }
 
     @Test
     void shouldReturnOriginalBeanWhenBeanIsAspect() {
         TestAspect testAspect = new TestAspect();
-        Object result = proxyCreator.postProcessAfterInitialization(testAspect, "testAspect");
+        Object result = proxyCreator.create(testAspect, "testAspect");
         assertSame(testAspect, result);
     }
 
@@ -72,7 +72,7 @@ class AspectJAutoProxyCreatorTest {
         }
 
         // Test proxy creation
-        Object result = proxyCreator.postProcessAfterInitialization(testService, "testService");
+        Object result = proxyCreator.create(testService, "testService");
 
         assertNotNull(result);
         assertNotSame(testService, result);

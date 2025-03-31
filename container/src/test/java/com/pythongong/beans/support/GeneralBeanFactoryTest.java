@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.registry.SingletonBeanRegistry;
-import com.pythongong.exception.NoSuchBeanException;
 
 /**
  * Test class for GeneralBeanFactory.
@@ -107,7 +106,7 @@ class GeneralBeanFactoryTest {
         String beanName = "nonExistentBean";
         when(getBeanDefinition.apply(beanName)).thenReturn(null);
 
-        assertThrows(NoSuchBeanException.class, () -> beanFactory.getBean(beanName));
+        assertNull(beanFactory.getBean(beanName));
     }
 
     /**

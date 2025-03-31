@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.pythongong.aop.autoproxy.AspectJAutoProxyCreator;
 import com.pythongong.beans.aware.Aware;
 import com.pythongong.beans.aware.BeanClassLoaderAware;
 import com.pythongong.beans.aware.BeanFactoryAware;
@@ -175,7 +176,7 @@ public class DefaultListableBeanFactory
         bean = createBeanInstance(beanDefinition);
 
         if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
-            singletonBeanRegistry.registerSingleton(beanName, bean);
+            singletonBeanRegistry.registerSingleton(beanName, getEarlyBeanReference(bean, beanName));
         }
 
         fillFieldValues(beanDefinition, bean);
@@ -185,11 +186,22 @@ public class DefaultListableBeanFactory
         bean = initializeBean(bean, beanDefinition);
 
         registerDisposableBeanIfNecessary(bean, beanDefinition);
-
-        if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
-            singletonBeanRegistry.registerSingleton(beanName, bean);
-        }
         return bean;
+    }
+
+    private Object getEarlyBeanReference(Object bean, String beanName) {
+        if (bean instanceof AspectJAutoProxyCreator) {
+            return bean;
+        }
+        AspectJAutoProxyCreator aspectJAutoProxyCreator = generalBeanFactory.getBean(AspectJAutoProxyCreator.BEAN_NAME,
+                AspectJAutoProxyCreator.class);
+        if (aspectJAutoProxyCreator == null) {
+            return bean;
+        }
+        if (aspectJAutoProxyCreator.getBeanFactory() == null) {
+            aspectJAutoProxyCreator.setBeanFactory(this);
+        }
+        return aspectJAutoProxyCreator.create(bean, beanName);
     }
 
     /**

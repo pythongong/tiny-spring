@@ -120,7 +120,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
         }
         BeanDefinition beanDefinition = getBeanDefinition.apply(beanName);
         if (beanDefinition == null) {
-            throw new NoSuchBeanException(String.format("No bean is definited as: {%s}", beanName));
+            return null;
         }
 
         return (T) getObjectForBeanInstance(createBean.apply(beanDefinition), beanName);

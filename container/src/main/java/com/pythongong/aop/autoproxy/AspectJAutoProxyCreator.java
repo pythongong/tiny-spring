@@ -29,9 +29,6 @@ import com.pythongong.aop.interceptor.AdviceInterceptorParam;
 import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.aop.proxy.ProxyFactory;
-import com.pythongong.beans.aware.BeanFactoryAware;
-import com.pythongong.beans.config.BeanPostProcessor;
-import com.pythongong.beans.factory.BeanFactory;
 import com.pythongong.beans.support.DefaultListableBeanFactory;
 import com.pythongong.enums.AdviceEnum;
 import com.pythongong.exception.AopConfigException;
@@ -43,13 +40,17 @@ import com.pythongong.util.StringUtils;
  * BeanPostProcessor implementation that creates AOP proxies based on detected
  * AspectJ-annotated classes in Spring beans.
  *
- * <p>Processes beans to create AOP proxies that implement the specific aspect contracts,
+ * <p>
+ * Processes beans to create AOP proxies that implement the specific aspect
+ * contracts,
  * delegating to the given AspectJ aspects for the actual aspect implementation.
  *
  * @author pythongong
  * @since 1.0
  */
-public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAware {
+public class AspectJAutoProxyCreator {
+
+    public static final String BEAN_NAME = AspectJAutoProxyCreator.class.getName();
 
     /** The bean factory used for resolving aspect bean references */
     private DefaultListableBeanFactory beanFactory;
@@ -57,33 +58,24 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
     /** List of AspectJ advisors */
     private List<AspectJExpressionPointcutAdvisor> advisors;
 
-    /**
-     * Set the BeanFactory that this object runs in.
-     * @param beanFactory the BeanFactory to be used by this object
-     * @throws BeansException if the BeanFactory is invalid
-     */
-    @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
+    public DefaultListableBeanFactory getBeanFactory() {
+        return beanFactory;
     }
 
-    /**
-     * No processing is done before bean initialization
-     */
-    @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
+    public void setBeanFactory(DefaultListableBeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
     }
 
     /**
      * Create a proxy with AOP support if necessary.
-     * @param bean the new bean instance
+     * 
+     * @param bean     the new bean instance
      * @param beanName the name of the bean
      * @return the bean instance to use, either the original or a wrapped one
      * @throws BeansException in case of errors
      */
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+
+    public Object create(Object bean, String beanName) throws BeansException {
         // Skip if no advisors available or invalid bean
         if (ClassUtils.isCollectionEmpty(advisors) || bean == null || StringUtils.isEmpty(beanName)) {
             return bean;
@@ -117,6 +109,7 @@ public class AspectJAutoProxyCreator implements BeanPostProcessor, BeanFactoryAw
 
     /**
      * Creates method interceptors for each advisor that matches the target class.
+     * 
      * @param relatedAdvisors list of advisors that match the target class
      * @return list of method matcher interceptors
      * @throws AopConfigException if advice creation fails
