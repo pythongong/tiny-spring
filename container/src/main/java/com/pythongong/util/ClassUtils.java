@@ -17,6 +17,7 @@ package com.pythongong.util;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Utility class for common class-related operations.
@@ -31,8 +32,10 @@ public class ClassUtils {
     private ClassUtils() {
     }
 
+    /** The big default initialization size of the collections, which is a power of 2 */
     public static int BIG_INIT_SIZE = 256;
 
+    /** The small default initialization size of the collections, which is a power of 2 */
     public static int SMALL_INIT_SIZE = 16;
 
     /**
@@ -90,7 +93,17 @@ public class ClassUtils {
         return array == null || array.length == 0;
     }
 
+   
     public static boolean isCollectionEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+     /**
+     * Checks if a map is null or empty.
+     * @param map the map to check
+     * @return  true if the map is null or empty, false otherwise
+     */
+    public static boolean isMapEmpty(Map<?, ?> map) {
+        return map == null || map.isEmpty();
     }
 }

@@ -175,13 +175,10 @@ public class DefaultListableBeanFactory
 
         bean = createBeanInstance(beanDefinition);
 
+        // Avoid the cylclic dependency problem
         if (ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
             singletonBeanRegistry.registerSingleton(beanName, getEarlyBeanReference(bean, beanName));
         }
-
-        fillFieldValues(beanDefinition, bean);
-
-        methodInject(bean, beanDefinition);
 
         bean = initializeBean(bean, beanDefinition);
 
@@ -189,6 +186,18 @@ public class DefaultListableBeanFactory
         return bean;
     }
 
+    /**
+     * Get the empty reference for the given bean to avoid the cyclic dependency
+     * problem.
+     * If the bean is an AspectJAutoProxyCreator, it returns the bean itself.
+     * Otherwise, it gets an AspectJAutoProxyCreator.
+     * If an AspectJAutoProxyCreator is not found, it returns the bean itself.
+     * and sets its bean factory to create the proxy.
+     * 
+     * @param bean     the bean instance
+     * @param beanName the name of the bean
+     * @return the empty reference for the bean or a proxy reference of the bean
+     */
     private Object getEarlyBeanReference(Object bean, String beanName) {
         if (bean instanceof AspectJAutoProxyCreator) {
             return bean;
@@ -320,16 +329,22 @@ public class DefaultListableBeanFactory
      * and applying post processors.
      */
     private Object initializeBean(Object bean, BeanDefinition beanDefinition) {
+        fillFieldValues(beanDefinition, bean);
+
+        methodInject(bean, beanDefinition);
+
         String beanName = beanDefinition.beanName();
+
         awareBean(beanName, bean);
 
         List<BeanPostProcessor> beanPostProcessors = generalBeanFactory.getBeanPostProcessors();
         beanPostProcessors
                 .forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(bean, beanName));
+
         invokeInitMethods(bean, beanDefinition);
 
         beanPostProcessors
-                .forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(bean, beanName));
+                .forEach(beanPostProcessor -> beanPostProcessor.postProcessAfterInitialization(bean, beanName));
         return bean;
     }
 

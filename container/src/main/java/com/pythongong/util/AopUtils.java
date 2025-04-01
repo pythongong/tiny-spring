@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.pythongong.util;
 
 import java.lang.annotation.Annotation;
@@ -22,10 +38,27 @@ import com.pythongong.beans.config.FieldValueList;
 import com.pythongong.enums.AdviceEnum;
 import com.pythongong.exception.AopConfigException;
 
+/**
+ * Utility class providing AOP-related helper methods.
+ * 
+ * <p>Contains methods for handling aspect definitions, advisor creation,
+ * and advice invocation in the AOP framework.
+ *
+ * @author pythongong
+ * @since 1.0
+ */
 public class AopUtils {
+
+    /**
+     * Private constructor to prevent instantiation.
+     */
     private AopUtils() {
     }
 
+    /**
+     * Creates a bean definition for the AOP bean post processor.
+     * @return the created bean definition
+     */
     public static BeanDefinition definiteAopBeanPostProcessor() {
         Class<AspectJAutoProxyCreator> beanClass = AspectJAutoProxyCreator.class;
         return BeanDefinition.builder()
@@ -34,6 +67,11 @@ public class AopUtils {
                 .build();
     }
 
+    /**
+     * Adds advisors to the AOP bean post processor definition.
+     * @param aspectDefinition the aspect bean definition
+     * @param aopBeanPostProcessorDefinition the AOP post processor definition
+     */
     @SuppressWarnings("unchecked")
     public static void addAdvisors(BeanDefinition aspectDefinition, BeanDefinition aopBeanPostProcessorDefinition) {
         Class<?> aspectClass = aspectDefinition.beanClass();
@@ -56,6 +94,12 @@ public class AopUtils {
         oldAdvisors.addAll(advisors);
     }
 
+    /**
+     * Creates an advisor from the given aspect method.
+     * @param apsectName the name of the aspect
+     * @param method the method to create advisor from
+     * @return the created advisor, or null if method is not an advice
+     */
     private static AspectJExpressionPointcutAdvisor createAdvisor(String apsectName, Method method) {
         AdviceEnum adviceEnum = null;
         Annotation adviceAnnotation = null;
@@ -101,6 +145,11 @@ public class AopUtils {
                 .build();
     }
 
+    /**
+     * Validates the method signature for after returning advice.
+     * @param method the method to validate
+     * @throws AopConfigException if the method signature is invalid
+     */
     private static void checkAfterReturning(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (ClassUtils.isArrayEmpty(parameterTypes) || parameterTypes.length != 2
@@ -109,6 +158,11 @@ public class AopUtils {
         }
     }
 
+    /**
+     * Validates the method signature for around advice.
+     * @param method the method to validate
+     * @throws AopConfigException if the method signature is invalid
+     */
     private static void checkAroundAgurs(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (ClassUtils.isArrayEmpty(parameterTypes) || parameterTypes.length != 1
@@ -120,6 +174,11 @@ public class AopUtils {
         }
     }
 
+    /**
+     * Validates the method signature for before and after advice.
+     * @param method the method to validate
+     * @throws AopConfigException if the method signature is invalid
+     */
     private static void checkBeforeAndAfterArgus(Method method) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (ClassUtils.isArrayEmpty(parameterTypes)) {
@@ -131,6 +190,12 @@ public class AopUtils {
         }
     }
 
+    /**
+     * Invokes the advice method with the appropriate parameters.
+     * @param param the parameters for advice invocation
+     * @return the result of advice invocation
+     * @throws AopConfigException if advice invocation fails
+     */
     public static Object invokeAdvice(AdviceMethodParam param) {
         Method advicMethod = param.advicMethod();
         Class<?>[] parameterTypes = advicMethod.getParameterTypes();
@@ -156,5 +221,4 @@ public class AopUtils {
             throw new AopConfigException(String.format("{%s} advice failed", advicMethod.getName()));
         }
     }
-
 }

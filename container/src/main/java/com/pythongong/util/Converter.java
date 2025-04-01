@@ -17,22 +17,23 @@
 package com.pythongong.util;
 
 /**
- * Functional interface for converting string values to objects.
+ * Functional interface for converting source class to another class.
  * 
- * <p>Provides a simple conversion mechanism from string representations
- * to their corresponding object types.
+ * <p>
+ * Provides a simple conversion mechanism from source type representations
+ * to their corresponding types.
  *
  * @author pythongong
  * @since 1.0
  */
 @FunctionalInterface
-public interface StringConverter {
+public interface Converter<S, T> {
 
     /**
-     * Converts a string source to its corresponding object representation.
+     * Converts a source type to its corresponding object representation.
      * 
-     * @param source the string to be converted
-     * @return the converted object
+     * @param source the source type to be converted
+     * @return the converted type object
      */
-    Object convert(String source);
+    T convert(S source);
 }

@@ -34,7 +34,7 @@ import java.util.Map;
 public class StringUtils {
 
     /** A map to store converters */
-    private static final Map<Class<?>, StringConverter> stringConverters = new HashMap<>();
+    private static final Map<Class<?>, Converter<String, Object>> stringConverters = new HashMap<>();
 
     /**
      * A static block to initialize the string converters.
@@ -80,7 +80,7 @@ public class StringUtils {
      * @return the converted object
      */
     public static Object convertString(String source, Class<?> targetClass) {
-        StringConverter stringConverter = stringConverters.get(targetClass);
+        Converter<String, Object> stringConverter = stringConverters.get(targetClass);
         if (stringConverter == null) {
             throw new IllegalArgumentException();
         }

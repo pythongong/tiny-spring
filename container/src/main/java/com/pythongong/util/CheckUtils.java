@@ -44,6 +44,15 @@ public class CheckUtils {
         }
     }
 
+    /**
+     * Checks if an object is null or empty and
+     * throws an IllegalArgumentException if it is.
+     *
+     * @param map    the object to check
+     * @param method methd name for the error message
+     * @param argu   argument name for the error message
+     * @throws IllegalArgumentException if the object is null or empty
+     */
     public static void nullArgs(Object obj, String method, String argu) {
         nullArgs(obj, String.format("{%s} recevies null {%s}", method, argu));
     }
@@ -76,6 +85,15 @@ public class CheckUtils {
         }
     }
 
+    /**
+     * Checks if a string is null or empty and throws
+     * an IllegalArgumentException if it is.
+     *
+     * @param map    the string to check
+     * @param method methd name for the error message
+     * @param argu   argument name for the error message
+     * @throws IllegalArgumentException if the string is null or empty
+     */
     public static void emptyString(String str, String method, String argu) {
         emptyString(str, String.format("{%s} recevies empty {%s}", method, argu));
     }
@@ -86,12 +104,30 @@ public class CheckUtils {
         }
     }
 
+    /**
+     * Checks if a collection is null or empty and throws an
+     * IllegalArgumentException if it is.
+     *
+     * @param collection the collection to check
+     * @param method     methd name for the error message
+     * @param argu       argument name for the error message
+     * @throws IllegalArgumentException if the collection is null or empty
+     */
     public static void emptyCollection(Collection<?> collection, String method, String argu) {
         emptyCollection(collection, String.format("{%s} recevies empty {%s}", method, argu));
     }
 
+    /**
+     * Checks if a map is null or empty and throws an IllegalArgumentException if it
+     * is.
+     *
+     * @param map    the map to check
+     * @param method methd name for the error message
+     * @param argu   argument name for the error message
+     * @throws IllegalArgumentException if the map is null or empty
+     */
     public static void emptyMap(Map<?, ?> map, String method, String argu) {
-        if (map == null || map.isEmpty()) {
+        if (ClassUtils.isMapEmpty(map)) {
             throw new IllegalArgumentException(String.format("{%s} recevies empty {%s}", method, argu));
         }
     }

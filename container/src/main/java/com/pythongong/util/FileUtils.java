@@ -55,10 +55,6 @@ import com.pythongong.exception.BeansException;
  */
 public class FileUtils {
 
-	/** Private constructor to prevent instantiation */
-	private FileUtils() {
-	}
-
 	/** Root classpath constant */
 	public static final String ROOT_CLASS_PATH = "";
 
@@ -103,6 +99,10 @@ public class FileUtils {
 
 	/** Prefix for loading from a JAR file */
 	public static final String JAR_URL_PREFIX = "jar:";
+
+	/** Private constructor to prevent instantiation */
+	private FileUtils() {
+	}
 
 	/**
 	 * Finds class path file names based on the provided search parameters.
