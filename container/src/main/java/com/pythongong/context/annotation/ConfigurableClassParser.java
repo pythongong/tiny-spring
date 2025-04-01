@@ -24,7 +24,7 @@ import java.util.*;
 import org.aspectj.lang.annotation.Aspect;
 
 import com.pythongong.beans.config.*;
-import com.pythongong.context.support.PropertyResolver;
+import com.pythongong.context.impl.PropertyResolver;
 import com.pythongong.enums.FiledAnnoEnum;
 import com.pythongong.enums.ScopeEnum;
 import com.pythongong.exception.BeansException;

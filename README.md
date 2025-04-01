@@ -47,10 +47,10 @@ tiny-spring
 │                   │   ├── aware
 │                   │   ├── config
 │                   │   ├── factory
-│                   │   └── support
+│                   │   └── impl
 │                   ├── context
 │                   │   ├── annotation
-│                   │   └── support
+│                   │   └── impl
 │                   ├── io
 │                   ├── enums
 │                   ├── exception

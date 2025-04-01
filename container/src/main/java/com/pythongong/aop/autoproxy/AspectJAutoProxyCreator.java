@@ -29,7 +29,7 @@ import com.pythongong.aop.interceptor.AdviceInterceptorParam;
 import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.aop.proxy.ProxyFactory;
-import com.pythongong.beans.support.DefaultListableBeanFactory;
+import com.pythongong.beans.impl.DefaultListableBeanFactory;
 import com.pythongong.enums.AdviceEnum;
 import com.pythongong.exception.AopConfigException;
 import com.pythongong.exception.BeansException;

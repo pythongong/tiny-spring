@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pythongong.beans.support;
+package com.pythongong.beans.impl;
 
 import java.lang.reflect.Constructor;
 import com.pythongong.exception.BeansException;

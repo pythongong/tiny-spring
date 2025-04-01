@@ -3,8 +3,6 @@ package com.pythongong.io;
 
 import org.junit.jupiter.api.Test;
 
-import com.pythongong.io.RemoteResource;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 

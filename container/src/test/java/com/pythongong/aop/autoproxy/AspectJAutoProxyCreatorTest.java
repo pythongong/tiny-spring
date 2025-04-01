@@ -11,7 +11,7 @@ import com.pythongong.aop.JoinPoint;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcut;
 import com.pythongong.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.support.DefaultListableBeanFactory;
+import com.pythongong.beans.impl.DefaultListableBeanFactory;
 import com.pythongong.enums.AdviceEnum;
 import com.pythongong.test.aop.valid.AopTestTarget;
 import com.pythongong.test.aop.valid.TestAspect;

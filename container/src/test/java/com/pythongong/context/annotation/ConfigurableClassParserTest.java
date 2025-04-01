@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pythongong.context.support.PropertyResolver;
 import com.pythongong.aop.autoproxy.AspectJAutoProxyCreator;
 import com.pythongong.beans.config.BeanDefinition;
+import com.pythongong.context.impl.PropertyResolver;
 import com.pythongong.stereotype.ComponentScan;
 import com.pythongong.stereotype.Configuration;
 import com.pythongong.test.aop.valid.AopConfig;

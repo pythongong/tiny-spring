@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pythongong.beans.support;
+package com.pythongong.beans.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
