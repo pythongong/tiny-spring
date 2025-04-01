@@ -31,7 +31,7 @@ A lightweight implementation of the Spring Framework core features, demonstratin
 - Maven 3.6.0 or higher
 
 ## 📁 Project Structure
-
+``` marks
 tiny-spring
 ├── src
 │   └── main
@@ -57,8 +57,7 @@ tiny-spring
 │                   ├── stereotype
 │                   └── util
 └── pom.xml
-
-
+``` 
 
 
 ## 🌟 Key Features
