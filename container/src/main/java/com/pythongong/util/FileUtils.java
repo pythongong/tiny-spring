@@ -41,10 +41,10 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 import org.yaml.snakeyaml.resolver.Resolver;
 
-import com.pythongong.core.io.DefaultResourceLoader;
-import com.pythongong.core.io.Resource;
-import com.pythongong.core.io.ResourceLoader;
 import com.pythongong.exception.BeansException;
+import com.pythongong.io.DefaultResourceLoader;
+import com.pythongong.io.Resource;
+import com.pythongong.io.ResourceLoader;
 
 /**
  * Utility class for handling classpath resources and file system operations.
@@ -261,6 +261,7 @@ public class FileUtils {
 /**
  * Disable all implicit convert and treat all values as string.
  */
+ 
 class NoImplicitResolver extends Resolver {
 
 	public NoImplicitResolver() {

@@ -3,9 +3,91 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java Version](https://img.shields.io/badge/Java-11%2B-brightgreen)](https://adoptopenjdk.net/)
 
-A lightweight implementation of the Spring Framework core features, demonstrating advanced Java development skills and deep understanding of Spring's internal workings. This project help
-you understand the essential principle of the Spring Framework.
+A lightweight implementation of the Spring Framework core features, demonstrating advanced Java development skills and deep understanding of Spring's internal workings. This project helps you understand the essential principles of the Spring Framework.
 
+## 📁 Project Structure
+tiny-spring
+├── src
+│   └── main
+│       └── java
+│           └── com.pythongong
+│                   ├── aop
+│                   │   ├── aspectj
+│                   │   ├── autoproxy
+│                   │   ├── interceptor
+│                   │   └── proxy
+│                   ├── beans
+│                   │   ├── aware
+│                   │   ├── config
+│                   │   ├── factory
+│                   │   └── support
+│                   ├── context
+│                   │   ├── annotation
+│                   │   └── support
+│                   ├── io
+│                   ├── enums
+│                   ├── exception
+│                   ├── stereotype
+│                   └── util
+└── pom.xml
+
+
+## 📖 Core Modules
+
+- **aop**: Implements AOP functionality with AspectJ integration, providing method interception and proxy creation capabilities.
+  
+- **beans**: Core container that handles bean instantiation, dependency injection, and lifecycle management.
+  
+- **context**: Application context implementation that builds on the beans module, adding annotation support and additional enterprise features.
+  
+- **io**: Resource abstraction for handling configuration files and classpath resources.
+  
+- **util**: Common utilities for reflection, type conversion, and other framework-wide operations.
+
+
+## Trae AI
+Used 1 Reference
+
+README.md 6-6
+
+I'll add a folder structure section to the README.md after the Prerequisites section:
+
+```markdown
+// ... existing content ...
+
+## 📋 Prerequisites
+
+- Java 11 or higher
+- Maven 3.6.0 or higher
+
+## 📁 Project Structure
+
+ ```
+
+tiny-spring
+├── src
+│   └── main
+│       └── java
+│           └── com.pythongong
+│                   ├── aop                     # AOP implementation
+│                   │   ├── aspectj             # AspectJ integration
+│                   │   ├── autoproxy          # Auto proxy creation
+│                   │   ├── interceptor        # Method interceptors
+│                   │   └── proxy              # Proxy Factory
+│                   ├── beans                   # Bean container core
+│                   │   ├── aware              # Aware interfaces
+│                   │   ├── config             # Bean configurations
+│                   │   ├── factory            # Bean factory interfaces
+│                   │   └── support            # Support utilities
+│                   ├── context                 # Application context
+│                   │   ├── annotation         # Annotation support
+│                   │   └── support            # Context implementations
+│                   ├── io                    # IO abstractions
+│                   ├── enums                   # Enumerations
+│                   ├── exception               # Framework exceptions
+│                   ├── stereotype              # Stereotype annotations
+│                   └── util                    # Utility classes
+└── pom.xml
 ## 🌟 Key Features
 
 - **Dependency Injection Container**
@@ -18,6 +100,18 @@ you understand the essential principle of the Spring Framework.
   - Bean lifecycle management (initialization and destruction)
   - Circular dependency resolution
   - Property value resolution and injection
+
+- **Aspect-Oriented Programming (AOP)**
+  - Support for @Before, @After, @Around, and @AfterReturning advice
+  - Static pointcut checking with execution expressions
+  - Ordered advice execution using back-tracing algorithms
+  - AspectJ annotation support
+
+- **Property Configuration**
+  - Support for both .properties and YAML files
+  - Advanced type conversion for property values
+  - Custom property value converters
+  - Environment abstraction
 
 - **Component Scanning**
   - Automatic bean detection and registration
@@ -90,6 +184,32 @@ public class UserService {
     public void init() {
         // Initialization logic
     }
+}
+
+// AOP Example
+@Aspect
+@Component
+public class LoggingAspect {
+    @Before("execution(* com.example.service.*.*(..))")
+    public void logBefore(JoinPoint joinPoint) {
+        // Before method execution
+    }
+
+    @Around("execution(* com.example.service.*.*(..))")
+    public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        // Around method execution
+        return joinPoint.proceed();
+    }
+}
+
+// Property Configuration Example
+@Configuration
+public class AppConfig {
+    @Value("${db.connection.timeout:30}")
+    private Integer timeout;  // Automatic type conversion
+
+    @Value("${app.settings}")
+    private Settings settings;  // YAML structure mapping
 }
 ```
 
