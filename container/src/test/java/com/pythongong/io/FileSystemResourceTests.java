@@ -21,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.pythongong.io.FileSystemResource;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
