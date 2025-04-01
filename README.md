@@ -32,7 +32,7 @@ A lightweight implementation of the Spring Framework core features, demonstratin
 
 ## 📁 Project Structure
 ``` marks
-tiny-spring
+container
 ├── src
 │   └── main
 │       └── java
