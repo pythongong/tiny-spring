@@ -31,7 +31,9 @@ public class ClassUtils {
     private ClassUtils() {
     }
 
-    public static int BIG_INITIAL_SIZE = 256;
+    public static int BIG_INIT_SIZE = 256;
+
+    public static int SMALL_INIT_SIZE = 16;
 
     /**
      * Default bean name for the application event multicaster

@@ -179,8 +179,8 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      * @return configured PropertyResolver instance
      */
     private PropertyResolver createPropertyResolver() {
-        List<String> propertiesFiles = new ArrayList<>();
-        List<String> yamlFiles = new ArrayList<>();
+        List<String> propertiesFiles = new ArrayList<>(4);
+        List<String> yamlFiles = new ArrayList<>(4);
         FileUtils.findClassPathFileNames(ClassPathSerchParam.builder()
                 .packagePath(FileUtils.ROOT_CLASS_PATH)
                 .searchSudDirect(false)

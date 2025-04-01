@@ -117,7 +117,7 @@ public class AspectJAutoProxyCreator {
     private List<MethodMatcherInterceptor> createMethodMatcherInterceptors(
             List<AspectJExpressionPointcutAdvisor> relatedAdvisors) {
 
-        List<MethodMatcherInterceptor> methodMatcherInterceptors = new ArrayList<>();
+        List<MethodMatcherInterceptor> methodMatcherInterceptors = new ArrayList<>(relatedAdvisors.size());
 
         relatedAdvisors.forEach(advisor -> {
             // Get the aspect instance from bean factory

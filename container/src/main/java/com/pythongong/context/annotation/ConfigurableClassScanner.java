@@ -79,7 +79,7 @@ public class ConfigurableClassScanner {
      * @throws BeansException if class loading fails
      */
     private Set<Class<?>> scanCandidateComponents(String basePackage) {
-        Set<String> classNames = new HashSet<>();
+        Set<String> classNames = new HashSet<>(ClassUtils.BIG_INIT_SIZE);
         String packagePath = FileUtils.convertPackageToPath(basePackage);
 
         FileUtils.findClassPathFileNames(ClassPathSerchParam.builder()

@@ -26,6 +26,7 @@ import com.pythongong.beans.registry.SingletonBeanRegistry;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.util.CheckUtils;
+import com.pythongong.util.ClassUtils;
 
 /**
  * Default implementation of the SingletonBeanRegistry interface, providing a
@@ -42,10 +43,10 @@ import com.pythongong.util.CheckUtils;
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     /** Cache of singleton objects: bean name to bean instance */
-    private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>();
+    private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(ClassUtils.BIG_INIT_SIZE);
 
     /** Map of disposable beans: bean name to disposable instance */
-    private final Map<String, DisposableBean> disposableBeanMap = new HashMap<>();
+    private final Map<String, DisposableBean> disposableBeanMap = new HashMap<>(ClassUtils.SMALL_INIT_SIZE);
 
     /**
      * Register a disposable bean for later destruction.

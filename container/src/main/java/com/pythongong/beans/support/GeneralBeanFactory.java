@@ -27,6 +27,7 @@ import com.pythongong.beans.registry.SingletonBeanRegistry;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.util.CheckUtils;
+import com.pythongong.util.ClassUtils;
 
 /**
  * General implementation of the ConfigurableBeanFactory interface.
@@ -52,7 +53,7 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
     private final FactoryBeanRegistrySupport beanRegistrySupport = new FactoryBeanRegistrySupport();
 
     /** List of bean post processors */
-    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>(ClassUtils.SMALL_INIT_SIZE);
 
     /**
      * Constructs a new GeneralBeanFactory with the specified dependencies.

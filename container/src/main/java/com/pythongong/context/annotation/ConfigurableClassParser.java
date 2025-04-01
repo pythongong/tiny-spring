@@ -83,7 +83,6 @@ public class ConfigurableClassParser {
         CheckUtils.nullArgs(propertyResolver, "ConfigurableClassParser receives null propertyResolver");
         this.scanner = new ConfigurableClassScanner();
         this.propertyResolver = propertyResolver;
-        beanDefinitions = new HashSet<>();
     }
 
     /**
@@ -110,18 +109,7 @@ public class ConfigurableClassParser {
         String[] basePackages = componentScan.basePackages();
         Set<Class<?>> beanClasses = scanner.scan(
                 ClassUtils.isArrayEmpty(basePackages) ? new String[] { declaredClass.getPackageName() } : basePackages);
-
-        return doParse(beanClasses);
-    }
-
-    /**
-     * Processes discovered bean classes to create bean definitions.
-     *
-     * @param beanClasses the set of candidate component classes
-     * @return a Set of bean definitions
-     */
-    private Set<BeanDefinition> doParse(Set<Class<?>> beanClasses) {
-        this.beanDefinitions = new HashSet<>();
+        this.beanDefinitions = new HashSet<>(beanClasses.size());
         beanClasses.forEach(beanClass -> createBeanDefinition(beanClass));
         this.beanDefinitions.forEach(this::fillfieldValueList);
         return this.beanDefinitions;

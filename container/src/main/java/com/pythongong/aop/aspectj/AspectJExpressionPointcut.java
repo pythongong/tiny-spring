@@ -16,9 +16,12 @@
 package com.pythongong.aop.aspectj;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.aspectj.weaver.tools.PointcutExpression;
 import org.aspectj.weaver.tools.PointcutParser;
+import org.aspectj.weaver.tools.PointcutPrimitive;
 
 import com.pythongong.util.CheckUtils;
 
@@ -51,10 +54,16 @@ import com.pythongong.util.CheckUtils;
  */
 public class AspectJExpressionPointcut implements MethodMatcher {
 
+    private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<PointcutPrimitive>(1);
+
     /**
      * The compiled AspectJ pointcut expression used for method matching.
      */
     private final PointcutExpression pointcutExpression;
+
+    static {
+        SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
+    }
 
     /**
      * Creates a new pointcut using the specified AspectJ expression.
@@ -67,7 +76,8 @@ public class AspectJExpressionPointcut implements MethodMatcher {
     public AspectJExpressionPointcut(String expression) {
         CheckUtils.emptyString(expression, "AspectJ expression must not be empty");
         PointcutParser pointcutParser = PointcutParser
-                .getPointcutParserSupportingAllPrimitivesAndUsingContextClassloaderForResolution();
+                .getPointcutParserSupportingSpecifiedPrimitivesAndUsingContextClassloaderForResolution(
+                        SUPPORTED_PRIMITIVES);
         pointcutExpression = pointcutParser.parsePointcutExpression(expression);
     }
 

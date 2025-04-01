@@ -22,6 +22,7 @@ import com.pythongong.beans.config.FactoryBean;
 import com.pythongong.exception.BeansException;
 import com.pythongong.stereotype.Nullable;
 import com.pythongong.util.CheckUtils;
+import com.pythongong.util.ClassUtils;
 
 /**
  * Support base class for bean factories that need to handle FactoryBean
@@ -34,7 +35,7 @@ import com.pythongong.util.CheckUtils;
 public class FactoryBeanRegistrySupport {
 
     /** Cache of singleton objects created by FactoryBeans */
-    private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>();
+    private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<>(ClassUtils.SMALL_INIT_SIZE);
 
     /**
      * Returns the cached object for a FactoryBean.

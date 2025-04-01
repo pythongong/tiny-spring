@@ -65,7 +65,7 @@ public class DefaultListableBeanFactory
         implements BeanDefinitionRegistry, ConfigurableListableBeanFactory {
 
     /** Map of bean definitions, keyed by bean name */
-    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
+    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(ClassUtils.BIG_INIT_SIZE);
 
     /** Strategy for creating bean instances */
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiation();
