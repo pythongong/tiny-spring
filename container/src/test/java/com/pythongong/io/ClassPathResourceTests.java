@@ -17,8 +17,6 @@ package com.pythongong.io;
 
 import org.junit.jupiter.api.Test;
 
-import com.pythongong.io.ClassPathResource;
-
 import org.junit.jupiter.api.DisplayName;
 
 import java.io.IOException;

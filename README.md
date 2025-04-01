@@ -5,7 +5,33 @@
 
 A lightweight implementation of the Spring Framework core features, demonstrating advanced Java development skills and deep understanding of Spring's internal workings. This project helps you understand the essential principles of the Spring Framework.
 
+
+
+
+## 📖 Core Modules
+
+- **aop**: Implements AOP functionality with AspectJ integration, providing method interception and proxy creation capabilities.
+  
+- **beans**: Core container that handles bean instantiation, dependency injection, and lifecycle management.
+  
+- **context**: Application context implementation that builds on the beans module, adding annotation support and additional enterprise features.
+  
+- **io**: Resource abstraction for handling configuration files and classpath resources.
+  
+- **util**: Common utilities for reflection, type conversion, and other framework-wide operations.
+
+
+
+
+
+
+## 📋 Prerequisites
+
+- Java 11 or higher
+- Maven 3.6.0 or higher
+
 ## 📁 Project Structure
+
 tiny-spring
 ├── src
 │   └── main
@@ -31,63 +57,6 @@ tiny-spring
 │                   └── util
 └── pom.xml
 
-
-## 📖 Core Modules
-
-- **aop**: Implements AOP functionality with AspectJ integration, providing method interception and proxy creation capabilities.
-  
-- **beans**: Core container that handles bean instantiation, dependency injection, and lifecycle management.
-  
-- **context**: Application context implementation that builds on the beans module, adding annotation support and additional enterprise features.
-  
-- **io**: Resource abstraction for handling configuration files and classpath resources.
-  
-- **util**: Common utilities for reflection, type conversion, and other framework-wide operations.
-
-
-## Trae AI
-Used 1 Reference
-
-README.md 6-6
-
-I'll add a folder structure section to the README.md after the Prerequisites section:
-
-```markdown
-// ... existing content ...
-
-## 📋 Prerequisites
-
-- Java 11 or higher
-- Maven 3.6.0 or higher
-
-## 📁 Project Structure
-
- ```
-
-tiny-spring
-├── src
-│   └── main
-│       └── java
-│           └── com.pythongong
-│                   ├── aop                     # AOP implementation
-│                   │   ├── aspectj             # AspectJ integration
-│                   │   ├── autoproxy          # Auto proxy creation
-│                   │   ├── interceptor        # Method interceptors
-│                   │   └── proxy              # Proxy Factory
-│                   ├── beans                   # Bean container core
-│                   │   ├── aware              # Aware interfaces
-│                   │   ├── config             # Bean configurations
-│                   │   ├── factory            # Bean factory interfaces
-│                   │   └── support            # Support utilities
-│                   ├── context                 # Application context
-│                   │   ├── annotation         # Annotation support
-│                   │   └── support            # Context implementations
-│                   ├── io                    # IO abstractions
-│                   ├── enums                   # Enumerations
-│                   ├── exception               # Framework exceptions
-│                   ├── stereotype              # Stereotype annotations
-│                   └── util                    # Utility classes
-└── pom.xml
 ## 🌟 Key Features
 
 - **Dependency Injection Container**
