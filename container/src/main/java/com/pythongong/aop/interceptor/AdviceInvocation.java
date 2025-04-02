@@ -28,19 +28,25 @@ import com.pythongong.util.CheckUtils;
 import lombok.Builder;
 
 /**
- * Represents an invocation of an advised method, which handles the execution chain
+ * Represents an invocation of an advised method, which handles the execution
+ * chain
  * of method interceptors and the target method.
  *
- * <p>This record maintains the state of the current invocation including the target
+ * <p>
+ * This record maintains the state of the current invocation including the
+ * target
  * object, method, join point, and the chain of interceptors to be applied.
  *
  * @author pythongong
  * @since 1.0
- * @param target the target object on which the method is being invoked
- * @param method the method being invoked
- * @param joinPoint the join point representing the method invocation
+ * @param target                    the target object on which the method is
+ *                                  being invoked
+ * @param method                    the method being invoked
+ * @param joinPoint                 the join point representing the method
+ *                                  invocation
  * @param methodMatcherInterceptors the list of interceptors to be applied
- * @param interceptedNum the current position in the interceptor chain
+ * @param interceptedNum            the current position in the interceptor
+ *                                  chain
  */
 @Builder
 public record AdviceInvocation(
@@ -57,6 +63,7 @@ public record AdviceInvocation(
 
     /**
      * Compact constructor for parameter validation.
+     * 
      * @throws IllegalArgumentException if any required parameter is null or empty
      */
     public AdviceInvocation {
@@ -71,30 +78,23 @@ public record AdviceInvocation(
 
     /**
      * Proceeds with the invocation chain.
-     * <p>Either invokes the next interceptor in the chain or proceeds to the target method
+     * <p>
+     * Either invokes the next interceptor in the chain or proceeds to the target
+     * method
      * if all interceptors have been executed.
      *
      * @return the result of the invocation
      */
-    public Object proceed() {
+    public Object proceed() throws AopConfigException {
         if (interceptedNum.get() == (methodMatcherInterceptors.size())) {
-            return invokeRealMethod();
+            method.setAccessible(true);
+            try {
+                return method.invoke(target, joinPoint.args());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new AopConfigException("invoke method failed");
+            }
         }
         int interceptorIndex = interceptedNum.getAndIncrement();
         return methodMatcherInterceptors.get(interceptorIndex).methodInterceptor().invoke(this);
-    }
-
-    /**
-     * Invokes the actual target method.
-     * @return the result of the target method invocation
-     * @throws AopConfigException if method invocation fails
-     */
-    private Object invokeRealMethod() {
-        try {
-            method.setAccessible(true);
-            return method.invoke(target, joinPoint.args());
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new AopConfigException("method invoke in failure");
-        }
     }
 }

@@ -6,9 +6,9 @@ import java.sql.SQLException;
 import com.pythongong.stereotype.Nullable;
 
 @FunctionalInterface
-public interface Mapper<T> {
+public interface RowMapper<T> {
 
     @Nullable
-    T map(ResultSet rs, int rowNum) throws SQLException;
+    T mapRow(ResultSet resultSet, int rowNum) throws SQLException;
 
 }

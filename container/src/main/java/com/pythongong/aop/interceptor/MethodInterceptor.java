@@ -21,7 +21,8 @@ import com.pythongong.exception.AopConfigException;
 /**
  * Interface for method interception in AOP.
  * 
- * <p>Provides the core interception mechanism for AOP advice, allowing custom
+ * <p>
+ * Provides the core interception mechanism for AOP advice, allowing custom
  * behavior to be inserted before, after, or around method invocations.
  *
  * @author pythongong

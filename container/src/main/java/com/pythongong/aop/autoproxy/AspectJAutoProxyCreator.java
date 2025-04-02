@@ -29,7 +29,7 @@ import com.pythongong.aop.interceptor.AdviceInterceptorParam;
 import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.aop.proxy.ProxyFactory;
-import com.pythongong.beans.impl.DefaultListableBeanFactory;
+import com.pythongong.beans.factory.BeanFactory;
 import com.pythongong.enums.AdviceEnum;
 import com.pythongong.exception.AopConfigException;
 import com.pythongong.exception.BeansException;
@@ -48,21 +48,21 @@ import com.pythongong.util.StringUtils;
  * @author pythongong
  * @since 1.0
  */
-public class AspectJAutoProxyCreator {
+public class AspectJAutoProxyCreator implements AutoProxyCreator {
 
     public static final String BEAN_NAME = AspectJAutoProxyCreator.class.getName();
 
     /** The bean factory used for resolving aspect bean references */
-    private DefaultListableBeanFactory beanFactory;
+    private BeanFactory beanFactory;
 
     /** List of AspectJ advisors */
     private List<AspectJExpressionPointcutAdvisor> advisors;
 
-    public DefaultListableBeanFactory getBeanFactory() {
+    public BeanFactory getBeanFactory() {
         return beanFactory;
     }
 
-    public void setBeanFactory(DefaultListableBeanFactory beanFactory) {
+    public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
 

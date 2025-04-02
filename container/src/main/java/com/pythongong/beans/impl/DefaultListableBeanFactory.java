@@ -22,9 +22,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.pythongong.aop.autoproxy.AspectJAutoProxyCreator;
+import com.pythongong.aop.autoproxy.AutoProxyCreator;
 import com.pythongong.beans.aware.Aware;
 import com.pythongong.beans.aware.BeanClassLoaderAware;
 import com.pythongong.beans.aware.BeanFactoryAware;
@@ -189,9 +190,9 @@ public class DefaultListableBeanFactory
     /**
      * Get the empty reference for the given bean to avoid the cyclic dependency
      * problem.
-     * If the bean is an AspectJAutoProxyCreator, it returns the bean itself.
-     * Otherwise, it gets an AspectJAutoProxyCreator.
-     * If an AspectJAutoProxyCreator is not found, it returns the bean itself.
+     * If the bean is an autoProxyCreator, it returns the bean itself.
+     * Otherwise, it gets an autoProxyCreator.
+     * If an autoProxyCreator is not found, it returns the bean itself.
      * and sets its bean factory to create the proxy.
      * 
      * @param bean     the bean instance
@@ -199,18 +200,25 @@ public class DefaultListableBeanFactory
      * @return the empty reference for the bean or a proxy reference of the bean
      */
     private Object getEarlyBeanReference(Object bean, String beanName) {
-        if (bean instanceof AspectJAutoProxyCreator) {
+        if (bean instanceof AutoProxyCreator) {
             return bean;
         }
-        AspectJAutoProxyCreator aspectJAutoProxyCreator = generalBeanFactory.getBean(AspectJAutoProxyCreator.BEAN_NAME,
-                AspectJAutoProxyCreator.class);
-        if (aspectJAutoProxyCreator == null) {
+        Map<String, AutoProxyCreator> autoProxyCreatorMap = getBeansOfType(AutoProxyCreator.class);
+        if (ClassUtils.isMapEmpty(autoProxyCreatorMap)) {
             return bean;
         }
-        if (aspectJAutoProxyCreator.getBeanFactory() == null) {
-            aspectJAutoProxyCreator.setBeanFactory(this);
+
+        for (Entry<String, AutoProxyCreator> creatoEntry : autoProxyCreatorMap.entrySet()) {
+            AutoProxyCreator creator = creatoEntry.getValue();
+            if (creator.getBeanFactory() == null) {
+                creator.setBeanFactory(generalBeanFactory);
+            }
+            Object curBean = creator.create(bean, beanName);
+            if (curBean != null) {
+                bean = curBean;
+            }
         }
-        return aspectJAutoProxyCreator.create(bean, beanName);
+        return bean;
     }
 
     /**
