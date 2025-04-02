@@ -31,8 +31,9 @@ A lightweight implementation of the Spring Framework core features, demonstratin
 - Maven 3.6.0 or higher
 
 ## 📁 Project Structure
+Container moulde includes the implementation of dpendency injection and AOP features.
 ``` marks
-tiny-spring
+container
 ├── src
 │   └── main
 │       └── java
