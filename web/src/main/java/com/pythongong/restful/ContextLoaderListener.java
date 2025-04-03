@@ -1,4 +1,4 @@
-package com.pythongong.web;
+package com.pythongong.restful;
 
 import com.pythongong.context.ApplicationContext;
 import com.pythongong.context.impl.AnnotationConfigApplicationContext;

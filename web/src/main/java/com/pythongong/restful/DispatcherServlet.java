@@ -1,6 +1,7 @@
-package com.pythongong.web;
+package com.pythongong.restful;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -15,13 +16,17 @@ import com.pythongong.context.ApplicationContext;
 import com.pythongong.context.impl.AnnotationConfigApplicationContext;
 import com.pythongong.exception.WebException;
 import com.pythongong.util.ClassUtils;
+import com.pythongong.utils.JsonUtils;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class DispatcherServlet extends HttpServlet {
+
+    private static final String DEFAULT_CONTENT = "application/json";
 
     private final ApplicationContext applicationContext;
 
@@ -52,22 +57,12 @@ public class DispatcherServlet extends HttpServlet {
             if (method.isAnnotationPresent(GetMapping.class)) {
                 checkMethod(method);
                 GetMapping get = method.getAnnotation(GetMapping.class);
-                getDispatchers.add(Dispatcher.builder()
-                        .controller(bean)
-                        .isPost(false)
-                        .method(method)
-                        .url(get.value())
-                        .build());
+                getDispatchers.add(new Dispatcher(false, beanClass, method, get.value()));
             }
             if (method.isAnnotationPresent(PostMapping.class)) {
                 checkMethod(method);
                 PostMapping post = method.getAnnotation(PostMapping.class);
-                postDispatchers.add(Dispatcher.builder()
-                        .controller(bean)
-                        .isPost(true)
-                        .method(method)
-                        .url(post.value())
-                        .build());
+                postDispatchers.add(new Dispatcher(true, beanClass, method, post.value()));
             }
 
         });
@@ -82,8 +77,46 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        super.doGet(req, resp);
+        getDispatchers.forEach(dispatcher -> {
+            if (processReq(req, resp, dispatcher)) {
+                return;
+            }
+        });
+    }
+
+    private boolean processReq(HttpServletRequest req, HttpServletResponse resp, Dispatcher dispatcher) {
+        Result result = dispatcher.process(req, resp);
+        if (!result.isProcessed()) {
+            return false;
+        }
+        if (!resp.isCommitted()) {
+            resp.setContentType(DEFAULT_CONTENT);
+        }
+
+        try {
+            PrintWriter writer = resp.getWriter();
+            if (!dispatcher.isReturnBody()) {
+                if (dispatcher.isReturnVoid()) {
+                    JsonUtils.writeJson(writer, resp);
+                    writer.flush();
+                }
+                return true;
+            }
+            Object retVal = result.retVal();
+            if (retVal instanceof String str) {
+                writer.write(str);
+            } else if (retVal instanceof byte[] responseBody) {
+                ServletOutputStream outputStream = resp.getOutputStream();
+                outputStream.write(responseBody);
+                outputStream.flush();
+            } else {
+                throw new WebException("");
+            }
+            return true;
+        } catch (IOException e) {
+            throw new WebException("");
+        }
+
     }
 
     @Override
