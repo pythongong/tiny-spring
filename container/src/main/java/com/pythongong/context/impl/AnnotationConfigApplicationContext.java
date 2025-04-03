@@ -15,9 +15,6 @@
  */
 package com.pythongong.context.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,12 +31,8 @@ import com.pythongong.context.event.ApplicationListener;
 import com.pythongong.context.event.ConextClosedEvent;
 import com.pythongong.context.event.ContextRefreshedEvent;
 import com.pythongong.exception.BeansException;
-import com.pythongong.io.DefaultResourceLoader;
-import com.pythongong.io.Resource;
-import com.pythongong.io.ResourceLoader;
 import com.pythongong.util.CheckUtils;
-import com.pythongong.util.ClassPathSerchParam;
-import com.pythongong.util.FileUtils;
+import com.pythongong.util.ContextUtils;
 
 /**
  * Central class for handling annotation-based configuration and bootstrapping
@@ -61,6 +54,8 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      */
     private final Class<?> configurationClass;
 
+    private final PropertyResolver propertyResolver;
+
     /**
      * The core container that holds bean definitions and handles bean
      * instantiation.
@@ -81,8 +76,14 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
      *                           application context
      */
     public AnnotationConfigApplicationContext(Class<?> configurationClass) {
+        this(configurationClass, null);
+
+    }
+
+    public AnnotationConfigApplicationContext(Class<?> configurationClass, PropertyResolver propertyResolver) {
         CheckUtils.nullArgs(configurationClass, "AnnotationConfigApplicationContext receives null class");
         this.configurationClass = configurationClass;
+        this.propertyResolver = propertyResolver == null ? ContextUtils.createPropertyResolver() : propertyResolver;
         refresh();
     }
 
@@ -173,55 +174,13 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     }
 
     /**
-     * Creates and initializes a PropertyResolver by scanning for and loading
-     * all .properties files in the classpath.
-     *
-     * @return configured PropertyResolver instance
-     */
-    private PropertyResolver createPropertyResolver() {
-        List<String> propertiesFiles = new ArrayList<>(4);
-        List<String> yamlFiles = new ArrayList<>(4);
-        FileUtils.findClassPathFileNames(ClassPathSerchParam.builder()
-                .packagePath(FileUtils.ROOT_CLASS_PATH)
-                .searchSudDirect(false)
-                .serachJar(false)
-                .serachFile(true)
-                .pathMapper((basePath, filePath) -> {
-                    String fileName = FileUtils.CLASSPATH_URL_PREFIX + filePath.getFileName().toString();
-                    if (fileName.endsWith(FileUtils.PROPERTY_SUFFIX)) {
-                        propertiesFiles.add(fileName);
-                    }
-                    if (fileName.endsWith(FileUtils.YAML_SUFFIX)) {
-                        yamlFiles.add(fileName);
-                    }
-                })
-                .build());
-
-        ResourceLoader resourceLoader = new DefaultResourceLoader();
-        PropertyResolver propertyResolver = new PropertyResolver();
-        propertiesFiles.forEach(propertiesFile -> {
-            Resource resource = resourceLoader.getResource(propertiesFile);
-            try {
-                propertyResolver.load(resource.getInputStream());
-            } catch (IOException e) {
-                throw new BeansException(String.format("Load propeties file {%s} failed", propertiesFile), e);
-            }
-        });
-        yamlFiles.forEach(yamlFile -> {
-            Map<String, Object> yamlData = FileUtils.loadYaml(yamlFile);
-            propertyResolver.addAll(yamlData);
-        });
-        return propertyResolver;
-    }
-
-    /**
      * Refreshes the internal bean factory by parsing the configuration class
      * and registering all discovered bean definitions.
      *
      * @throws BeansException if an error occurs during bean factory refresh
      */
     private void refreshBeanFactory() throws BeansException {
-        ConfigurableClassParser parser = new ConfigurableClassParser(createPropertyResolver());
+        ConfigurableClassParser parser = new ConfigurableClassParser(propertyResolver);
         Set<BeanDefinition> beanDefinitions = parser.parse(configurationClass);
         beanDefinitions.forEach(this.beanFactory::registerBeanDefinition);
     }

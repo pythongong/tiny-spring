@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.pythongong.restful;
 
 import java.io.BufferedReader;
@@ -15,6 +31,7 @@ import com.pythongong.annotation.RequestParam;
 import com.pythongong.annotation.ResponseBody;
 import com.pythongong.enums.ParamType;
 import com.pythongong.exception.WebException;
+import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
 import com.pythongong.util.StringUtils;
 import com.pythongong.utils.JsonUtils;
@@ -24,33 +41,72 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 
+/**
+ * Handles the dispatching of HTTP requests to controller methods.
+ * 
+ * <p>
+ * Maps incoming HTTP requests to the appropriate controller methods based on
+ * URL patterns
+ * and HTTP methods. Supports parameter resolution for path variables, request
+ * parameters,
+ * and request body.
+ *
+ * @author pythongong
+ * @since 1.0
+ */
 @Getter
 public class Dispatcher {
 
+    /** Result indicating the request was not processed */
     private static final Result NOT_PROCESSED = new Result(false, null);
 
-    private final boolean isPost;
+    /** Whether the method returns a response body */
     private final boolean returnBody;
+    /** Whether the method returns void */
     private final boolean returnVoid;
+    /** The controller instance */
     private final Object controller;
+    /** The handler method */
     private final Method method;
+    /** The method parameters */
     private final List<Param> params;
+    /** The URL pattern for matching requests */
     private final Pattern urlPattern;
 
-    public Dispatcher(boolean isPost, Object controller, Method method, String url) {
-        this.isPost = isPost;
+    /**
+     * Creates a new dispatcher for the given controller method.
+     * 
+     * @param isPost     whether this handles POST requests
+     * @param controller the controller instance
+     * @param method     the handler method
+     * @param url        the URL pattern to match
+     */
+    public Dispatcher(Object controller, Method method, String url) {
+        String className = "Dispatcher";
+        CheckUtils.nullArgs(controller, className, "controller");
+        CheckUtils.nullArgs(method, className, "method");
+        CheckUtils.emptyString(url, className, "url");
+
         this.controller = controller;
         this.method = method;
         returnBody = method.isAnnotationPresent(ResponseBody.class);
         returnVoid = method.getReturnType() == Void.class;
         urlPattern = WebUtils.generatePathPattern(url);
 
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        Annotation[] annotations = method.getAnnotations();
-        params = createParams(parameterTypes, annotations);
+        params = createParams();
     }
 
-    private List<Param> createParams(Class<?>[] parameterTypes, Annotation[] annotations) {
+    /**
+     * Creates parameter descriptors for the method parameters.
+     * 
+     * @param parameterTypes the parameter types
+     * @param annotations    the parameter annotations
+     * @return list of parameter descriptors
+     * @throws WebException if parameter configuration is invalid
+     */
+    private List<Param> createParams() {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Annotation[] annotations = method.getAnnotations();
         if (ClassUtils.isArrayEmpty(parameterTypes) || ClassUtils.isArrayEmpty(annotations)) {
             return null;
         }
@@ -60,26 +116,20 @@ public class Dispatcher {
             if (paramType == null) {
                 throw new WebException("");
             }
-            String name = "";
-            switch (paramType) {
-                case REQUEST_PARAM: {
-                    RequestParam requestParam = method.getAnnotation(RequestParam.class);
-                    name = requestParam.value();
-                    break;
-                }
-                case PATH_VARIABLE: {
-                    PathVariable pathVariable = method.getAnnotation(PathVariable.class);
-                    name = pathVariable.value();
-                    break;
-                }
-                default:
-                    break;
-            }
+            String name = generateParamName(paramType);
 
             return new Param(paramType, paramClass, name);
         }).toList();
     }
 
+    /**
+     * Processes an HTTP request.
+     * 
+     * @param req  the HTTP request
+     * @param resp the HTTP response
+     * @return the result of processing
+     * @throws WebException if processing fails
+     */
     public Result process(HttpServletRequest req, HttpServletResponse resp) {
         String url = req.getRequestURI();
         Matcher matcher = urlPattern.matcher(url);
@@ -89,38 +139,63 @@ public class Dispatcher {
         if (ClassUtils.isCollectionEmpty(params)) {
             return invokeHandlerMethod(null);
         }
-        Object[] arguments = params.stream()
-                .map(param -> {
-                    switch (param.paramType()) {
-                        case REQUEST_BODY: {
-                            try {
-                                BufferedReader reader = req.getReader();
-                                return JsonUtils.readJson(reader, param.classType());
-                            } catch (IOException e) {
-                                throw new WebException("");
-                            }
-                        }
+        Object[] arguments = createArgus(req, matcher);
 
-                        case REQUEST_PARAM: {
-                            String paramVal = req.getParameter(param.name());
-                            return StringUtils.convertString(paramVal, param.classType());
-                        }
-
-                        case PATH_VARIABLE: {
-                            String paramVal = matcher.group(param.name());
-                            return StringUtils.convertString(paramVal, param.classType());
-                        }
-
-                        default:
-                            throw new WebException("");
-                    }
-                }).toArray();
-
-        return
-
-        invokeHandlerMethod(arguments);
+        return invokeHandlerMethod(arguments);
     }
 
+    private String generateParamName(ParamType paramType) {
+
+        switch (paramType) {
+            case REQUEST_PARAM: {
+                RequestParam requestParam = method.getAnnotation(RequestParam.class);
+                return requestParam.value();
+            }
+            case PATH_VARIABLE: {
+                PathVariable pathVariable = method.getAnnotation(PathVariable.class);
+                return pathVariable.value();
+            }
+            default:
+                return null;
+        }
+
+    }
+
+    private Object[] createArgus(HttpServletRequest req, Matcher matcher) {
+        return params.stream().map(param -> {
+            switch (param.paramType()) {
+                case REQUEST_BODY: {
+                    try {
+                        BufferedReader reader = req.getReader();
+                        return JsonUtils.readJson(reader, param.classType());
+                    } catch (IOException e) {
+                        throw new WebException("");
+                    }
+                }
+
+                case REQUEST_PARAM: {
+                    String paramVal = req.getParameter(param.name());
+                    return StringUtils.convertString(paramVal, param.classType());
+                }
+
+                case PATH_VARIABLE: {
+                    String paramVal = matcher.group(param.name());
+                    return StringUtils.convertString(paramVal, param.classType());
+                }
+
+                default:
+                    throw new WebException("");
+            }
+        }).toArray();
+    }
+
+    /**
+     * Invokes the handler method with the given arguments.
+     * 
+     * @param argus the method arguments
+     * @return the result of invocation
+     * @throws WebException if invocation fails
+     */
     private Result invokeHandlerMethod(Object[] argus) {
         try {
             Object retVal = method.invoke(controller, argus);
@@ -129,5 +204,4 @@ public class Dispatcher {
             throw new WebException("");
         }
     }
-
 }

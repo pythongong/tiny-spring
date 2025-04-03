@@ -57,15 +57,30 @@ public class DispatcherServlet extends HttpServlet {
             if (method.isAnnotationPresent(GetMapping.class)) {
                 checkMethod(method);
                 GetMapping get = method.getAnnotation(GetMapping.class);
-                getDispatchers.add(new Dispatcher(false, beanClass, method, get.value()));
+                getDispatchers.add(new Dispatcher(beanClass, method, get.value()));
             }
             if (method.isAnnotationPresent(PostMapping.class)) {
                 checkMethod(method);
                 PostMapping post = method.getAnnotation(PostMapping.class);
-                postDispatchers.add(new Dispatcher(true, beanClass, method, post.value()));
+                postDispatchers.add(new Dispatcher(beanClass, method, post.value()));
             }
 
         });
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doService(req, resp, getDispatchers);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doService(req, resp, postDispatchers);
+    }
+
+    @Override
+    public void destroy() {
+        applicationContext.close();
     }
 
     private void checkMethod(Method method) {
@@ -75,9 +90,8 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        getDispatchers.forEach(dispatcher -> {
+    private void doService(HttpServletRequest req, HttpServletResponse resp, List<Dispatcher> dispatchers) {
+        dispatchers.forEach(dispatcher -> {
             if (processReq(req, resp, dispatcher)) {
                 return;
             }
@@ -117,17 +131,6 @@ public class DispatcherServlet extends HttpServlet {
             throw new WebException("");
         }
 
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-        super.doPost(req, resp);
-    }
-
-    @Override
-    public void destroy() {
-        applicationContext.close();
     }
 
 }

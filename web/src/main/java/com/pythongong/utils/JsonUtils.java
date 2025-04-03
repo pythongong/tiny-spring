@@ -33,8 +33,11 @@ public class JsonUtils {
     }
 
     public static Object readJson(BufferedReader reader, Class<?> classType) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'readJson'");
+        try {
+            return DEFAULT_MAPPER.readValue(reader, classType);
+        } catch (IOException e) {
+            throw new WebException("");
+        }
     }
 
 }
