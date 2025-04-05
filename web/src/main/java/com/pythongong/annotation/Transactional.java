@@ -7,10 +7,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.pythongong.enums.TransactionIsolationLevel;
+
 @Target(value = { ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
 public @interface Transactional {
     String value() default "platformTransactionManager";
+
+    TransactionIsolationLevel level() default TransactionIsolationLevel.NONE;
 }

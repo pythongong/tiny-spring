@@ -14,9 +14,6 @@ import com.pythongong.stereotype.Component;
 @Component
 public @interface RestController {
 
-    /**
-     * Bean name. Default to simple class name with first-letter-lowercase.
-     */
     String value() default "";
 
 }

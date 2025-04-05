@@ -21,12 +21,13 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.pythongong.annotation.PathVariable;
+import com.pythongong.annotation.RequestBody;
 import com.pythongong.annotation.RequestParam;
 import com.pythongong.annotation.ResponseBody;
 import com.pythongong.enums.ParamType;
@@ -96,31 +97,7 @@ public class Dispatcher {
         params = createParams();
     }
 
-    /**
-     * Creates parameter descriptors for the method parameters.
-     * 
-     * @param parameterTypes the parameter types
-     * @param annotations    the parameter annotations
-     * @return list of parameter descriptors
-     * @throws WebException if parameter configuration is invalid
-     */
-    private List<Param> createParams() {
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        Annotation[] annotations = method.getAnnotations();
-        if (ClassUtils.isArrayEmpty(parameterTypes) || ClassUtils.isArrayEmpty(annotations)) {
-            return null;
-        }
-
-        return Arrays.stream(parameterTypes).map(paramClass -> {
-            ParamType paramType = ParamType.getTypeFromAnnos(annotations);
-            if (paramType == null) {
-                throw new WebException("");
-            }
-            String name = generateParamName(paramType);
-
-            return new Param(paramType, paramClass, name);
-        }).toList();
-    }
+    
 
     /**
      * Processes an HTTP request.
@@ -144,23 +121,64 @@ public class Dispatcher {
         return invokeHandlerMethod(arguments);
     }
 
-    private String generateParamName(ParamType paramType) {
-
-        switch (paramType) {
-            case REQUEST_PARAM: {
-                RequestParam requestParam = method.getAnnotation(RequestParam.class);
-                return requestParam.value();
-            }
-            case PATH_VARIABLE: {
-                PathVariable pathVariable = method.getAnnotation(PathVariable.class);
-                return pathVariable.value();
-            }
-            default:
-                return null;
+    /**
+     * Creates parameter descriptors for the method parameters.
+     * 
+     * @return list of parameter descriptors
+     * @throws WebException if parameter configuration is invalid
+     */
+    private List<Param> createParams() {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        if (ClassUtils.isArrayEmpty(parameterTypes) || ClassUtils.isArrayEmpty(parameterTypes)) {
+            return null;
         }
+        List<Param> params = new ArrayList<>(parameterTypes.length);
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> paramClass = parameterTypes[i];
+            ParamType paramType = null;    
+            String name = null;
 
+            for (Annotation annotation : parameterAnnotations[i]) {
+                if (annotation instanceof RequestParam) {
+                    paramType = ParamType.REQUEST_PARAM;
+                    String value = ((RequestParam) annotation).value();
+                    if (StringUtils.isEmpty(value)) {
+                        throw new WebException("");
+                    }
+                    name = value;
+                    break;    
+                }
+            
+                if (annotation instanceof PathVariable) {
+                    paramType = ParamType.PATH_VARIABLE;
+                    String value = ((PathVariable) annotation).value();
+                    if (StringUtils.isEmpty(value)) {
+                        throw new WebException("");
+                    }
+                    name = value;
+                    break;
+                }
+                if (annotation instanceof RequestBody) {
+                    paramType = ParamType.REQUEST_BODY;
+                    break;
+                }
+            }
+            if (paramType == null) {
+                continue;       
+            }
+            params.add(new Param(paramType, paramClass, name));
+        }
+        return params;
     }
 
+    /**
+     * Creates method arguments for the given request and matcher.
+     * 
+     * @param req  the HTTP request
+     * @param matcher the URL pattern matcher
+     * @return array of method arguments
+     */
     private Object[] createArgus(HttpServletRequest req, Matcher matcher) {
         return params.stream().map(param -> {
             switch (param.paramType()) {

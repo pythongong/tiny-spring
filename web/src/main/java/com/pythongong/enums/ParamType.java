@@ -27,4 +27,13 @@ public enum ParamType {
         return null;
     }
 
+    public static ParamType fromTypes(Class<? extends Annotation> annotationType) {
+        for (ParamType paramType : values()) {
+            if (paramType.anonClass == annotationType) {
+                return paramType;
+            } 
+        }
+        return null;
+    }
+
 }

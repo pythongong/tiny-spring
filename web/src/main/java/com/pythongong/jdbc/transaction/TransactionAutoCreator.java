@@ -16,7 +16,7 @@ import com.pythongong.aop.interceptor.MethodInterceptor;
 import com.pythongong.aop.interceptor.MethodMatcherInterceptor;
 import com.pythongong.aop.proxy.ProxyFactory;
 import com.pythongong.beans.factory.BeanFactory;
-import com.pythongong.exception.AopConfigException;
+import com.pythongong.enums.TransactionIsolationLevel;
 import com.pythongong.exception.BeansException;
 
 public class TransactionAutoCreator implements AutoProxyCreator {
@@ -59,22 +59,21 @@ public class TransactionAutoCreator implements AutoProxyCreator {
     }
 
     private List<MethodMatcherInterceptor> createMatcherInterceptors(List<Method> transactionMethods) {
-        return transactionMethods.stream().map(transactionMethod -> {
+        List<MethodMatcherInterceptor> methodMatcherInterceptors = new ArrayList<>(transactionMethods.size());
+        transactionMethods.forEach(transactionMethod -> {
             Transactional annotation = transactionMethod.getAnnotation(Transactional.class);
             MethodInterceptor methodInterceptor = null;
             String managerName = annotation.value();
-            if (DEFAULT_MANAGER.equals(managerName)) {
-                methodInterceptor = new DataSourceTransactionManager(dataSource);
-            } else {
-                methodInterceptor = (MethodInterceptor) beanFactory.getBean(managerName);
+            TransactionIsolationLevel level = annotation.level();
+            if (!DEFAULT_MANAGER.equals(managerName)) {
+                return;
             }
-            if (methodInterceptor == null) {
-                throw new AopConfigException(managerName + " doesn't exist");
-            }
-            return new MethodMatcherInterceptor(methodInterceptor, (method) -> {
+            methodInterceptor = new DataSourceTransactionManager(dataSource, level);
+            methodMatcherInterceptors.add(new MethodMatcherInterceptor(methodInterceptor, (method) -> {
                 return transactionMethod.equals(method);
-            });
-        }).toList();
+            }));
+        });
+        return methodMatcherInterceptors;
     }
 
     private List<Method> getTransactionMethod(Class<?> beanClass) {

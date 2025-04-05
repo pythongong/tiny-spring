@@ -24,7 +24,7 @@ public class JdbcTemplate {
     }
 
     public <T> T execute(ConnectionCallback<T> action) {
-        Connection transactionalConnection = DataSourceTransactionManager.getLocalConnection();
+        Connection transactionalConnection = DataSourceTransactionManager.getConnection();
         if (transactionalConnection != null) {
             try {
                 return action.doInConnection(transactionalConnection);
@@ -34,15 +34,9 @@ public class JdbcTemplate {
         }
 
         try (Connection connection = dataSource.getConnection()) {
-            boolean autoCommit = connection.getAutoCommit();
-            if (!autoCommit) {
-                connection.setAutoCommit(true);
-            }
+            connection.setAutoCommit(true);
             T result = action.doInConnection(connection);
-
-            if (!autoCommit) {
-                connection.setAutoCommit(false);
-            }
+            connection.setAutoCommit(false);
             return result;
         } catch (SQLException e) {
             throw new DataAccessException("Connect to database failed");

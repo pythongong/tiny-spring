@@ -14,6 +14,6 @@ public @interface GetMapping {
     /**
      * URL mapping.
      */
-    String value();
+    String value() default "";
 
 }
