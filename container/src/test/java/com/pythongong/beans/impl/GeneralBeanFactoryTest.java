@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.registry.SingletonBeanRegistry;
 
 /**
@@ -107,37 +106,6 @@ class GeneralBeanFactoryTest {
         when(getBeanDefinition.apply(beanName)).thenReturn(null);
 
         assertNull(beanFactory.getBean(beanName));
-    }
-
-    /**
-     * Tests bean post processor registration.
-     */
-    @Test
-    void whenAddBeanPostProcessor_thenProcessorAdded() {
-        BeanPostProcessor processor = mock(BeanPostProcessor.class);
-        beanFactory.addBeanPostProcessor(processor);
-
-        assertTrue(beanFactory.getBeanPostProcessors().contains(processor));
-    }
-
-    /**
-     * Tests validation of null post processors.
-     */
-    @Test
-    void whenAddNullPostProcessor_thenThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> beanFactory.addBeanPostProcessor(null));
-    }
-
-    /**
-     * Tests handling of duplicate post processors.
-     */
-    @Test
-    void whenAddDuplicateProcessor_thenIgnored() {
-        BeanPostProcessor processor = mock(BeanPostProcessor.class);
-        beanFactory.addBeanPostProcessor(processor);
-        beanFactory.addBeanPostProcessor(processor);
-
-        assertEquals(1, beanFactory.getBeanPostProcessors().size());
     }
 
     /**

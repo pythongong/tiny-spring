@@ -15,7 +15,8 @@
  */
 package com.pythongong.context.impl;
 
-import com.pythongong.beans.config.BeanPostProcessor;
+import com.pythongong.beans.config.AfterInitializationpProcessor;
+import com.pythongong.beans.config.BeforeInitializationProcessor;
 import com.pythongong.context.ApplicationContext;
 import com.pythongong.context.ApplicationContextAware;
 import com.pythongong.exception.BeansException;
@@ -28,7 +29,7 @@ import com.pythongong.exception.BeansException;
  *
  * @author Cheng Gong
  */
-public class ApplicationContextAwareProcessor implements BeanPostProcessor {
+public class ApplicationContextAwareProcessor implements BeforeInitializationProcessor, AfterInitializationpProcessor {
 
     /**
      * The ApplicationContext instance to be injected into aware beans

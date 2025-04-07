@@ -20,7 +20,7 @@ import java.util.Set;
 
 import com.pythongong.beans.config.BeanDefinition;
 import com.pythongong.beans.config.BeanFactoryPostProcessor;
-import com.pythongong.beans.config.BeanPostProcessor;
+import com.pythongong.beans.config.BeanProcessor;
 import com.pythongong.beans.factory.ConfigurableListableBeanFactory;
 import com.pythongong.beans.impl.DefaultListableBeanFactory;
 import com.pythongong.context.ApplicationContext;
@@ -32,6 +32,7 @@ import com.pythongong.context.event.ConextClosedEvent;
 import com.pythongong.context.event.ContextRefreshedEvent;
 import com.pythongong.exception.BeansException;
 import com.pythongong.util.CheckUtils;
+import com.pythongong.util.ClassUtils;
 import com.pythongong.util.ContextUtils;
 
 /**
@@ -102,11 +103,11 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
         refreshBeanFactory();
 
-        beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+        beanFactory.addBeanProcessor(new ApplicationContextAwareProcessor(this));
 
         invokeBeanFactoryPostProcessors(beanFactory);
 
-        registerBeanPostProcessors(beanFactory);
+        registerBeanProcessors(beanFactory);
 
         applicationEventMulticaster = beanFactory.initApplicationEventMulticaster();
 
@@ -224,14 +225,17 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
     }
 
     /**
-     * Registers all BeanPostProcessor beans with the bean factory.
+     * Registers all BeanProcessor beans with the bean factory.
      *
      * @param beanFactory the bean factory to register processors with
      */
-    private void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory) {
-        Map<String, BeanPostProcessor> beanPostProcessorMap = beanFactory.getBeansOfType(BeanPostProcessor.class);
-        for (BeanPostProcessor beanPostProcessor : beanPostProcessorMap.values()) {
-            beanFactory.addBeanPostProcessor(beanPostProcessor);
+    private void registerBeanProcessors(ConfigurableListableBeanFactory beanFactory) {
+        Map<String, BeanProcessor> beanProcessorMap = beanFactory.getBeansOfType(BeanProcessor.class);
+        if (ClassUtils.isMapEmpty(beanProcessorMap)) {
+            return;
+        }
+        for (BeanProcessor beanProcessor : beanProcessorMap.values()) {
+            beanFactory.addBeanProcessor(beanProcessor);
         }
     }
 }

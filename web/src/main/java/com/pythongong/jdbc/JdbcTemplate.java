@@ -103,18 +103,14 @@ public class JdbcTemplate {
             statement.setFetchSize(size);
             List<T> results = new ArrayList<>(size);
             RowMapper<T> rowMapper = (RowMapper<T>) RowMapperFactory.create(param.reuiredClass());
-            boolean hasNext = true;
-            while (hasNext) {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
                 if (size == 1 && !results.isEmpty()) {
                     throw new DataAccessException("Multiple row");
                 }
-                ResultSet resultSet = statement.executeQuery();
-                hasNext = resultSet.next();
-                while (resultSet.next()) {
-                    T rowObject = rowMapper.mapRow(resultSet, resultSet.getRow());
-                    if (rowObject != null) {
-                        results.add(rowObject);
-                    }
+                T rowObject = rowMapper.mapRow(resultSet, resultSet.getRow());
+                if (rowObject != null) {
+                    results.add(rowObject);
                 }
             }
             return results;

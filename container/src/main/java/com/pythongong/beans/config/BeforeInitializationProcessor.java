@@ -23,7 +23,8 @@ import com.pythongong.exception.BeansException;
  *
  * @author Cheng Gong
  */
-public interface BeanPostProcessor {
+@FunctionalInterface
+public interface BeforeInitializationProcessor extends BeanProcessor {
 
     /**
      * Apply this post processor before initialization of the given bean instance.
@@ -35,13 +36,4 @@ public interface BeanPostProcessor {
      */
     void postProcessBeforeInitialization(Object bean, String beanName) throws BeansException;
 
-    /**
-     * Apply this post processor after initialization of the given bean instance.
-     *
-     * @param bean     the new bean instance
-     * @param beanName the name of the bean
-     * @return the bean instance to use, either the original or a wrapped one
-     * @throws BeansException in case of errors
-     */
-    void postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
 }

@@ -16,6 +16,9 @@
 
 package com.pythongong.utils;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -25,7 +28,9 @@ import com.pythongong.context.impl.AnnotationConfigApplicationContext;
 import com.pythongong.exception.WebException;
 import com.pythongong.restful.DispatcherServlet;
 import com.pythongong.restful.FilterRegistrationBean;
+import com.pythongong.util.CheckUtils;
 import com.pythongong.util.ClassUtils;
+import com.pythongong.util.FileUtils;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
@@ -67,6 +72,7 @@ public class WebUtils {
         DispatcherServlet servlet = new DispatcherServlet(applicationContext);
         Dynamic dispatcherReg = servletContext.addServlet(APP_SERVLET, servlet);
         dispatcherReg.addMapping(DEFAULT_MAPPING);
+        // Sets the load-on-startup priority for the DispatcherServlet
         dispatcherReg.setLoadOnStartup(0);
     }
 
@@ -100,21 +106,61 @@ public class WebUtils {
     public static void registerFilters(ServletContext servletContext, ApplicationContext applicationContext) {
         applicationContext = (AnnotationConfigApplicationContext) applicationContext;
         applicationContext.getBeansOfType(FilterRegistrationBean.class).forEach((name, bean) -> {
-            List<String> urlPatterns = bean.getUrlPatterns.get();
+            List<String> urlPatterns = bean.getUrlPatterns().get();
             if (ClassUtils.isCollectionEmpty(urlPatterns)) {
                 throw new WebException("");
             }
-            Filter filter = bean.getFilter.get();
+            Filter filter = bean.getFilter().get();
             if (filter == null) {
                 throw new WebException("");
             }
             FilterRegistration.Dynamic filterReg = servletContext.addFilter(bean.getName(), filter);
-            // DispatcherType.REQUEST means the filter will only be applied to
-            // direct client requests
+
+            if (filterReg == null) {
+                throw new WebException("");
+            }
+
+            // DispatcherType.REQUEST means the filter will only be applied to direct client
+            // requests
             // This filter will be executed earlier in the filter chain.
             filterReg.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true,
                     urlPatterns.toArray(String[]::new));
 
         });
+    }
+
+    /**
+     * Retrieves the configuration path for a given class.
+     * 
+     * @param configClass the class to get the configuration path for
+     * @return the configuration path for the given class
+     */
+    public static String getConfigPath(Class<?> configClass) {
+        CheckUtils.nullArgs(configClass, "getConfigPath", "configClass");
+        String classPath = FileUtils.convertPackageToPath(configClass.getName()) +
+                FileUtils.CLASS_FILE_SUFFIX;
+        ClassLoader defaultClassLoader = ClassUtils.getDefaultClassLoader();
+        URL resource = defaultClassLoader.getResource(classPath);
+        if (resource == null) {
+            throw new WebException("Can't find class");
+        }
+
+        try {
+            String uri = resource.toURI().toString();
+            return uri.substring(FileUtils.FILE_URL_PREFIX.length(),
+                    uri.length() - configClass.getSimpleName().length() - FileUtils.CLASS_FILE_SUFFIX.length() - 1);
+        } catch (URISyntaxException e) {
+            throw new WebException("");
+        }
+    }
+
+    public static boolean deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        return directoryToBeDeleted.delete();
     }
 }

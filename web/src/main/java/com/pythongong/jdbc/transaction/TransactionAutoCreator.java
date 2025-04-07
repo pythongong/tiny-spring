@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.pythongong.jdbc.transaction;
 
 import java.lang.reflect.Method;
@@ -19,17 +35,41 @@ import com.pythongong.beans.factory.BeanFactory;
 import com.pythongong.enums.TransactionIsolationLevel;
 import com.pythongong.exception.BeansException;
 
+/**
+ * Creates AOP proxies for transactional methods automatically.
+ * 
+ * <p>This class is responsible for creating proxy objects that add transaction
+ * management capabilities to beans with {@code @Transactional} annotations.
+ * It scans beans for transaction annotations and creates appropriate interceptors
+ * for transaction management.
+ *
+ * <p>The creator supports both class-level and method-level @Transactional
+ * annotations and configures transaction isolation levels as specified.
+ *
+ * @author pythongong
+ * @since 1.0
+ * @see com.pythongong.annotation.Transactional
+ * @see com.pythongong.aop.autoproxy.AutoProxyCreator
+ */
 public class TransactionAutoCreator implements AutoProxyCreator {
 
+    /** Default name for the platform transaction manager bean */
     private static final String DEFAULT_MANAGER = "platformTransactionManager";
 
+    /** DataSource for creating transaction managers */
     private final DataSource dataSource;
 
+    /** Reference to the bean factory */
+    private BeanFactory beanFactory;
+
+    /**
+     * Creates a new transaction proxy creator with the specified data source.
+     *
+     * @param dataSource the data source for transaction management
+     */
     public TransactionAutoCreator(DataSource dataSource) {
         this.dataSource = dataSource;
     }
-
-    private BeanFactory beanFactory;
 
     @Override
     public BeanFactory getBeanFactory() {

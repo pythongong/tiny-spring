@@ -396,9 +396,17 @@ class DefaultConfigurableListableBeanFactoryTest {
                                 .beanName("testComponent")
                                 .build();
                 beanFactory.registerBeanDefinition(beanDefinition);
-                beanFactory.addBeanPostProcessor(new TestBeanPostProcessor());
+                beanFactory.addBeanProcessor(new TestBeanPostProcessor());
                 TestComponent testComponent = beanFactory.getBean("testComponent", TestComponent.class);
                 assertTrue(testComponent.isPostProcessed());
+        }
+
+        /**
+         * Tests validation of null post processors.
+         */
+        @Test
+        void whenAddNullPostProcessor_thenThrowsException() {
+                assertThrows(IllegalArgumentException.class, () -> beanFactory.addBeanProcessor(null));
         }
 
 }

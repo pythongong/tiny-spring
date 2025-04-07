@@ -36,6 +36,9 @@ public class RowMapperFactory {
         T instance = (T) instantiationStrategy.instance(targetClass, null, null);
         return (resultSet, rowNum) -> {
             ResultSetMetaData metaData = resultSet.getMetaData();
+            if (metaData == null) {
+                throw new DataAccessException("");
+            }
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
                 try {
                     String label = metaData.getColumnLabel(rowNum);

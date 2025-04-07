@@ -21,6 +21,7 @@ import java.util.Set;
 import com.pythongong.context.ApplicationContext;
 import com.pythongong.context.impl.AnnotationConfigApplicationContext;
 import com.pythongong.context.impl.PropertyResolver;
+import com.pythongong.util.CheckUtils;
 import com.pythongong.utils.WebUtils;
 
 import jakarta.servlet.ServletContainerInitializer;
@@ -52,6 +53,8 @@ public class ContextLoaderInitialize implements ServletContainerInitializer {
      * @param propertyResolver the property resolver for configuration values
      */
     public ContextLoaderInitialize(Class<?> configClass, PropertyResolver propertyResolver) {
+        CheckUtils.nullArgs(configClass, "ContextLoaderInitialize", "configClass");
+        CheckUtils.nullArgs(propertyResolver, "ContextLoaderInitialize", "propertyResolver");
         this.configClass = configClass;
         this.propertyResolver = propertyResolver;
     }

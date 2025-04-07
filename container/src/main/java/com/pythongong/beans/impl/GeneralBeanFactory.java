@@ -15,19 +15,15 @@
  */
 package com.pythongong.beans.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.config.BeanPostProcessor;
 import com.pythongong.beans.config.FactoryBean;
-import com.pythongong.beans.factory.ConfigurableBeanFactory;
+import com.pythongong.beans.factory.BeanFactory;
 import com.pythongong.beans.registry.SingletonBeanRegistry;
 import com.pythongong.exception.BeansException;
 import com.pythongong.exception.NoSuchBeanException;
 import com.pythongong.util.CheckUtils;
-import com.pythongong.util.ClassUtils;
 
 /**
  * General implementation of the ConfigurableBeanFactory interface.
@@ -38,7 +34,7 @@ import com.pythongong.util.ClassUtils;
  * @author Cheng Gong
  */
 @SuppressWarnings("unchecked")
-public class GeneralBeanFactory implements ConfigurableBeanFactory {
+public class GeneralBeanFactory implements BeanFactory {
 
     /** Function to retrieve bean definitions by name */
     private final Function<String, BeanDefinition> getBeanDefinition;
@@ -51,9 +47,6 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
 
     /** Support class for handling FactoryBean instances */
     private final FactoryBeanRegistrySupport beanRegistrySupport = new FactoryBeanRegistrySupport();
-
-    /** List of bean post processors */
-    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>(ClassUtils.SMALL_INIT_SIZE);
 
     /**
      * Constructs a new GeneralBeanFactory with the specified dependencies.
@@ -78,24 +71,6 @@ public class GeneralBeanFactory implements ConfigurableBeanFactory {
     public Object getBean(String beanName) throws BeansException {
         CheckUtils.emptyString(beanName, "GeneralBeanFactory.getBean recevies empty bean name");
         return doGetBean(beanName);
-    }
-
-    @Override
-    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
-        CheckUtils.nullArgs(beanPostProcessor, "GeneralBeanFactory.addBeanPostProcessor recevies null processor");
-        if (!beanPostProcessors.contains(beanPostProcessor)) {
-            beanPostProcessors.add(beanPostProcessor);
-        }
-    }
-
-    /**
-     * Returns the list of BeanPostProcessors that will be applied to beans
-     * created by this factory.
-     *
-     * @return the list of BeanPostProcessors
-     */
-    public List<BeanPostProcessor> getBeanPostProcessors() {
-        return this.beanPostProcessors;
     }
 
     @Override

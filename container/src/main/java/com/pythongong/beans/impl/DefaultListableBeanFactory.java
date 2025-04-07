@@ -19,10 +19,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.pythongong.aop.autoproxy.AutoProxyCreator;
@@ -30,9 +30,11 @@ import com.pythongong.beans.aware.Aware;
 import com.pythongong.beans.aware.BeanClassLoaderAware;
 import com.pythongong.beans.aware.BeanFactoryAware;
 import com.pythongong.beans.aware.BeanNameAware;
+import com.pythongong.beans.config.AfterInitializationpProcessor;
 import com.pythongong.beans.config.BeanDefinition;
-import com.pythongong.beans.config.BeanPostProcessor;
+import com.pythongong.beans.config.BeanProcessor;
 import com.pythongong.beans.config.BeanReference;
+import com.pythongong.beans.config.BeforeInitializationProcessor;
 import com.pythongong.beans.config.DisposableBean;
 import com.pythongong.beans.config.FactoryDefinition;
 import com.pythongong.beans.config.InitializingBean;
@@ -67,6 +69,9 @@ public class DefaultListableBeanFactory
 
     /** Map of bean definitions, keyed by bean name */
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(ClassUtils.BIG_INIT_SIZE);
+
+    /** List of bean post processors */
+    private final List<BeanProcessor> beanProcessors = new ArrayList<>(ClassUtils.SMALL_INIT_SIZE);
 
     /** Strategy for creating bean instances */
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiation();
@@ -146,8 +151,11 @@ public class DefaultListableBeanFactory
     }
 
     @Override
-    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
-        generalBeanFactory.addBeanPostProcessor(beanPostProcessor);
+    public void addBeanProcessor(BeanProcessor beanProcessor) {
+        CheckUtils.nullArgs(beanProcessor, "GeneralBeanFactory.addbeanProcessor recevies null processor");
+        if (!beanProcessors.contains(beanProcessor)) {
+            beanProcessors.add(beanProcessor);
+        }
     }
 
     @Nullable
@@ -203,21 +211,20 @@ public class DefaultListableBeanFactory
         if (bean instanceof AutoProxyCreator) {
             return bean;
         }
-        Map<String, AutoProxyCreator> autoProxyCreatorMap = getBeansOfType(AutoProxyCreator.class);
-        if (ClassUtils.isMapEmpty(autoProxyCreatorMap)) {
-            return bean;
+
+        for (BeanProcessor beanProcessor : beanProcessors) {
+            if (beanProcessor instanceof AutoProxyCreator) {
+                AutoProxyCreator creator = (AutoProxyCreator) beanProcessor;
+                if (creator.getBeanFactory() == null) {
+                    creator.setBeanFactory(generalBeanFactory);
+                }
+                Object curBean = creator.create(bean, beanName);
+                if (curBean != null) {
+                    bean = curBean;
+                }
+            }
         }
 
-        for (Entry<String, AutoProxyCreator> creatoEntry : autoProxyCreatorMap.entrySet()) {
-            AutoProxyCreator creator = creatoEntry.getValue();
-            if (creator.getBeanFactory() == null) {
-                creator.setBeanFactory(generalBeanFactory);
-            }
-            Object curBean = creator.create(bean, beanName);
-            if (curBean != null) {
-                bean = curBean;
-            }
-        }
         return bean;
     }
 
@@ -345,14 +352,19 @@ public class DefaultListableBeanFactory
 
         awareBean(beanName, bean);
 
-        List<BeanPostProcessor> beanPostProcessors = generalBeanFactory.getBeanPostProcessors();
-        beanPostProcessors
-                .forEach(beanPostProcessor -> beanPostProcessor.postProcessBeforeInitialization(bean, beanName));
+        beanProcessors.stream().filter(beanProcessor -> {
+            return (beanProcessor instanceof BeforeInitializationProcessor);
+        })
+                .forEach(beanPostProcessor -> ((BeforeInitializationProcessor) beanPostProcessor)
+                        .postProcessBeforeInitialization(bean, beanName));
 
         invokeInitMethods(bean, beanDefinition);
 
-        beanPostProcessors
-                .forEach(beanPostProcessor -> beanPostProcessor.postProcessAfterInitialization(bean, beanName));
+        beanProcessors.stream().filter(beanProcessor -> {
+            return (beanProcessor instanceof AfterInitializationpProcessor);
+        })
+                .forEach(beanPostProcessor -> ((AfterInitializationpProcessor) beanPostProcessor)
+                        .postProcessAfterInitialization(bean, beanName));
         return bean;
     }
 

@@ -106,7 +106,7 @@ public class PropertyResolver {
         PropertyExpr propertyExpr = parsePropertyExpr(key);
         String value = null;
         if (propertyExpr != null && propertyExpr.defaultValue() != null) {
-            value = properties.getProperty(key, propertyExpr.defaultValue());
+            value = properties.getProperty(propertyExpr.key(), propertyExpr.defaultValue());
         } else if (propertyExpr != null) {
             value = properties.getProperty(propertyExpr.key());
 

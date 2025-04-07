@@ -15,30 +15,33 @@
  */
 package com.pythongong.beans.factory;
 
-import com.pythongong.beans.config.BeanPostProcessor;
+import com.pythongong.beans.config.BeanProcessor;
 
 /**
  * Configuration interface to be implemented by most bean factories.
- * <p>Provides facilities to configure a bean factory beyond the bean
+ * <p>
+ * Provides facilities to configure a bean factory beyond the bean
  * factory client methods in the {@link BeanFactory} interface.
  * 
- * <p>This interface allows for framework-level customization of bean
- * creation and initialization processes through BeanPostProcessors.
+ * <p>
+ * This interface allows for framework-level customization of bean
+ * creation and initialization processes through beanProcessors.
  *
  * @author Cheng Gong
  * @see BeanFactory
- * @see BeanPostProcessor
+ * @see beanProcessor
  */
 public interface ConfigurableBeanFactory extends BeanFactory {
-    
+
     /**
-     * Add a new BeanPostProcessor that will get applied to beans created
+     * Add a new beanProcessor that will get applied to beans created
      * by this factory. Post processors can perform custom modification
      * of bean instances, before and after initialization.
      *
-     * <p>The post processors will be applied in the order they were registered.
+     * <p>
+     * The post processors will be applied in the order they were registered.
      *
-     * @param beanPostProcessor the post processor to register
+     * @param beanProcessor the post processor to register
      */
-    void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
+    void addBeanProcessor(BeanProcessor beanProcessor);
 }
