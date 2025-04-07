@@ -80,7 +80,7 @@ web
 │       │           └── utils
 │       └── resources
 └── pom.xml
-
+```
 ## 🌟 Key Features
 - **Web Framework Support**
   - RESTful API development with @RestController and @RequestMapping
