@@ -26,7 +26,7 @@ package com.pythongong.jdbc.transaction;
  * <p>Acts as a marker interface for transaction managers, allowing for
  * consistent transaction handling across different implementations.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public interface PlatformTransactionManager {

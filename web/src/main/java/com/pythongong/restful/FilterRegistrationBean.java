@@ -30,7 +30,7 @@ import jakarta.servlet.Filter;
  * URL patterns and filter instance. Uses suppliers to allow lazy initialization
  * of the filter and its patterns.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public record FilterRegistrationBean(

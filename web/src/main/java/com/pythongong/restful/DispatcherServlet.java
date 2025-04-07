@@ -56,7 +56,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *   <li>Automatic JSON response serialization
  * </ul>
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public class DispatcherServlet extends HttpServlet {
@@ -108,8 +108,6 @@ public class DispatcherServlet extends HttpServlet {
         applicationContext.close();
     }
 
-   
-    
 
     /**
      * Handles HTTP GET requests by delegating to registered GET dispatchers.
@@ -216,6 +214,11 @@ public class DispatcherServlet extends HttpServlet {
                 return true;
             }
             Object retVal = result.retVal();
+
+            if (retVal == null && !dispatcher.isReturnVoid()) {
+                throw new WebException("Response body is null for repquest: " + req.getRequestURL());
+            }
+            
             if (retVal instanceof String str) {
                 writer.write(str);
                 writer.flush();
@@ -224,11 +227,11 @@ public class DispatcherServlet extends HttpServlet {
                 outputStream.write(JsonUtils.toJsonBytes(retVal));
                 outputStream.flush();
             } else {
-                throw new WebException("");
+                throw new WebException("Type of response body is wrong for " + req.getRequestURL());
             }
             return true;
         } catch (IOException e) {
-            throw new WebException("");
+            throw new WebException("Process request failed for " + req.getRequestURL());
         }
 
     }

@@ -22,7 +22,7 @@ package com.pythongong.restful;
  * <p>Holds information about whether a request was processed
  * and its return value if any.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  * @param isProcessed whether the request was processed
  * @param retVal the return value from processing, if any

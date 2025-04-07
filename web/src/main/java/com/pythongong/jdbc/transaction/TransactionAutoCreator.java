@@ -46,7 +46,7 @@ import com.pythongong.exception.BeansException;
  * <p>The creator supports both class-level and method-level @Transactional
  * annotations and configures transaction isolation levels as specified.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  * @see com.pythongong.annotation.Transactional
  * @see com.pythongong.aop.autoproxy.AutoProxyCreator

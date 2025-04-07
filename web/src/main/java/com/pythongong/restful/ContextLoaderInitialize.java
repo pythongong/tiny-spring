@@ -35,7 +35,7 @@ import jakarta.servlet.ServletException;
  * context during servlet container startup. Handles character encoding configuration
  * and registers the dispatcher servlet and filters.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public class ContextLoaderInitialize implements ServletContainerInitializer {

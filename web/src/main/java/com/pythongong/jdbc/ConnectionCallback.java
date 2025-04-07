@@ -32,7 +32,7 @@ import com.pythongong.stereotype.Nullable;
  * for simple JDBC operations.
  *
  * @param <T> the result type of the callback
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 @FunctionalInterface

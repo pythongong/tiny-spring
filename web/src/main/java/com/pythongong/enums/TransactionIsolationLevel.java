@@ -32,7 +32,7 @@ import lombok.Getter;
  * <li>SERIALIZABLE - Highest isolation level, prevents all concurrency issues
  * </ul>
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  * @see java.sql.Connection
  */

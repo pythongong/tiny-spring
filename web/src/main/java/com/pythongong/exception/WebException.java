@@ -23,7 +23,7 @@ package com.pythongong.exception;
  * and other web processing errors into a Spring-specific unchecked exception.
  * It serves as a base class for more specific web exceptions.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public class WebException extends RuntimeException {

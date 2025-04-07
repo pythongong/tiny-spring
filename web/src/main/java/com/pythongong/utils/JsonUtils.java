@@ -69,7 +69,7 @@ public class JsonUtils {
         try {
             DEFAULT_MAPPER.writeValue(writer, obj);
         } catch (IOException e) {
-            throw new WebException("");
+            throw new WebException("Writing JSON failed for " + obj.getClass().getCanonicalName());
         }
     }
 
@@ -87,7 +87,7 @@ public class JsonUtils {
         try {
             return DEFAULT_MAPPER.readValue(reader, classType);
         } catch (IOException e) {
-            throw new WebException("");
+            throw new WebException("Reading JSON failed for " + classType.getCanonicalName());
         }
     }
 
@@ -102,7 +102,7 @@ public class JsonUtils {
         try {
             return DEFAULT_MAPPER.writeValueAsBytes(obj);
         } catch (JsonProcessingException e) {
-            throw new WebException(obj.getClass().getName() + " serialization failed");
+            throw new WebException("JSON convertion failed for " + obj.getClass().getCanonicalName());
         }
     }
 }

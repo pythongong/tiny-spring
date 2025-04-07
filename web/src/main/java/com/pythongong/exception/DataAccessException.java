@@ -23,7 +23,7 @@ package com.pythongong.exception;
  * Used to wrap SQLExceptions and other database-related exceptions into
  * a Spring-specific unchecked exception.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public class DataAccessException extends RuntimeException {

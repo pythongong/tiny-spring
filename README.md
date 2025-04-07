@@ -20,9 +20,13 @@ A lightweight implementation of the Spring Framework core features, demonstratin
   
 - **util**: Common utilities for reflection, type conversion, and other framework-wide operations.
 
-
-
-
+- **web**: Comprehensive web support including:
+  - Spring MVC-style RESTful API implementation
+  - JDBC operations and transaction management
+  - Embedded server support
+  - Auto-configuration capabilities similar to Spring Boot
+  - Filter chain processing
+  - URL pattern matching and routing
 
 
 ## 📋 Prerequisites
@@ -59,9 +63,34 @@ container
 │                   └── util
 └── pom.xml
 ``` 
+Web moudle includes the implementation of RESTful API, JDBC operations, and transaction management.
 
+``` marks
+web
+├── src
+│   └── main
+│       ├── java
+│       │   └── com
+│       │       └── pythongong
+│       │           ├── context
+│       │           │   └── impl
+│       │           ├── exception
+│       │           ├── restful
+│       │           ├── util
+│       │           └── utils
+│       └── resources
+└── pom.xml
 
 ## 🌟 Key Features
+- **Web Framework Support**
+  - RESTful API development with @RestController and @RequestMapping
+  - JDBC operations with JdbcTemplate
+  - Declarative transaction management with @Transactional
+  - Embedded Tomcat server integration
+  - Auto-configuration for web components
+  - Request filtering and interceptor chain
+  - Path variable and request body support
+  - Transaction isolation level support
 
 - **Dependency Injection Container**
   - Support for constructor, field, and method injection
@@ -99,7 +128,16 @@ container
   - `@Value` for property injection
   - `@PostConstruct` and `@PreDestroy` for lifecycle callbacks
 
+
+
 ## 🔧 Technical Highlights
+
+- **Web Technologies**
+  - JDBC template for database operations
+  - Declarative transaction management by thread-local storage
+  - Servlet request handling for restful API
+  - Lightweight usage for a web application
+
 
 - **Functional Programming**
   - Stream API for bean processing pipelines
@@ -213,3 +251,29 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ---
 
 ⭐ If you find this project interesting, please consider giving it a star!
+
+// Web Module Example
+@RestController
+@RequestMapping("/api")
+public class UserController {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable Long id) {
+        return jdbcTemplate.queryForObject(
+            "SELECT * FROM users WHERE id = ?",
+            new Object[]{id},
+            User.class
+        );
+    }
+
+    @Transactional
+    @PostMapping("/users")
+    public void createUser(@RequestBody User user) {
+        jdbcTemplate.update(
+            "INSERT INTO users (name, email) VALUES (?, ?)",
+            user.getName(), user.getEmail()
+        );
+    }
+}

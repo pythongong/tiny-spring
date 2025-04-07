@@ -27,7 +27,7 @@ import com.pythongong.util.CheckUtils;
  * It is used to track transaction state and ensure proper connection management
  * throughout the transaction lifecycle.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public record TransactionStatus(

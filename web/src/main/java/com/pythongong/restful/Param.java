@@ -26,7 +26,7 @@ import com.pythongong.util.CheckUtils;
  * This record holds information about a parameter including its type,
  * class and name. Used for parameter resolution when handling HTTP requests.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public record Param(

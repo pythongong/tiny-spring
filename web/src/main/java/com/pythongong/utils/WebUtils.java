@@ -45,7 +45,7 @@ import jakarta.servlet.ServletRegistration.Dynamic;
  * Provides helper methods for servlet registration, URL pattern handling,
  * and filter configuration in the web container.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public class WebUtils {
@@ -117,7 +117,7 @@ public class WebUtils {
             FilterRegistration.Dynamic filterReg = servletContext.addFilter(bean.getName(), filter);
 
             if (filterReg == null) {
-                throw new WebException("");
+                throw new WebException("Filter registration failed for filter: " + bean.getName());
             }
 
             // DispatcherType.REQUEST means the filter will only be applied to direct client
@@ -142,7 +142,7 @@ public class WebUtils {
         ClassLoader defaultClassLoader = ClassUtils.getDefaultClassLoader();
         URL resource = defaultClassLoader.getResource(classPath);
         if (resource == null) {
-            throw new WebException("Can't find class");
+            throw new WebException(String.format("Can not find the class path: %s", classPath));
         }
 
         try {
@@ -150,10 +150,15 @@ public class WebUtils {
             return uri.substring(FileUtils.FILE_URL_PREFIX.length(),
                     uri.length() - configClass.getSimpleName().length() - FileUtils.CLASS_FILE_SUFFIX.length() - 1);
         } catch (URISyntaxException e) {
-            throw new WebException("");
+            throw new WebException("Convert to URI error for url: " + resource);
         }
     }
 
+    /**
+     * Deletes a directory and all its contents.
+     * @param directoryToBeDeleted the directory to be deleted
+     * @return true if the directory was deleted successfully, false otherwise
+     */
     public static boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {

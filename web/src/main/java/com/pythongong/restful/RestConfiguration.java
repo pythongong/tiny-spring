@@ -28,7 +28,7 @@ import jakarta.servlet.ServletContext;
  * Uses static context holder pattern to make ServletContext available
  * throughout the application.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 @Configuration

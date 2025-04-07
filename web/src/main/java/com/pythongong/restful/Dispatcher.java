@@ -144,7 +144,8 @@ public class Dispatcher {
                     paramType = ParamType.REQUEST_PARAM;
                     String value = ((RequestParam) annotation).value();
                     if (StringUtils.isEmpty(value)) {
-                        throw new WebException("");
+                        throw new WebException(String.format("RequestParam value is empty for method {%s} in class {%s} "
+                        , method.getName(), controller.getClass().getCanonicalName()));
                     }
                     name = value;
                     break;    
@@ -154,7 +155,8 @@ public class Dispatcher {
                     paramType = ParamType.PATH_VARIABLE;
                     String value = ((PathVariable) annotation).value();
                     if (StringUtils.isEmpty(value)) {
-                        throw new WebException("");
+                        throw new WebException(String.format("PathVariable value is empty for method {%s} in class {%s} "
+                        , method.getName(), controller.getClass().getCanonicalName()));
                     }
                     name = value;
                     break;
@@ -187,7 +189,7 @@ public class Dispatcher {
                         BufferedReader reader = req.getReader();
                         return JsonUtils.readJson(reader, param.classType());
                     } catch (IOException e) {
-                        throw new WebException("");
+                        throw new WebException("Get request body failed");
                     }
                 }
 
@@ -202,7 +204,7 @@ public class Dispatcher {
                 }
 
                 default:
-                    throw new WebException("");
+                    throw new WebException("Not supported param type: " + param.paramType());
             }
         }).toArray();
     }

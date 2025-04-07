@@ -17,7 +17,6 @@
 package com.pythongong.boot;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -30,12 +29,10 @@ import org.apache.catalina.LifecycleException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 import com.pythongong.context.impl.PropertyResolver;
 import com.pythongong.exception.WebException;
 import com.pythongong.mock.restful.TestController;
-import com.pythongong.util.ContextUtils;
 
 class TinySpringApplicationTest {
 
@@ -54,7 +51,8 @@ class TinySpringApplicationTest {
 
     @Test
     void testStartServerWithDefaultPort() {
-        server = application.startTomcat(TestController.class);
+        PropertyResolver propertyResolver = new PropertyResolver();
+        server = application.startTomcat(TestController.class, propertyResolver);
         assertNotNull(server);
         assertTrue(server.getState().isAvailable());
     }
@@ -63,10 +61,7 @@ class TinySpringApplicationTest {
     void testStartServerWithCustomPort() throws IOException, URISyntaxException {
         PropertyResolver propertyResolver = new PropertyResolver();
         propertyResolver.addAll(Map.of("server.port", "8081"));
-        ;
-        try (MockedStatic<ContextUtils> mockedContext = mockStatic(ContextUtils.class)) {
-            mockedContext.when(() -> ContextUtils.createPropertyResolver()).thenReturn(propertyResolver);
-            server = application.startTomcat(TestController.class);
+        server = application.startTomcat(TestController.class, propertyResolver);
             Service service = server.findService("Tomcat");
 
             Connector[] connectors = service.findConnectors();
@@ -75,7 +70,7 @@ class TinySpringApplicationTest {
                     assertTrue(connector.getPort() == 8081);
                 }
             }
-        }
+        
 
     }
 
@@ -83,17 +78,8 @@ class TinySpringApplicationTest {
     void testStartServerWithInvalidPort() {
         PropertyResolver propertyResolver = new PropertyResolver();
         propertyResolver.addAll(Map.of("server.port", "-1"));
-        try (MockedStatic<ContextUtils> mockedContext = mockStatic(ContextUtils.class)) {
-            mockedContext.when(() -> ContextUtils.createPropertyResolver()).thenReturn(propertyResolver);
-            assertThrows(WebException.class, () -> application.start(getClass()));
-        }
+        assertThrows(WebException.class, () -> application.start(TestController.class, propertyResolver));
 
-    }
-
-    @Test
-    void test() {
-        TinySpringApplication.run(TestController.class, "ss");
-        System.exit(0);
     }
 
 }

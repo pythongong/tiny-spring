@@ -36,7 +36,7 @@ import com.pythongong.exception.AopConfigException;
  * <p>Implements both PlatformTransactionManager for transaction management and
  * MethodInterceptor for AOP-based transaction handling.
  *
- * @author pythongong
+ * @author Cheng Gong
  * @since 1.0
  */
 public class DataSourceTransactionManager implements PlatformTransactionManager, MethodInterceptor {
@@ -105,15 +105,19 @@ public class DataSourceTransactionManager implements PlatformTransactionManager,
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    throw new AopConfigException("rollback failed");
+
+                    throw new AopConfigException(String.format("Transaction rollback failed for method {%s} in class {%s}" 
+            , invocation.method().getName(), invocation.target().getClass().getCanonicalName()));
                 }
-                throw new AopConfigException("perfrom transaction failed");
+                throw new AopConfigException(String.format("Perform transaction failed for method {%s} in class {%s}" 
+            , invocation.method().getName(), invocation.target().getClass().getCanonicalName()));
             } finally {
                 LOCAL_STATUS.remove();
                 connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
-            throw new AopConfigException("");
+            throw new AopConfigException(String.format("Get transactional connection failed for method {%s} in class {%s}" 
+            , invocation.method().getName(), invocation.target().getClass().getCanonicalName()));
         }
     }
 }
