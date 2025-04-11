@@ -192,7 +192,15 @@ public class DefaultListableBeanFactory
         bean = initializeBean(bean, beanDefinition);
 
         registerDisposableBeanIfNecessary(bean, beanDefinition);
-        return bean;
+        if (!ScopeEnum.SINGLETON.equals(beanDefinition.scope())) {
+            return bean;
+        }
+        Object singleton = singletonBeanRegistry.getSingleton(beanName);
+        if (singleton == null) {
+            singleton = bean;
+            singletonBeanRegistry.registerSingleton(beanName, bean);
+        }
+        return singleton;
     }
 
     /**
