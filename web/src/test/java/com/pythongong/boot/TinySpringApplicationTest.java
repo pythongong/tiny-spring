@@ -62,15 +62,14 @@ class TinySpringApplicationTest {
         PropertyResolver propertyResolver = new PropertyResolver();
         propertyResolver.addAll(Map.of("server.port", "8081"));
         server = application.startTomcat(TestController.class, propertyResolver);
-            Service service = server.findService("Tomcat");
+        Service service = server.findService("Tomcat");
 
-            Connector[] connectors = service.findConnectors();
-            for (Connector connector : connectors) {
-                if ("HTTP/1.1".equals(connector.getProtocol())) {
-                    assertTrue(connector.getPort() == 8081);
-                }
+        Connector[] connectors = service.findConnectors();
+        for (Connector connector : connectors) {
+            if ("HTTP/1.1".equals(connector.getProtocol())) {
+                assertTrue(connector.getPort() == 8081);
             }
-        
+        }
 
     }
 
@@ -78,7 +77,7 @@ class TinySpringApplicationTest {
     void testStartServerWithInvalidPort() {
         PropertyResolver propertyResolver = new PropertyResolver();
         propertyResolver.addAll(Map.of("server.port", "-1"));
-        assertThrows(WebException.class, () -> application.start(TestController.class, propertyResolver));
+        assertThrows(WebException.class, () -> application.startTomcat(TestController.class, propertyResolver));
 
     }
 
