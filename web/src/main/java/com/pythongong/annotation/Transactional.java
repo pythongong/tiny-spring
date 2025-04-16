@@ -28,11 +28,14 @@ import com.pythongong.enums.TransactionIsolationLevel;
 /**
  * Annotation that marks a method or class as transactional.
  * 
- * <p>When applied to a method, makes that specific method execute within
+ * <p>
+ * When applied to a method, makes that specific method execute within
  * a transaction. When applied to a class, makes all methods in that class
  * transactional by default.
  *
- * <p>Example usage:
+ * <p>
+ * Example usage:
+ * 
  * <pre>
  * {@code @Transactional(level = TransactionIsolationLevel.READ_COMMITTED)}
  * public void transferMoney(Account from, Account to, BigDecimal amount) {
@@ -48,7 +51,7 @@ import com.pythongong.enums.TransactionIsolationLevel;
 @Documented
 @Inherited
 public @interface Transactional {
-    
+
     /**
      * The name of the transaction manager to use.
      * Defaults to "platformTransactionManager".
@@ -63,5 +66,5 @@ public @interface Transactional {
      *
      * @return the transaction isolation level
      */
-    TransactionIsolationLevel level() default TransactionIsolationLevel.NONE;
+    TransactionIsolationLevel level() default TransactionIsolationLevel.READ_COMMITTED;
 }
