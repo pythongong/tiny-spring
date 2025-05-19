@@ -66,5 +66,5 @@ public @interface Transactional {
      *
      * @return the transaction isolation level
      */
-    TransactionIsolationLevel level() default TransactionIsolationLevel.READ_COMMITTED;
+    TransactionIsolationLevel level() default TransactionIsolationLevel.REPEATABLE_READ;
 }
